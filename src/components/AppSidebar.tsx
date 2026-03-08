@@ -32,12 +32,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <div className="flex items-center gap-2.5 px-4 py-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg gold-gradient shrink-0">
+      <div className="flex items-center gap-3 px-4 py-5">
+        <div className="relative flex h-9 w-9 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/25 shrink-0">
           <Zap className="h-4 w-4 text-primary-foreground" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
         </div>
         {!collapsed && (
-          <span className="font-display text-xl font-bold tracking-tight">
+          <span className="font-brand text-xl font-bold tracking-tight">
             <span className="gold-text">Nexus</span>
             <span className="text-foreground">GH</span>
           </span>
