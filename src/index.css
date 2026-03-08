@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
   :root {
@@ -91,12 +91,12 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Sora', system-ui, sans-serif;
-    letter-spacing: -0.02em;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.03em;
   }
 }
 
@@ -111,9 +111,30 @@
     background-clip: text;
   }
   .glass-card {
-    background: hsl(220, 35%, 12% / 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid hsl(220, 20%, 20% / 0.5);
+    background: hsl(220 35% 12% / 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(220 20% 30% / 0.3);
+    box-shadow: 0 8px 32px hsl(220 40% 4% / 0.4), inset 0 1px 0 hsl(220 20% 40% / 0.15);
+  }
+  .glass-card-strong {
+    background: hsl(220 35% 14% / 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid hsl(220 20% 35% / 0.4);
+    box-shadow: 0 8px 32px hsl(220 40% 4% / 0.5), inset 0 1px 0 hsl(220 20% 50% / 0.1);
+  }
+  .glass-nav {
+    background: hsl(220 40% 6% / 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid hsl(220 20% 20% / 0.4);
+  }
+  .glass-glow {
+    box-shadow: 0 0 40px hsl(37 90% 55% / 0.15), 0 8px 32px hsl(220 40% 4% / 0.4);
+  }
+  .font-brand {
+    font-family: 'Outfit', 'Space Grotesk', system-ui, sans-serif;
   }
 }
 
