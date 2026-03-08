@@ -32,11 +32,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <div className="flex items-center gap-2 px-4 py-5">
-        <Zap className="h-7 w-7 text-primary shrink-0" />
+      <div className="flex items-center gap-2.5 px-4 py-5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg gold-gradient shrink-0">
+          <Zap className="h-4 w-4 text-primary-foreground" />
+        </div>
         {!collapsed && (
-          <span className="font-display text-xl font-bold gold-text">
-            NexusGH
+          <span className="font-display text-xl font-bold tracking-tight">
+            <span className="gold-text">Nexus</span>
+            <span className="text-foreground">GH</span>
           </span>
         )}
       </div>
