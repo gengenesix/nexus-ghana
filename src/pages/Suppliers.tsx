@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useBusiness } from "@/hooks/useBusiness";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,32 +10,64 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Truck, Edit, Trash2, Eye } from "lucide-react";
+import { Search, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface Supplier {
-  id: number;
-  name: string;
-  contact: string;
-  phone: string;
-  location: string;
-  productsSupplied: string;
-  activePOs: number;
-}
-
-const initialSuppliers: Supplier[] = [
-  { id: 1, name: "De-Heer Foods Ltd", contact: "Mr. Mensah", phone: "0301234567", location: "Tema", productsSupplied: "Noodles, Seasonings", activePOs: 2 },
-  { id: 2, name: "Fan Milk Ghana", contact: "Mrs. Owusu", phone: "0302345678", location: "Accra", productsSupplied: "Dairy, Ice Cream", activePOs: 1 },
-  { id: 3, name: "Kasapreko Company", contact: "Mr. Adjei", phone: "0303456789", location: "Accra", productsSupplied: "Beverages, Water", activePOs: 0 },
-  { id: 4, name: "Unilever Ghana", contact: "Ms. Agyeman", phone: "0304567890", location: "Tema", productsSupplied: "Detergents, Personal Care", activePOs: 1 },
-];
-
 export default function Suppliers() {
-  const [suppliers] = useState<Supplier[]>(initialSuppliers);
+  const { business } = useBusiness();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
+  const [formName, setFormName] = useState("");
+  const [formContact, setFormContact] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formLocation, setFormLocation] = useState("");
+  const [formProducts, setFormProducts] = useState("");
 
-  const filtered = suppliers.filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
+  const { data: suppliers = [], isLoading } = useQuery({
+    queryKey: ["suppliers", business?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("suppliers").select("*").eq("business_id", business!.id).order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!business,
+  });
+
+  const filtered = suppliers.filter((s: any) => s.name.toLowerCase().includes(search.toLowerCase()));
+
+  const resetForm = () => { setFormName(""); setFormContact(""); setFormPhone(""); setFormLocation(""); setFormProducts(""); };
+
+  const addMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("suppliers").insert({
+        business_id: business!.id,
+        name: formName.trim(),
+        contact_person: formContact,
+        phone: formPhone,
+        location: formLocation,
+        products_supplied: formProducts,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      setShowAdd(false); resetForm();
+      toast.success("Supplier added!");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("suppliers").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      toast.success("Supplier deleted");
+    },
+  });
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -41,7 +76,7 @@ export default function Suppliers() {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Suppliers</h1>
           <p className="text-muted-foreground text-sm">{suppliers.length} suppliers</p>
         </div>
-        <Button onClick={() => setShowAdd(true)} className="gold-gradient text-primary-foreground">
+        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
           <Plus className="h-4 w-4 mr-1" /> Add Supplier
         </Button>
       </div>
@@ -60,22 +95,20 @@ export default function Suppliers() {
                 <TableHead className="hidden sm:table-cell">Contact</TableHead>
                 <TableHead className="hidden md:table-cell">Location</TableHead>
                 <TableHead className="hidden lg:table-cell">Products</TableHead>
-                <TableHead className="text-center">Active POs</TableHead>
-                <TableHead className="w-[80px]"></TableHead>
+                <TableHead className="w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(supplier => (
+              {filtered.length === 0 ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{isLoading ? "Loading..." : "No suppliers yet."}</TableCell></TableRow>
+              ) : filtered.map((supplier: any) => (
                 <TableRow key={supplier.id}>
                   <TableCell className="font-medium">{supplier.name}</TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">{supplier.contact} · {supplier.phone}</TableCell>
-                  <TableCell className="hidden md:table-cell">{supplier.location}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-muted-foreground">{supplier.productsSupplied}</TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant={supplier.activePOs > 0 ? "default" : "secondary"}>{supplier.activePOs}</Badge>
-                  </TableCell>
+                  <TableCell className="hidden sm:table-cell text-muted-foreground">{supplier.contact_person} · {supplier.phone}</TableCell>
+                  <TableCell className="hidden md:table-cell">{supplier.location || "—"}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-muted-foreground">{supplier.products_supplied || "—"}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(supplier.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -88,15 +121,15 @@ export default function Suppliers() {
         <DialogContent>
           <DialogHeader><DialogTitle className="font-display">Add Supplier</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"><Label>Company Name</Label><Input placeholder="e.g. ABC Trading Ltd" /></div>
+            <div className="space-y-2"><Label>Company Name *</Label><Input placeholder="e.g. ABC Trading Ltd" value={formName} onChange={e => setFormName(e.target.value)} /></div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Contact Person</Label><Input placeholder="Mr./Mrs. ..." /></div>
-              <div className="space-y-2"><Label>Phone</Label><Input placeholder="0XXXXXXXXX" /></div>
+              <div className="space-y-2"><Label>Contact Person</Label><Input placeholder="Mr./Mrs. ..." value={formContact} onChange={e => setFormContact(e.target.value)} /></div>
+              <div className="space-y-2"><Label>Phone</Label><Input placeholder="0XXXXXXXXX" value={formPhone} onChange={e => setFormPhone(e.target.value)} /></div>
             </div>
-            <div className="space-y-2"><Label>Location</Label><Input placeholder="e.g. Tema, Accra" /></div>
-            <div className="space-y-2"><Label>Products Supplied</Label><Textarea placeholder="e.g. Noodles, Rice, Cooking Oil" /></div>
-            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => { setShowAdd(false); toast.success("Supplier added!"); }}>
-              Add Supplier
+            <div className="space-y-2"><Label>Location</Label><Input placeholder="e.g. Tema, Accra" value={formLocation} onChange={e => setFormLocation(e.target.value)} /></div>
+            <div className="space-y-2"><Label>Products Supplied</Label><Textarea placeholder="e.g. Noodles, Rice, Cooking Oil" value={formProducts} onChange={e => setFormProducts(e.target.value)} /></div>
+            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => addMutation.mutate()} disabled={!formName.trim() || addMutation.isPending}>
+              {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Supplier"}
             </Button>
           </div>
         </DialogContent>
