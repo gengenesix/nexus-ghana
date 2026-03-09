@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Search, Plus, Trash2, Loader2, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { exportSuppliersCsv } from "@/lib/export";
-import { CsvImportDialog } from "@/components/CsvImportDialog";
+import CsvImportDialog from "@/components/CsvImportDialog";
 
 export default function Suppliers() {
   const { business } = useBusiness();
