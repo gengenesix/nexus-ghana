@@ -18,6 +18,14 @@ import { formatDistanceToNow } from "date-fns";
 
 const DEFAULT_ROLES = ["Administrator", "Manager", "Supervisor", "Cashier", "Sales Rep", "Warehouse", "Accountant", "Staff"];
 
+// Extended roles from SAP-style role templates
+const EXTENDED_ROLES = [
+  "System Administrator", "CFO / Finance Manager", "Accountant",
+  "Sales Manager", "Sales Representative", "Purchasing Manager",
+  "Warehouse Manager", "Production Planner", "HR Manager",
+  "Project Manager", "Service Technician", "Executive / CEO",
+];
+
 const ROLE_DESCRIPTIONS: Record<string, string> = {
   Administrator: "Full system access — manage staff, settings, reports",
   Manager: "Dashboard, POS, inventory, invoices, customers, suppliers, expenses, reports, staff",
