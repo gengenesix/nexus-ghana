@@ -17,6 +17,7 @@ export default {
         sans: ['DM Sans', 'system-ui', 'sans-serif'],
         display: ['Space Grotesk', 'system-ui', 'sans-serif'],
         brand: ['Outfit', 'Space Grotesk', 'system-ui', 'sans-serif'],
+        curly: ['Pacifico', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",

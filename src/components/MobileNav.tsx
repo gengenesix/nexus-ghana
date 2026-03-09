@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingCart, Package, FileText, Users, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Package, FileText, Users, MoreHorizontal, Landmark } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -41,8 +41,8 @@ export function MobileNav() {
               </SheetTrigger>
               <SheetContent side="bottom" className="bg-card border-border">
                 <div className="flex items-center gap-2 mb-4">
-                  <Zap className="h-5 w-5 text-primary" />
-                  <span className="font-display font-bold text-lg gold-text">NexusGH</span>
+                  <Landmark className="h-5 w-5 text-primary" />
+                  <span className="font-curly text-lg gold-text">NexusGH</span>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   {moreItems.map((mi) => (

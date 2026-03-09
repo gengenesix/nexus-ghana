@@ -21,7 +21,7 @@ export function AppLayout() {
             <div className="flex items-center gap-4">
               <SidebarTrigger className="mr-2 hidden md:flex" />
               <div className="flex items-center gap-2 md:hidden">
-                <span className="font-display text-lg font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+                <span className="font-curly text-lg bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
                   NexusGH
                 </span>
               </div>
