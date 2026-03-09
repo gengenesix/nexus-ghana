@@ -28,6 +28,7 @@ export default function Customers() {
   const debouncedSearch = useDebounce(search, 350);
   const { page, from, to, nextPage, prevPage, resetPage } = usePagination(PAGE_SIZE);
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [formName, setFormName] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formEmail, setFormEmail] = useState("");
