@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
+import { useDebounce } from "@/hooks/useDebounce";
+import { usePagination } from "@/hooks/usePagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,14 +13,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { formatGHS, GHANA_REGIONS } from "@/lib/ghana";
-import { Search, Plus, Eye, Loader2, Trash2 } from "lucide-react";
+import { GHANA_REGIONS } from "@/lib/ghana";
+import { Search, Plus, Loader2, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+
+const PAGE_SIZE = 25;
 
 export default function Customers() {
   const { business } = useBusiness();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 350);
+  const { page, from, to, nextPage, prevPage, resetPage } = usePagination(PAGE_SIZE);
   const [showAdd, setShowAdd] = useState(false);
   const [formName, setFormName] = useState("");
   const [formPhone, setFormPhone] = useState("");
@@ -26,19 +32,36 @@ export default function Customers() {
   const [formRegion, setFormRegion] = useState("");
   const [formNotes, setFormNotes] = useState("");
 
-  const { data: customers = [], isLoading } = useQuery({
-    queryKey: ["customers", business?.id],
+  const { data, isLoading } = useQuery({
+    queryKey: ["customers", business?.id, debouncedSearch, page],
     queryFn: async () => {
-      const { data, error } = await supabase.from("customers").select("*").eq("business_id", business!.id).order("name");
+      let query = supabase
+        .from("customers")
+        .select("*", { count: "exact" })
+        .eq("business_id", business!.id)
+        .order("name")
+        .range(from, to);
+
+      if (debouncedSearch) {
+        query = query.or(`name.ilike.%${debouncedSearch}%,phone.ilike.%${debouncedSearch}%`);
+      }
+
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data;
+      return { customers: data ?? [], total: count ?? 0 };
     },
     enabled: !!business,
+    staleTime: 30_000,
+    placeholderData: (prev) => prev,
   });
 
-  const filtered = customers.filter((c: any) => c.name.toLowerCase().includes(search.toLowerCase()) || (c.phone || "").includes(search));
+  const customers = data?.customers ?? [];
+  const totalCount = data?.total ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-  const resetForm = () => { setFormName(""); setFormPhone(""); setFormEmail(""); setFormRegion(""); setFormNotes(""); };
+  const resetForm = () => {
+    setFormName(""); setFormPhone(""); setFormEmail(""); setFormRegion(""); setFormNotes("");
+  };
 
   const addMutation = useMutation({
     mutationFn: async () => {
@@ -72,12 +95,17 @@ export default function Customers() {
     },
   });
 
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    resetPage();
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-display font-bold">Customers</h1>
-          <p className="text-muted-foreground text-sm">{customers.length} customers</p>
+          <p className="text-muted-foreground text-sm">{totalCount} customers</p>
         </div>
         <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
           <Plus className="h-4 w-4 mr-1" /> Add Customer
@@ -86,7 +114,7 @@ export default function Customers() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search by name or phone..." className="pl-10" value={search} onChange={e => setSearch(e.target.value)} />
+        <Input placeholder="Search by name or phone..." className="pl-10" value={search} onChange={e => handleSearch(e.target.value)} />
       </div>
 
       <Card>
@@ -102,9 +130,11 @@ export default function Customers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{isLoading ? "Loading..." : "No customers yet."}</TableCell></TableRow>
-              ) : filtered.map((customer: any) => (
+              {isLoading ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+              ) : customers.length === 0 ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No customers found.</TableCell></TableRow>
+              ) : customers.map((customer: any) => (
                 <TableRow key={customer.id}>
                   <TableCell className="font-medium">{customer.name}</TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground">{customer.phone || "—"}</TableCell>
@@ -121,6 +151,16 @@ export default function Customers() {
           </Table>
         </CardContent>
       </Card>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>Page {page + 1} of {totalPages} ({totalCount} total)</span>
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={prevPage} disabled={page === 0}><ChevronLeft className="h-4 w-4" /></Button>
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={nextPage} disabled={page >= totalPages - 1}><ChevronRight className="h-4 w-4" /></Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent>

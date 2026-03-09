@@ -596,8 +596,6 @@ export type Database = {
     Functions: {
       generate_invoice_number: { Args: never; Returns: string }
       get_business_id: { Args: never; Returns: string }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       [_ in never]: never
