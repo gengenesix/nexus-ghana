@@ -127,7 +127,7 @@ export default function SalesOrders() {
           <Card><CardContent className="pt-4">
             {salesOrders.length > 0 ? (
               <Table>
-                <TableHeader><TableRow><TableHead>Order #</TableHead><TableHead>Customer</TableHead><TableHead>Date</TableHead><TableHead>Source</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                <TableHeader><TableRow><TableHead>Order #</TableHead><TableHead>Customer</TableHead><TableHead>Date</TableHead><TableHead>Source</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead><TableHead className="w-28"></TableHead></TableRow></TableHeader>
                 <TableBody>{salesOrders.map((o: any) => (
                   <TableRow key={o.id}>
                     <TableCell className="font-mono">{o.order_number}</TableCell>
@@ -136,6 +136,13 @@ export default function SalesOrders() {
                     <TableCell>{o.quotation_id ? <Badge variant="secondary" className="text-xs">From Quote</Badge> : <Badge variant="outline" className="text-xs">Direct</Badge>}</TableCell>
                     <TableCell className="text-right font-mono">GHS {Number(o.total).toLocaleString()}</TableCell>
                     <TableCell><Badge variant="outline" className="capitalize">{o.status}</Badge></TableCell>
+                    <TableCell>
+                      {o.status === "open" && (
+                        <Button variant="outline" size="sm" onClick={() => convertToInvoice.mutate(o)} disabled={convertToInvoice.isPending}>
+                          {convertToInvoice.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><FileText className="h-3.5 w-3.5 mr-1" />To Invoice</>}
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}</TableBody>
               </Table>
