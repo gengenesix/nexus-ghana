@@ -58,7 +58,7 @@ export const generateInvoicePDF = (invoice: InvoiceData, business: BusinessData)
   doc.text(business.name || 'NexusGH', 20, 25);
   
   // Invoice title
-  doc.setTextColor(...darkGray);
+  doc.setTextColor(51, 51, 51);
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text('INVOICE', 150, 25);
