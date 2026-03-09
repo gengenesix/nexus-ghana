@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,10 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { ShoppingCart, Truck, Package, FileCheck, Plus } from "lucide-react";
 import { format } from "date-fns";
+import PurchaseOrderDialog from "@/components/purchasing/PurchaseOrderDialog";
 
 export default function Purchasing() {
   const { business } = useBusiness();
   const [activeTab, setActiveTab] = useState("orders");
+  const [poOpen, setPoOpen] = useState(false);
 
   const { data: purchaseOrders = [] } = useQuery({
     queryKey: ["purchase_orders", business?.id],
@@ -47,7 +49,7 @@ export default function Purchasing() {
         </TabsList>
 
         <TabsContent value="orders" className="space-y-4">
-          <div className="flex justify-between"><h3 className="font-semibold">Purchase Orders</h3><Button><Plus className="h-4 w-4 mr-1" />New PO</Button></div>
+          <div className="flex justify-between"><h3 className="font-semibold">Purchase Orders</h3><Button onClick={() => setPoOpen(true)}><Plus className="h-4 w-4 mr-1" />New PO</Button></div>
           <Card><CardContent className="pt-4">
             {purchaseOrders.length > 0 ? (
               <Table>
@@ -72,6 +74,8 @@ export default function Purchasing() {
         <TabsContent value="invoices"><Card><CardContent className="text-center py-12 text-muted-foreground"><FileCheck className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Accounts payable invoices.</p></CardContent></Card></TabsContent>
         <TabsContent value="returns"><Card><CardContent className="text-center py-12 text-muted-foreground"><Truck className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Vendor returns & debit memos.</p></CardContent></Card></TabsContent>
       </Tabs>
+
+      <PurchaseOrderDialog open={poOpen} onOpenChange={setPoOpen} />
     </div>
   );
 }

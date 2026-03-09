@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useBusiness } from "@/hooks/useBusiness";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { FileText, ShoppingBag, CreditCard, RotateCcw, Plus, Search } from "lucide-react";
+import { FileText, ShoppingBag, CreditCard, RotateCcw, Plus } from "lucide-react";
 import { format } from "date-fns";
+import QuotationDialog from "@/components/sales/QuotationDialog";
 
 export default function SalesOrders() {
   const { business } = useBusiness();
   const [activeTab, setActiveTab] = useState("quotations");
+  const [quotationOpen, setQuotationOpen] = useState(false);
 
   const { data: quotations = [] } = useQuery({
     queryKey: ["sales_quotations", business?.id],
@@ -58,7 +59,7 @@ export default function SalesOrders() {
         </TabsList>
 
         <TabsContent value="quotations" className="space-y-4">
-          <div className="flex justify-between"><h3 className="font-semibold">Sales Quotations</h3><Button><Plus className="h-4 w-4 mr-1" />New Quotation</Button></div>
+          <div className="flex justify-between"><h3 className="font-semibold">Sales Quotations</h3><Button onClick={() => setQuotationOpen(true)}><Plus className="h-4 w-4 mr-1" />New Quotation</Button></div>
           <Card><CardContent className="pt-4">
             {quotations.length > 0 ? (
               <Table>
@@ -102,13 +103,11 @@ export default function SalesOrders() {
           </CardContent></Card>
         </TabsContent>
 
-        <TabsContent value="deliveries">
-          <Card><CardContent className="text-center py-12 text-muted-foreground"><CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Delivery tracking — create a sales order first.</p></CardContent></Card>
-        </TabsContent>
-        <TabsContent value="returns">
-          <Card><CardContent className="text-center py-12 text-muted-foreground"><RotateCcw className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Returns & credit notes management.</p></CardContent></Card>
-        </TabsContent>
+        <TabsContent value="deliveries"><Card><CardContent className="text-center py-12 text-muted-foreground"><CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Delivery tracking — create a sales order first.</p></CardContent></Card></TabsContent>
+        <TabsContent value="returns"><Card><CardContent className="text-center py-12 text-muted-foreground"><RotateCcw className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Returns & credit notes management.</p></CardContent></Card></TabsContent>
       </Tabs>
+
+      <QuotationDialog open={quotationOpen} onOpenChange={setQuotationOpen} />
     </div>
   );
 }
