@@ -411,7 +411,7 @@ export default function Landing() {
                 gengenesix@gmail.com
               </a>
             </div>
-            <p className="text-sm text-muted-foreground">© 2026 NexusGH. By GENESIS</p>
+            <p className="text-sm text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
           </div>
         </div>
       </footer>
