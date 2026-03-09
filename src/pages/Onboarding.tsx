@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useStaffSession } from "@/contexts/StaffSessionContext";
 
 export default function Onboarding() {
   const [name, setName] = useState("");
@@ -25,7 +24,6 @@ export default function Onboarding() {
   const [confirmPin, setConfirmPin] = useState("");
   const { createBusiness } = useBusiness();
   const { user } = useAuth();
-  const { loginWithPin } = useStaffSession();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,11 +31,13 @@ export default function Onboarding() {
     if (!name.trim()) { toast.error("Business name is required"); return; }
     if (adminPin.length < 4) { toast.error("PIN must be at least 4 digits"); return; }
     if (adminPin !== confirmPin) { toast.error("PINs do not match"); return; }
+
     try {
       const biz = await createBusiness.mutateAsync({ name: name.trim(), phone, email, region, address });
-      // Auto-create the owner as a Manager staff member with their chosen PIN
+
+      // Auto-create the account owner as Manager for optional staff-mode handover
       const fullName = user?.user_metadata?.full_name || user?.email || "Admin";
-      await supabase.from("staff_members").insert({
+      const { error: staffInsertError } = await supabase.from("staff_members").insert({
         business_id: biz.id,
         name: fullName,
         role: "Manager",
@@ -45,8 +45,11 @@ export default function Onboarding() {
         email: user?.email || "",
         status: "active",
       });
-      // Auto-login as the admin staff
-      await loginWithPin(biz.id, adminPin);
+
+      if (staffInsertError) {
+        throw staffInsertError;
+      }
+
       toast.success("Business created! Welcome to Nexus-GH 🎉");
       navigate("/dashboard");
     } catch (err: any) {
@@ -97,7 +100,7 @@ export default function Onboarding() {
               </div>
               <Separator className="my-2" />
               <p className="text-sm font-medium text-foreground">Set Your Admin PIN</p>
-              <p className="text-xs text-muted-foreground">You'll use this PIN to log in as Manager. You can add other staff & PINs later.</p>
+              <p className="text-xs text-muted-foreground">You'll use this PIN to assign/manage staff access. You won't be blocked by staff PIN as account owner.</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>PIN (4-6 digits)</Label>
