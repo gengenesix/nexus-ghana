@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { GHANA_REGIONS } from "@/lib/ghana";
-import { Building2, Receipt, CreditCard, Download, Zap, Loader2 } from "lucide-react";
+import { Building2, Receipt, CreditCard, Download, Landmark, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Settings() {
@@ -170,7 +170,7 @@ export default function Settings() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle className="font-display flex items-center gap-2"><Zap className="h-5 w-5 text-primary" /> Subscription</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="font-display flex items-center gap-2"><Landmark className="h-5 w-5 text-primary" /> Subscription</CardTitle></CardHeader>
             <CardContent>
               <div className="flex items-center justify-between p-4 rounded-lg gold-gradient text-primary-foreground">
                 <div>

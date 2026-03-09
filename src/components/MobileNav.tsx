@@ -2,7 +2,7 @@ import { LayoutDashboard, ShoppingCart, Package, FileText, Users, MoreHorizontal
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Truck, Receipt, BarChart3, UserCog, Settings, LogOut, Zap } from "lucide-react";
+import { Truck, Receipt, BarChart3, UserCog, Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Separator } from "@/components/ui/separator";
 
