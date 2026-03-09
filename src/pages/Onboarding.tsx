@@ -94,6 +94,19 @@ export default function Onboarding() {
                 <Label>Address</Label>
                 <Textarea placeholder="Business address" value={address} onChange={e => setAddress(e.target.value)} />
               </div>
+              <Separator className="my-2" />
+              <p className="text-sm font-medium text-foreground">Set Your Admin PIN</p>
+              <p className="text-xs text-muted-foreground">You'll use this PIN to log in as Manager. You can add other staff & PINs later.</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>PIN (4-6 digits)</Label>
+                  <Input type="password" placeholder="••••" maxLength={6} value={adminPin} onChange={e => setAdminPin(e.target.value.replace(/\D/g, ""))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Confirm PIN</Label>
+                  <Input type="password" placeholder="••••" maxLength={6} value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, ""))} required />
+                </div>
+              </div>
               <Button type="submit" className="w-full gold-gradient text-primary-foreground font-semibold" disabled={createBusiness.isPending}>
                 {createBusiness.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Business & Continue"}
               </Button>
