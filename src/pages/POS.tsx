@@ -222,7 +222,7 @@ export default function POS() {
       <div className="grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
           {/* Search & SKU quick-add */}
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search products..." className="pl-10" value={search} onChange={e => setSearch(e.target.value)} />
@@ -230,7 +230,7 @@ export default function POS() {
             <div className="flex gap-1">
               <Input
                 placeholder="SKU quick-add"
-                className="w-36"
+                className="flex-1 sm:w-36"
                 value={skuSearch}
                 onChange={e => setSkuSearch(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleSkuAdd()}
@@ -244,12 +244,12 @@ export default function POS() {
           {filtered.length === 0 ? (
             <p className="text-center text-muted-foreground py-12">No products found. Add products in Inventory first.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
               {filtered.map((product: any) => (
                 <button
                   key={product.id}
                   onClick={() => addToCart(product)}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/5"
+                  className="flex flex-col items-center gap-1.5 sm:gap-2 rounded-xl border border-border bg-card p-3 sm:p-4 transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/5"
                 >
                   <span className="text-3xl">📦</span>
                   <span className="text-sm font-medium text-center leading-tight">{product.name}</span>

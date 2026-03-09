@@ -117,7 +117,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="business">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+        <TabsList>
           <TabsTrigger value="business">Business</TabsTrigger>
           <TabsTrigger value="taxes">Taxes</TabsTrigger>
           <TabsTrigger value="receipts">Receipts</TabsTrigger>

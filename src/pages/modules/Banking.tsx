@@ -50,11 +50,11 @@ export default function Banking() {
         <p className="text-muted-foreground">Bank accounts, payments, and reconciliation</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Landmark className="h-8 w-8 text-primary" /><div><p className="text-2xl font-bold">GHS {totalBalance.toLocaleString()}</p><p className="text-xs text-muted-foreground">Total Balance</p></div></div></CardContent></Card>
-        <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><ArrowDownLeft className="h-8 w-8 text-green-500" /><div><p className="text-2xl font-bold">GHS {incoming.toLocaleString()}</p><p className="text-xs text-muted-foreground">Incoming</p></div></div></CardContent></Card>
-        <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><ArrowUpRight className="h-8 w-8 text-red-500" /><div><p className="text-2xl font-bold">GHS {outgoing.toLocaleString()}</p><p className="text-xs text-muted-foreground">Outgoing</p></div></div></CardContent></Card>
-        <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Landmark className="h-8 w-8 text-blue-500" /><div><p className="text-2xl font-bold">{bankAccounts.length}</p><p className="text-xs text-muted-foreground">Accounts</p></div></div></CardContent></Card>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Landmark className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" /><div className="min-w-0"><p className="text-lg sm:text-2xl font-bold truncate">GHS {totalBalance.toLocaleString()}</p><p className="text-xs text-muted-foreground">Total Balance</p></div></div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><ArrowDownLeft className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 shrink-0" /><div className="min-w-0"><p className="text-lg sm:text-2xl font-bold truncate">GHS {incoming.toLocaleString()}</p><p className="text-xs text-muted-foreground">Incoming</p></div></div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><ArrowUpRight className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 shrink-0" /><div className="min-w-0"><p className="text-lg sm:text-2xl font-bold truncate">GHS {outgoing.toLocaleString()}</p><p className="text-xs text-muted-foreground">Outgoing</p></div></div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Landmark className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 shrink-0" /><div className="min-w-0"><p className="text-lg sm:text-2xl font-bold">{bankAccounts.length}</p><p className="text-xs text-muted-foreground">Accounts</p></div></div></CardContent></Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

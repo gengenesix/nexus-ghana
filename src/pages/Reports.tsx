@@ -259,7 +259,7 @@ export default function Reports() {
       </div>
 
       <Tabs defaultValue="pnl">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-10 gap-1">
+        <TabsList>
           <TabsTrigger value="pnl">P&L</TabsTrigger>
           <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>
           <TabsTrigger value="trial-balance">Trial Balance</TabsTrigger>
