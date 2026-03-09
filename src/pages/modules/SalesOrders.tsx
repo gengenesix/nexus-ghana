@@ -70,6 +70,37 @@ export default function SalesOrders() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  // Convert Sales Order → Invoice (SAP document chain)
+  const convertToInvoice = useMutation({
+    mutationFn: async (order: any) => {
+      const invoiceNum = `INV-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase()}`;
+      const { error: invErr } = await supabase.from("invoices").insert({
+        business_id: business!.id,
+        invoice_number: invoiceNum,
+        customer_name: order.customer_name,
+        customer_id: order.customer_id,
+        date: new Date().toISOString().split("T")[0],
+        due_date: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
+        subtotal: order.subtotal,
+        vat_amount: order.tax_amount || 0,
+        total: order.total,
+        status: "sent",
+        notes: `Created from Sales Order ${order.order_number}`,
+      });
+      if (invErr) throw invErr;
+
+      // Update order status to "invoiced"
+      const { error: updateErr } = await supabase.from("sales_orders").update({ status: "invoiced" }).eq("id", order.id);
+      if (updateErr) throw updateErr;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Sales Order converted to Invoice — view it in Invoices module");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   return (
     <div className="space-y-6">
       <div>
