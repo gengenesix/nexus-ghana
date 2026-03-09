@@ -391,7 +391,7 @@ export default function Landing() {
                   <Landmark className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <span className="font-curly text-xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-                  NexusGH
+                  Nexus-GH
                 </span>
               </div>
               <div className="flex gap-8 text-sm text-muted-foreground">
