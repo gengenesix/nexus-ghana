@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
@@ -11,10 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatGHS } from "@/lib/ghana";
 import { exportInventoryCsv } from "@/lib/export";
 import CsvImportDialog from "@/components/CsvImportDialog";
-import { Search, Plus, Edit, Trash2, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Download, Upload } from "lucide-react";
+import { Search, Plus, Edit, Trash2, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Download, Upload, PackagePlus, PackageMinus } from "lucide-react";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 25;
@@ -27,7 +28,13 @@ export default function Inventory() {
   const { page, from, to, nextPage, prevPage, resetPage } = usePagination(PAGE_SIZE);
   const [showAdd, setShowAdd] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [showAdjust, setShowAdjust] = useState(false);
+  const [adjustProduct, setAdjustProduct] = useState<any>(null);
+  const [adjustQty, setAdjustQty] = useState("");
+  const [adjustType, setAdjustType] = useState<"add" | "remove">("add");
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [stockFilter, setStockFilter] = useState("all");
 
   const [formName, setFormName] = useState("");
   const [formSku, setFormSku] = useState("");
@@ -36,12 +43,22 @@ export default function Inventory() {
   const [formQty, setFormQty] = useState("");
   const [formReorderLevel, setFormReorderLevel] = useState("10");
 
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories", business?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("categories").select("*").eq("business_id", business!.id).order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!business,
+  });
+
   const { data, isLoading } = useQuery({
-    queryKey: ["products", business?.id, debouncedSearch, page],
+    queryKey: ["products", business?.id, debouncedSearch, page, categoryFilter, stockFilter],
     queryFn: async () => {
       let query = supabase
         .from("products")
-        .select("*", { count: "exact" })
+        .select("*, categories(name)", { count: "exact" })
         .eq("business_id", business!.id)
         .order("name")
         .range(from, to);
@@ -49,10 +66,21 @@ export default function Inventory() {
       if (debouncedSearch) {
         query = query.or(`name.ilike.%${debouncedSearch}%,sku.ilike.%${debouncedSearch}%`);
       }
+      if (categoryFilter !== "all") {
+        query = query.eq("category_id", categoryFilter);
+      }
 
       const { data, error, count } = await query;
       if (error) throw error;
-      return { products: data ?? [], total: count ?? 0 };
+
+      let filtered = data ?? [];
+      if (stockFilter === "low") {
+        filtered = filtered.filter((p: any) => p.qty <= p.reorder_level);
+      } else if (stockFilter === "out") {
+        filtered = filtered.filter((p: any) => p.qty === 0);
+      }
+
+      return { products: filtered, total: count ?? 0 };
     },
     enabled: !!business,
     staleTime: 30_000,
@@ -74,6 +102,13 @@ export default function Inventory() {
     setFormSellingPrice(String(p.selling_price)); setFormQty(String(p.qty)); setFormReorderLevel(String(p.reorder_level));
     setEditingProduct(p);
     setShowAdd(true);
+  };
+
+  const openAdjust = (p: any, type: "add" | "remove") => {
+    setAdjustProduct(p);
+    setAdjustType(type);
+    setAdjustQty("");
+    setShowAdjust(true);
   };
 
   const addMutation = useMutation({
@@ -104,6 +139,24 @@ export default function Inventory() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const adjustMutation = useMutation({
+    mutationFn: async () => {
+      const qty = Number(adjustQty) || 0;
+      if (qty <= 0) throw new Error("Quantity must be positive");
+      const newQty = adjustType === "add"
+        ? adjustProduct.qty + qty
+        : Math.max(0, adjustProduct.qty - qty);
+      const { error } = await supabase.from("products").update({ qty: newQty, updated_at: new Date().toISOString() }).eq("id", adjustProduct.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      setShowAdjust(false);
+      toast.success(`Stock ${adjustType === "add" ? "added" : "removed"} successfully`);
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("products").delete().eq("id", id);
@@ -129,9 +182,9 @@ export default function Inventory() {
           <p className="text-muted-foreground text-sm">{totalCount} products · {lowStockCount} low stock</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
-          <Button variant="outline" onClick={() => { if (products.length > 0) exportInventoryCsv(products); else toast.error("No products to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
-          <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
+          <Button variant="outline" size="sm" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
+          <Button variant="outline" size="sm" onClick={() => { if (products.length > 0) exportInventoryCsv(products); else toast.error("No products to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
+          <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
             <Plus className="h-4 w-4 mr-1" /> Add Product
           </Button>
         </div>
@@ -146,9 +199,27 @@ export default function Inventory() {
         </Card>
       )}
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search products or SKU..." className="pl-10" value={search} onChange={e => handleSearch(e.target.value)} />
+      {/* Filters row */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search products or SKU..." className="pl-10" value={search} onChange={e => handleSearch(e.target.value)} />
+        </div>
+        <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); resetPage(); }}>
+          <SelectTrigger className="w-[160px]"><SelectValue placeholder="All Categories" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={stockFilter} onValueChange={(v) => { setStockFilter(v); resetPage(); }}>
+          <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Stock</SelectItem>
+            <SelectItem value="low">Low Stock</SelectItem>
+            <SelectItem value="out">Out of Stock</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Card>
@@ -162,7 +233,7 @@ export default function Inventory() {
                 <TableHead className="hidden sm:table-cell text-right">Cost</TableHead>
                 <TableHead className="text-right">Price</TableHead>
                 <TableHead className="hidden md:table-cell text-right">Margin</TableHead>
-                <TableHead className="w-[80px]"></TableHead>
+                <TableHead className="w-[130px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -177,16 +248,23 @@ export default function Inventory() {
                 const isLow = product.qty <= product.reorder_level;
                 return (
                   <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{product.name}</p>
+                        {product.categories?.name && <p className="text-xs text-muted-foreground">{product.categories.name}</p>}
+                      </div>
+                    </TableCell>
                     <TableCell className="hidden sm:table-cell text-muted-foreground">{product.sku || "—"}</TableCell>
                     <TableCell className="text-center"><Badge variant={isLow ? "destructive" : "secondary"}>{product.qty}</Badge></TableCell>
                     <TableCell className="hidden sm:table-cell text-right">{formatGHS(Number(product.cost_price))}</TableCell>
                     <TableCell className="text-right font-medium">{formatGHS(Number(product.selling_price))}</TableCell>
                     <TableCell className="hidden md:table-cell text-right text-success">{margin}%</TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(product)}><Edit className="h-3.5 w-3.5" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(product.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                      <div className="flex gap-0.5">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openAdjust(product, "add")} title="Add stock"><PackagePlus className="h-3.5 w-3.5 text-green-500" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openAdjust(product, "remove")} title="Remove stock"><PackageMinus className="h-3.5 w-3.5 text-orange-500" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(product)} title="Edit"><Edit className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteMutation.mutate(product.id)} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -207,6 +285,7 @@ export default function Inventory() {
         </div>
       )}
 
+      {/* Add/Edit Product Dialog */}
       <Dialog open={showAdd} onOpenChange={(v) => { setShowAdd(v); if (!v) resetForm(); }}>
         <DialogContent>
           <DialogHeader>
@@ -229,6 +308,50 @@ export default function Inventory() {
               {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : editingProduct ? "Update Product" : "Add Product"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Stock Adjustment Dialog */}
+      <Dialog open={showAdjust} onOpenChange={setShowAdjust}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              {adjustType === "add" ? <PackagePlus className="h-5 w-5 text-green-500" /> : <PackageMinus className="h-5 w-5 text-orange-500" />}
+              {adjustType === "add" ? "Add Stock" : "Remove Stock"}
+            </DialogTitle>
+          </DialogHeader>
+          {adjustProduct && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-secondary/50 p-3">
+                <p className="font-medium">{adjustProduct.name}</p>
+                <p className="text-sm text-muted-foreground">Current stock: <span className="font-semibold">{adjustProduct.qty}</span></p>
+              </div>
+              <div className="space-y-2">
+                <Label>Quantity to {adjustType}</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Enter quantity"
+                  value={adjustQty}
+                  onChange={e => setAdjustQty(e.target.value)}
+                  autoFocus
+                />
+                {adjustQty && Number(adjustQty) > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    New stock: <span className="font-semibold">{adjustType === "add" ? adjustProduct.qty + Number(adjustQty) : Math.max(0, adjustProduct.qty - Number(adjustQty))}</span>
+                  </p>
+                )}
+              </div>
+              <Button
+                className="w-full"
+                variant={adjustType === "add" ? "default" : "destructive"}
+                onClick={() => adjustMutation.mutate()}
+                disabled={!adjustQty || Number(adjustQty) <= 0 || adjustMutation.isPending}
+              >
+                {adjustMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : `${adjustType === "add" ? "Add" : "Remove"} ${adjustQty || 0} units`}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
