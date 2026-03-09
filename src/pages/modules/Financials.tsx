@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import AccountDialog from "@/components/financials/AccountDialog";
 import JournalEntryDialog from "@/components/financials/JournalEntryDialog";
 import SeedChartOfAccounts from "@/components/financials/SeedChartOfAccounts";
+import ExchangeRatesTab from "@/components/financials/ExchangeRatesTab";
 
 export default function Financials() {
   const { business } = useBusiness();
@@ -62,6 +63,7 @@ export default function Financials() {
           <TabsTrigger value="chart">Chart of Accounts</TabsTrigger>
           <TabsTrigger value="journal">Journal Entries</TabsTrigger>
           <TabsTrigger value="ledger">General Ledger</TabsTrigger>
+          <TabsTrigger value="fx">Exchange Rates</TabsTrigger>
           <TabsTrigger value="reports">Financial Reports</TabsTrigger>
         </TabsList>
 
@@ -158,6 +160,10 @@ export default function Financials() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="fx">
+          <ExchangeRatesTab />
         </TabsContent>
       </Tabs>
 

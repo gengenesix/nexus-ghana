@@ -6,6 +6,7 @@ import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationsCenter } from "@/components/NotificationsCenter";
+import { ApprovalInbox } from "@/components/ApprovalInbox";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AppLayout() {
@@ -31,6 +32,7 @@ export function AppLayout() {
             </div>
             <div className="flex items-center gap-1">
               <ThemeToggle />
+              <ApprovalInbox />
               <NotificationsCenter />
             </div>
           </header>

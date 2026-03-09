@@ -20,6 +20,7 @@ import { exportInvoicesCsv } from "@/lib/export";
 import { Search, Plus, Eye, Send, Loader2, Download, RotateCcw, FileText, Clock, DollarSign, AlertTriangle, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { differenceInDays, format } from "date-fns";
+import RecurringInvoicesTab from "@/components/invoices/RecurringInvoicesTab";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -33,6 +34,7 @@ export default function Invoices() {
   const { business } = useBusiness();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [activeMainTab, setActiveMainTab] = useState("invoices");
   const [showCreate, setShowCreate] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
@@ -245,7 +247,17 @@ export default function Invoices() {
         </div>
       </div>
 
-      {/* KPI Cards */}
+      <Tabs value={activeMainTab} onValueChange={setActiveMainTab}>
+        <TabsList>
+          <TabsTrigger value="invoices">All Invoices</TabsTrigger>
+          <TabsTrigger value="recurring">Recurring</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="recurring">
+          <RecurringInvoicesTab />
+        </TabsContent>
+
+        <TabsContent value="invoices" className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -569,6 +581,8 @@ export default function Invoices() {
           </div>
         </DialogContent>
       </Dialog>
+      </TabsContent>
+      </Tabs>
     </div>
   );
 }

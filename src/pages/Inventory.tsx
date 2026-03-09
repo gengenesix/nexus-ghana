@@ -12,9 +12,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatGHS } from "@/lib/ghana";
 import { exportInventoryCsv } from "@/lib/export";
 import CsvImportDialog from "@/components/CsvImportDialog";
+import SerialBatchTab from "@/components/inventory/SerialBatchTab";
 import { Search, Plus, Edit, Trash2, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Download, Upload, PackagePlus, PackageMinus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +29,7 @@ export default function Inventory() {
   const debouncedSearch = useDebounce(search, 350);
   const { page, from, to, nextPage, prevPage, resetPage } = usePagination(PAGE_SIZE);
   const [showAdd, setShowAdd] = useState(false);
+  const [inventoryTab, setInventoryTab] = useState("products");
   const [showImport, setShowImport] = useState(false);
   const [showAdjust, setShowAdjust] = useState(false);
   const [adjustProduct, setAdjustProduct] = useState<any>(null);
@@ -190,6 +193,17 @@ export default function Inventory() {
         </div>
       </div>
 
+      <Tabs value={inventoryTab} onValueChange={setInventoryTab}>
+        <TabsList>
+          <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="serials">Serial / Batch</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="serials">
+          <SerialBatchTab />
+        </TabsContent>
+
+        <TabsContent value="products" className="space-y-6">
       {lowStockCount > 0 && (
         <Card className="border-warning/30 bg-warning/5">
           <CardContent className="p-4 flex items-center gap-3">
@@ -356,6 +370,8 @@ export default function Inventory() {
       </Dialog>
 
       <CsvImportDialog open={showImport} onOpenChange={setShowImport} type="products" />
+      </TabsContent>
+      </Tabs>
     </div>
   );
 }
