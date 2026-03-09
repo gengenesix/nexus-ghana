@@ -114,6 +114,10 @@ export default function Invoices() {
     },
   });
 
+  const downloadInvoice = (invoice: any) => {
+    generateInvoicePDF(invoice, business || { name: "NexusGH" });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
