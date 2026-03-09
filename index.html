@@ -37,6 +37,44 @@
 
     <!-- Canonical -->
     <link rel="canonical" href="https://nexusgh.app/" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://nexusgh.app/#website",
+            "url": "https://nexusgh.app/",
+            "name": "NexusGH",
+            "description": "Business Management for Ghana SMEs",
+            "publisher": {
+              "@id": "https://nexusgh.app/#organization"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://nexusgh.app/#organization",
+            "name": "NexusGH",
+            "url": "https://nexusgh.app/",
+            "logo": "https://nexusgh.app/favicon.png",
+            "description": "All-in-one POS, inventory, invoicing and business analytics built for Ghanaian small businesses."
+          }
+        ]
+      }
+    </script>
+
+    <!-- Google Analytics (GA4) - Replace G-XXXXXXXXXX with your actual GA4 Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // Configure your Measurement ID here
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
   </head>
 
   <body>
