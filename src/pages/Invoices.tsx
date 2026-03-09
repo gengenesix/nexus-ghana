@@ -119,6 +119,32 @@ export default function Invoices() {
     generateInvoicePDF(invoice, business || { name: "Nexus-GH" });
   };
 
+  // Create Credit Note from Invoice
+  const createCreditNote = useMutation({
+    mutationFn: async (invoice: any) => {
+      const creditNum = `CN-${Date.now().toString(36).toUpperCase()}`;
+      const { error } = await supabase.from("credit_notes").insert({
+        business_id: business!.id,
+        credit_number: creditNum,
+        invoice_id: invoice.id,
+        customer_name: invoice.customer_name,
+        customer_id: invoice.customer_id,
+        date: new Date().toISOString().split("T")[0],
+        reason: `Return/Credit for Invoice ${invoice.invoice_number}`,
+        subtotal: invoice.subtotal,
+        tax_amount: Number(invoice.vat_amount) + Number(invoice.nhil_amount || 0) + Number(invoice.getfl_amount || 0),
+        total: invoice.total,
+        status: "draft",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["credit_notes"] });
+      toast.success("Credit note created — view it in Sales → Credit Notes tab");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
