@@ -230,7 +230,7 @@ export default function POS() {
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <div className="text-center">
-              <p className="font-bold text-primary text-lg">{business?.name || "NexusGH"}</p>
+              <p className="font-bold text-primary text-lg">{business?.name || "Nexus-GH"}</p>
               <p className="text-muted-foreground text-xs">Receipt #{lastReceipt}</p>
             </div>
             <Separator />
