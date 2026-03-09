@@ -14,7 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { formatGHS, calculateTaxes } from "@/lib/ghana";
-import { Search, Plus, Eye, MessageCircle, Send, Loader2 } from "lucide-react";
+import { generateInvoicePDF } from "@/lib/pdf";
+import { Search, Plus, Eye, MessageCircle, Send, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
