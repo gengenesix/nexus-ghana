@@ -2,9 +2,10 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ShoppingCart, Package, FileText, BarChart3, Users, Receipt,
-  ArrowRight, Check, Zap, Star, Shield, Globe, Smartphone,
+  ArrowRight, Check, Landmark, Star, Shield, Globe, Smartphone,
   Sparkles, TrendingUp, Clock,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import heroDashboard from "@/assets/hero-dashboard.png";
 import featurePos from "@/assets/feature-pos.png";
 import featureInvoicing from "@/assets/feature-invoicing.png";
@@ -109,12 +110,11 @@ export default function Landing() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-3">
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/25">
-              <Zap className="h-5 w-5 text-primary-foreground" />
+              <Landmark className="h-5 w-5 text-primary-foreground" />
               <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
             </div>
-            <span className="font-brand text-2xl font-bold tracking-tight">
-              <span className="gold-text">Nexus</span>
-              <span className="text-foreground">GH</span>
+            <span className="font-display text-2xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+              NexusGH
             </span>
           </Link>
           <div className="hidden items-center gap-8 md:flex">
@@ -123,6 +123,7 @@ export default function Landing() {
             <a href="#testimonials" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Reviews</a>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" asChild>
               <Link to="/login">Sign In</Link>
             </Button>
@@ -387,11 +388,10 @@ export default function Landing() {
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/20">
-                <Zap className="h-4 w-4 text-primary-foreground" />
+                <Landmark className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-brand text-xl font-bold">
-                <span className="gold-text">Nexus</span>
-                <span className="text-foreground">GH</span>
+              <span className="font-display text-xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+                NexusGH
               </span>
             </div>
             <div className="flex gap-8 text-sm text-muted-foreground">
