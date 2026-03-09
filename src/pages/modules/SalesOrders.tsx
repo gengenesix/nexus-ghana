@@ -198,11 +198,13 @@ export default function SalesOrders() {
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="quotations">Quotations ({quotations.length})</TabsTrigger>
           <TabsTrigger value="orders">Orders ({salesOrders.length})</TabsTrigger>
           <TabsTrigger value="deliveries">Deliveries ({deliveries.length})</TabsTrigger>
           <TabsTrigger value="returns">Credit Notes ({creditNotes.length})</TabsTrigger>
+          <TabsTrigger value="pricelists">Price Lists</TabsTrigger>
+          <TabsTrigger value="commissions">Commissions</TabsTrigger>
         </TabsList>
 
         {/* Quotations Tab */}
