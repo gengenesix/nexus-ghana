@@ -25,6 +25,10 @@ const FIELD_MAPS = {
     required: ["name"],
     fields: { "name": "name", "phone": "phone", "email": "email", "region": "region", "notes": "notes" },
   },
+  suppliers: {
+    required: ["name"],
+    fields: { "name": "name", "contact person": "contact_person", "phone": "phone", "location": "location", "products": "products_supplied" },
+  },
 };
 
 export default function CsvImportDialog({ open, onOpenChange, type }: CsvImportDialogProps) {
