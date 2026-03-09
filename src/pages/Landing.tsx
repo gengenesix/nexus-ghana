@@ -2,9 +2,10 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ShoppingCart, Package, FileText, BarChart3, Users, Receipt,
-  ArrowRight, Check, Zap, Star, Shield, Globe, Smartphone,
+  ArrowRight, Check, Landmark, Star, Shield, Globe, Smartphone,
   Sparkles, TrendingUp, Clock,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import heroDashboard from "@/assets/hero-dashboard.png";
 import featurePos from "@/assets/feature-pos.png";
 import featureInvoicing from "@/assets/feature-invoicing.png";
