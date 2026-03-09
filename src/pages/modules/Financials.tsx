@@ -63,6 +63,7 @@ export default function Financials() {
           <TabsTrigger value="chart">Chart of Accounts</TabsTrigger>
           <TabsTrigger value="journal">Journal Entries</TabsTrigger>
           <TabsTrigger value="ledger">General Ledger</TabsTrigger>
+          <TabsTrigger value="fx">Exchange Rates</TabsTrigger>
           <TabsTrigger value="reports">Financial Reports</TabsTrigger>
         </TabsList>
 
