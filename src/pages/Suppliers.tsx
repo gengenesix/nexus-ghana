@@ -168,7 +168,6 @@ export default function Suppliers() {
         open={showImport}
         onOpenChange={setShowImport}
         type="suppliers"
-        onImport={handleImport}
       />
     </div>
   );
