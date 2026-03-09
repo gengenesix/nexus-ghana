@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   ShoppingCart, Package, FileText, BarChart3, Users, Receipt,
   ArrowRight, Check, Landmark, Star, Shield, Globe, Smartphone,
-  Sparkles, TrendingUp, Clock,
+  Sparkles, TrendingUp, Clock, Phone, Mail,
 } from "lucide-react";
 
 import heroDashboard from "@/assets/hero-dashboard.png";
