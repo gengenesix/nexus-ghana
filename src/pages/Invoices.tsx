@@ -152,9 +152,14 @@ export default function Invoices() {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Invoices</h1>
           <p className="text-muted-foreground text-sm">{invoices.length} invoices · {invoices.filter((i: any) => i.status === "overdue").length} overdue</p>
         </div>
-        <Button onClick={() => setShowCreate(true)} className="gold-gradient text-primary-foreground">
-          <Plus className="h-4 w-4 mr-1" /> New Invoice
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => { if (invoices.length > 0) exportInvoicesCsv(invoices); else toast.error("No invoices"); }}>
+            <Download className="h-4 w-4 mr-1" /> Export
+          </Button>
+          <Button onClick={() => setShowCreate(true)} className="gold-gradient text-primary-foreground">
+            <Plus className="h-4 w-4 mr-1" /> New Invoice
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
