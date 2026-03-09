@@ -60,7 +60,7 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     // Mark staff as offline
     if (staff) {
-      supabase.rpc("staff_logout", { _staff_id: staff.id }).catch(() => {});
+      supabase.rpc("staff_logout", { _staff_id: staff.id }).then(() => {});
     }
     setStaff(null);
     sessionStorage.removeItem("nexus_staff_session");
