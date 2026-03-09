@@ -7,11 +7,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useBusiness } from "@/hooks/useBusiness";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users, Calendar, Award, GraduationCap, Plus, Pencil, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Users, Calendar, Award, GraduationCap, Plus, Pencil, Trash2, CheckCircle, XCircle, Network } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import EmployeeDialog from "@/components/hr/EmployeeDialog";
 import LeaveDialog from "@/components/hr/LeaveDialog";
+import { OrgChart } from "@/components/hr/OrgChart";
 
 export default function HumanResources() {
   const { business } = useBusiness();
