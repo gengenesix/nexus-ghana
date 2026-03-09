@@ -110,9 +110,13 @@ export default function Customers() {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Customers</h1>
           <p className="text-muted-foreground text-sm">{totalCount} customers</p>
         </div>
-        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
-          <Plus className="h-4 w-4 mr-1" /> Add Customer
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
+          <Button variant="outline" onClick={() => { if (customers.length > 0) exportCustomersCsv(customers); else toast.error("No customers to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
+          <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
+            <Plus className="h-4 w-4 mr-1" /> Add Customer
+          </Button>
+        </div>
       </div>
 
       <div className="relative">
