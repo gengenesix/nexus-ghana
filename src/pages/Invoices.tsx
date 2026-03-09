@@ -115,7 +115,7 @@ export default function Invoices() {
   });
 
   const downloadInvoice = (invoice: any) => {
-    generateInvoicePDF(invoice, business || { name: "NexusGH" });
+    generateInvoicePDF(invoice, business || { name: "Nexus-GH" });
   };
 
   return (

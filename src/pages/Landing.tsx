@@ -78,7 +78,7 @@ const testimonials = [
   {
     name: "Ama Serwaa",
     role: "Owner, Serwaa's Cosmetics — Kumasi",
-    text: "NexusGH changed how I run my shop. I can track every cedi and my MoMo payments are sorted automatically.",
+    text: "Nexus-GH changed how I run my shop. I can track every cedi and my MoMo payments are sorted automatically.",
     rating: 5,
   },
   {
@@ -114,7 +114,7 @@ export default function Landing() {
               <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
             </div>
             <span className="font-curly text-2xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-              NexusGH
+              Nexus-GH
             </span>
           </Link>
           <div className="hidden items-center gap-8 md:flex">
@@ -175,7 +175,7 @@ export default function Landing() {
             <div className="relative rounded-2xl glass-card-strong p-2 sm:p-3 glass-glow">
               <img
                 src={heroDashboard}
-                alt="NexusGH Dashboard showing sales analytics and business metrics"
+                alt="Nexus-GH Dashboard showing sales analytics and business metrics"
                 className="w-full rounded-xl"
                 loading="eager"
               />
@@ -368,7 +368,7 @@ export default function Landing() {
                 <br />Your Business?
               </h2>
               <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto">
-                Join hundreds of Ghanaian entrepreneurs already using NexusGH to grow their business.
+                Join hundreds of Ghanaian entrepreneurs already using Nexus-GH to grow their business.
               </p>
               <Button size="lg" className="mt-10 h-14 px-12 text-base font-bold gold-gradient text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-[1.02]" asChild>
                 <Link to="/register">
@@ -391,7 +391,7 @@ export default function Landing() {
                   <Landmark className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <span className="font-curly text-xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-                  NexusGH
+                  Nexus-GH
                 </span>
               </div>
               <div className="flex gap-8 text-sm text-muted-foreground">
@@ -411,7 +411,7 @@ export default function Landing() {
                 gengenesix@gmail.com
               </a>
             </div>
-            <p className="text-sm text-muted-foreground">© 2026 NexusGH. By GENESIS</p>
+            <p className="text-sm text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
           </div>
         </div>
       </footer>

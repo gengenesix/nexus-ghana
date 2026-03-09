@@ -38,7 +38,7 @@ export default function Login() {
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
           </div>
           <span className="font-curly text-3xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-            NexusGH
+            Nexus-GH
           </span>
         </div>
 
@@ -68,7 +68,7 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">© 2026 NexusGH. By GENESIS</p>
+        <p className="mt-6 text-center text-xs text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
       </div>
     </div>
   );

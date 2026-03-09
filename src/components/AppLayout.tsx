@@ -22,7 +22,7 @@ export function AppLayout() {
               <SidebarTrigger className="mr-2 hidden md:flex" />
               <div className="flex items-center gap-2 md:hidden">
                 <span className="font-curly text-lg bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-                  NexusGH
+                  Nexus-GH
                 </span>
               </div>
             </div>

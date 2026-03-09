@@ -136,7 +136,7 @@ export default function POS() {
       payment_method: PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label || paymentMethod,
     };
     
-    generateReceiptPDF(receiptData, business || { name: "NexusGH" });
+    generateReceiptPDF(receiptData, business || { name: "Nexus-GH" });
   };
 
   return (
@@ -230,7 +230,7 @@ export default function POS() {
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <div className="text-center">
-              <p className="font-bold text-primary text-lg">{business?.name || "NexusGH"}</p>
+              <p className="font-bold text-primary text-lg">{business?.name || "Nexus-GH"}</p>
               <p className="text-muted-foreground text-xs">Receipt #{lastReceipt}</p>
             </div>
             <Separator />
@@ -251,7 +251,7 @@ export default function POS() {
             <div className="flex gap-2">
               <Button variant="secondary" size="sm" className="flex-1 transition-all duration-200 hover:scale-105" onClick={downloadReceipt}><Printer className="h-4 w-4 mr-1" /> PDF</Button>
               <Button variant="secondary" size="sm" className="flex-1" asChild>
-                <a href={`https://wa.me/?text=${encodeURIComponent(`${business?.name || "NexusGH"} Receipt #${lastReceipt}\nTotal: ${formatGHS(total)}`)}`} target="_blank" rel="noreferrer">
+                <a href={`https://wa.me/?text=${encodeURIComponent(`${business?.name || "Nexus-GH"} Receipt #${lastReceipt}\nTotal: ${formatGHS(total)}`)}`} target="_blank" rel="noreferrer">
                   <MessageCircle className="h-4 w-4 mr-1" /> WhatsApp
                 </a>
               </Button>

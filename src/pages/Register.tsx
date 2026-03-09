@@ -39,14 +39,14 @@ export default function Register() {
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
           </div>
           <span className="font-curly text-3xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-            NexusGH
+            Nexus-GH
           </span>
         </div>
 
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="font-display text-2xl">Create your account</CardTitle>
-            <CardDescription>Start managing your business with NexusGH</CardDescription>
+            <CardDescription>Start managing your business with Nexus-GH</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -73,7 +73,7 @@ export default function Register() {
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">© 2026 NexusGH. By GENESIS</p>
+        <p className="mt-6 text-center text-xs text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
       </div>
     </div>
   );
