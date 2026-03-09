@@ -14,12 +14,344 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          business_id: string
+          completed: boolean
+          contact_id: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          lead_id: string | null
+          opportunity_id: string | null
+          staff_id: string | null
+          subject: string
+          type: string
+        }
+        Insert: {
+          business_id: string
+          completed?: boolean
+          contact_id?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lead_id?: string | null
+          opportunity_id?: string | null
+          staff_id?: string | null
+          subject: string
+          type?: string
+        }
+        Update: {
+          business_id?: string
+          completed?: boolean
+          contact_id?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lead_id?: string | null
+          opportunity_id?: string | null
+          staff_id?: string | null
+          subject?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_workflows: {
+        Row: {
+          business_id: string
+          conditions: Json | null
+          created_at: string
+          document_type: string
+          id: string
+          is_active: boolean
+          name: string
+          steps: Json
+        }
+        Insert: {
+          business_id: string
+          conditions?: Json | null
+          created_at?: string
+          document_type: string
+          id?: string
+          is_active?: boolean
+          name: string
+          steps?: Json
+        }
+        Update: {
+          business_id?: string
+          conditions?: Json | null
+          created_at?: string
+          document_type?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          steps?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_workflows_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          business_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          module: string
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          record_type: string
+          staff_id: string | null
+          staff_name: string
+        }
+        Insert: {
+          action: string
+          business_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          module?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          record_type?: string
+          staff_id?: string | null
+          staff_name?: string
+        }
+        Update: {
+          action?: string
+          business_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          module?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          record_type?: string
+          staff_id?: string | null
+          staff_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_accounts: {
+        Row: {
+          account_number: string | null
+          account_type: string
+          balance: number
+          bank_name: string
+          business_id: string
+          chart_account_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type?: string
+          balance?: number
+          bank_name?: string
+          business_id: string
+          chart_account_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string
+          balance?: number
+          bank_name?: string
+          business_id?: string
+          chart_account_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_accounts_chart_account_id_fkey"
+            columns: ["chart_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bill_of_materials: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          product_id: string
+          quantity_to_produce: number
+          status: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          product_id: string
+          quantity_to_produce?: number
+          status?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          product_id?: string
+          quantity_to_produce?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bill_of_materials_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bill_of_materials_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bom_components: {
+        Row: {
+          bom_id: string
+          id: string
+          product_id: string
+          quantity: number
+          unit_cost: number
+        }
+        Insert: {
+          bom_id: string
+          id?: string
+          product_id: string
+          quantity?: number
+          unit_cost?: number
+        }
+        Update: {
+          bom_id?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bom_components_bom_id_fkey"
+            columns: ["bom_id"]
+            isOneToOne: false
+            referencedRelation: "bill_of_materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bom_components_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           address: string | null
           created_at: string
+          currency: string | null
           email: string | null
+          fiscal_year_start: number | null
           id: string
+          industry: string | null
           logo_url: string | null
           momo_merchant_airteltigo: string | null
           momo_merchant_mtn: string | null
@@ -34,13 +366,17 @@ export type Database = {
           tax_getfl: boolean
           tax_nhil: boolean
           tax_vat: boolean
+          timezone: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
           created_at?: string
+          currency?: string | null
           email?: string | null
+          fiscal_year_start?: number | null
           id?: string
+          industry?: string | null
           logo_url?: string | null
           momo_merchant_airteltigo?: string | null
           momo_merchant_mtn?: string | null
@@ -55,13 +391,17 @@ export type Database = {
           tax_getfl?: boolean
           tax_nhil?: boolean
           tax_vat?: boolean
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
           created_at?: string
+          currency?: string | null
           email?: string | null
+          fiscal_year_start?: number | null
           id?: string
+          industry?: string | null
           logo_url?: string | null
           momo_merchant_airteltigo?: string | null
           momo_merchant_mtn?: string | null
@@ -76,6 +416,7 @@ export type Database = {
           tax_getfl?: boolean
           tax_nhil?: boolean
           tax_vat?: boolean
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -105,6 +446,60 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chart_of_accounts: {
+        Row: {
+          account_code: string
+          account_type: string
+          balance: number
+          business_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          parent_id: string | null
+        }
+        Insert: {
+          account_code: string
+          account_type: string
+          balance?: number
+          business_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          parent_id?: string | null
+        }
+        Update: {
+          account_code?: string
+          account_type?: string
+          balance?: number
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -149,6 +544,81 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          address: string | null
+          bank_account: string | null
+          business_id: string
+          created_at: string
+          date_of_birth: string | null
+          department: string | null
+          emergency_contact: string | null
+          emergency_phone: string | null
+          first_name: string
+          hire_date: string | null
+          id: string
+          last_name: string
+          position: string | null
+          salary: number | null
+          salary_frequency: string | null
+          staff_id: string | null
+          status: string
+        }
+        Insert: {
+          address?: string | null
+          bank_account?: string | null
+          business_id: string
+          created_at?: string
+          date_of_birth?: string | null
+          department?: string | null
+          emergency_contact?: string | null
+          emergency_phone?: string | null
+          first_name: string
+          hire_date?: string | null
+          id?: string
+          last_name?: string
+          position?: string | null
+          salary?: number | null
+          salary_frequency?: string | null
+          staff_id?: string | null
+          status?: string
+        }
+        Update: {
+          address?: string | null
+          bank_account?: string | null
+          business_id?: string
+          created_at?: string
+          date_of_birth?: string | null
+          department?: string | null
+          emergency_contact?: string | null
+          emergency_phone?: string | null
+          first_name?: string
+          hire_date?: string | null
+          id?: string
+          last_name?: string
+          position?: string | null
+          salary?: number | null
+          salary_frequency?: string | null
+          staff_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
             referencedColumns: ["id"]
           },
         ]
@@ -317,6 +787,532 @@ export type Database = {
           },
         ]
       }
+      journal_entries: {
+        Row: {
+          business_id: string
+          created_at: string
+          date: string
+          description: string | null
+          entry_number: string
+          id: string
+          reference: string | null
+          staff_id: string | null
+          status: string
+          total_credit: number
+          total_debit: number
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          entry_number: string
+          id?: string
+          reference?: string | null
+          staff_id?: string | null
+          status?: string
+          total_credit?: number
+          total_debit?: number
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          entry_number?: string
+          id?: string
+          reference?: string | null
+          staff_id?: string | null
+          status?: string
+          total_credit?: number
+          total_debit?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entries_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_lines: {
+        Row: {
+          account_id: string
+          cost_center: string | null
+          credit: number
+          debit: number
+          description: string | null
+          id: string
+          journal_entry_id: string
+        }
+        Insert: {
+          account_id: string
+          cost_center?: string | null
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_entry_id: string
+        }
+        Update: {
+          account_id?: string
+          cost_center?: string | null
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entry_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          assigned_to: string | null
+          business_id: string
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          source: string | null
+          status: string
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          business_id: string
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          assigned_to?: string | null
+          business_id?: string
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          module: string | null
+          staff_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          module?: string | null
+          staff_id?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          module?: string | null
+          staff_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      number_series: {
+        Row: {
+          business_id: string
+          created_at: string
+          document_type: string
+          id: string
+          is_active: boolean
+          next_number: number
+          pad_length: number
+          prefix: string
+          suffix: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          document_type: string
+          id?: string
+          is_active?: boolean
+          next_number?: number
+          pad_length?: number
+          prefix?: string
+          suffix?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          document_type?: string
+          id?: string
+          is_active?: boolean
+          next_number?: number
+          pad_length?: number
+          prefix?: string
+          suffix?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "number_series_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunities: {
+        Row: {
+          assigned_to: string | null
+          business_id: string
+          created_at: string
+          customer_id: string | null
+          expected_close: string | null
+          id: string
+          lead_id: string | null
+          lost_reason: string | null
+          name: string
+          notes: string | null
+          probability: number | null
+          stage: string
+          status: string
+          updated_at: string
+          value: number | null
+          won_reason: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          business_id: string
+          created_at?: string
+          customer_id?: string | null
+          expected_close?: string | null
+          id?: string
+          lead_id?: string | null
+          lost_reason?: string | null
+          name: string
+          notes?: string | null
+          probability?: number | null
+          stage?: string
+          status?: string
+          updated_at?: string
+          value?: number | null
+          won_reason?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          business_id?: string
+          created_at?: string
+          customer_id?: string | null
+          expected_close?: string | null
+          id?: string
+          lead_id?: string | null
+          lost_reason?: string | null
+          name?: string
+          notes?: string | null
+          probability?: number | null
+          stage?: string
+          status?: string
+          updated_at?: string
+          value?: number | null
+          won_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          business_id: string
+          created_at: string
+          currency: string
+          customer_id: string | null
+          date: string
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          payment_method: string
+          payment_number: string
+          reference: string | null
+          staff_id: string | null
+          status: string
+          supplier_id: string | null
+          type: string
+        }
+        Insert: {
+          amount?: number
+          bank_account_id?: string | null
+          business_id: string
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          date?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_method?: string
+          payment_number: string
+          reference?: string | null
+          staff_id?: string | null
+          status?: string
+          supplier_id?: string | null
+          type?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          business_id?: string
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          date?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_method?: string
+          payment_number?: string
+          reference?: string | null
+          staff_id?: string | null
+          status?: string
+          supplier_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_orders: {
+        Row: {
+          bom_id: string | null
+          business_id: string
+          completion_date: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          order_number: string
+          planned_date: string | null
+          product_id: string | null
+          quantity: number
+          staff_id: string | null
+          status: string
+        }
+        Insert: {
+          bom_id?: string | null
+          business_id: string
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_number: string
+          planned_date?: string | null
+          product_id?: string | null
+          quantity?: number
+          staff_id?: string | null
+          status?: string
+        }
+        Update: {
+          bom_id?: string | null
+          business_id?: string
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_number?: string
+          planned_date?: string | null
+          product_id?: string | null
+          quantity?: number
+          staff_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_orders_bom_id_fkey"
+            columns: ["bom_id"]
+            isOneToOne: false
+            referencedRelation: "bill_of_materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_orders_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_orders_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           business_id: string
@@ -397,6 +1393,250 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      project_tasks: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          hours_actual: number | null
+          hours_estimated: number | null
+          id: string
+          priority: string | null
+          project_id: string
+          start_date: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          hours_actual?: number | null
+          hours_estimated?: number | null
+          id?: string
+          priority?: string | null
+          project_id: string
+          start_date?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          hours_actual?: number | null
+          hours_estimated?: number | null
+          id?: string
+          priority?: string | null
+          project_id?: string
+          start_date?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          actual_cost: number | null
+          budget: number | null
+          business_id: string
+          created_at: string
+          customer_id: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          manager_id: string | null
+          name: string
+          priority: string | null
+          start_date: string | null
+          status: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          budget?: number | null
+          business_id: string
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          manager_id?: string | null
+          name: string
+          priority?: string | null
+          start_date?: string | null
+          status?: string
+        }
+        Update: {
+          actual_cost?: number | null
+          budget?: number | null
+          business_id?: string
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          manager_id?: string | null
+          name?: string
+          priority?: string | null
+          start_date?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          business_id: string
+          created_at: string
+          date: string
+          expected_date: string | null
+          id: string
+          notes: string | null
+          po_number: string
+          staff_id: string | null
+          status: string
+          subtotal: number
+          supplier_id: string | null
+          supplier_name: string
+          tax_amount: number
+          total: number
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          date?: string
+          expected_date?: string | null
+          id?: string
+          notes?: string | null
+          po_number: string
+          staff_id?: string | null
+          status?: string
+          subtotal?: number
+          supplier_id?: string | null
+          supplier_name?: string
+          tax_amount?: number
+          total?: number
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          date?: string
+          expected_date?: string | null
+          id?: string
+          notes?: string | null
+          po_number?: string
+          staff_id?: string | null
+          status?: string
+          subtotal?: number
+          supplier_id?: string | null
+          supplier_name?: string
+          tax_amount?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_templates: {
+        Row: {
+          business_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_system: boolean
+          license_tier: Database["public"]["Enums"]["license_tier"]
+          name: string
+          permissions: Json
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          license_tier?: Database["public"]["Enums"]["license_tier"]
+          name: string
+          permissions?: Json
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          license_tier?: Database["public"]["Enums"]["license_tier"]
+          name?: string
+          permissions?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_templates_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sale_items: {
         Row: {
@@ -504,48 +1744,341 @@ export type Database = {
           },
         ]
       }
-      staff_members: {
+      sales_orders: {
         Row: {
           business_id: string
           created_at: string
-          email: string | null
+          customer_id: string | null
+          customer_name: string
+          date: string
+          delivery_date: string | null
+          discount_amount: number
           id: string
-          is_online: boolean
-          last_login: string | null
-          name: string
-          phone: string | null
-          pin: string | null
-          role: string
+          notes: string | null
+          order_number: string
+          quotation_id: string | null
           staff_id: string | null
           status: string
+          subtotal: number
+          tax_amount: number
+          total: number
         }
         Insert: {
           business_id: string
           created_at?: string
-          email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          delivery_date?: string | null
+          discount_amount?: number
           id?: string
-          is_online?: boolean
-          last_login?: string | null
-          name: string
-          phone?: string | null
-          pin?: string | null
-          role?: string
+          notes?: string | null
+          order_number: string
+          quotation_id?: string | null
           staff_id?: string | null
           status?: string
+          subtotal?: number
+          tax_amount?: number
+          total?: number
         }
         Update: {
           business_id?: string
           created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          delivery_date?: string | null
+          discount_amount?: number
+          id?: string
+          notes?: string | null
+          order_number?: string
+          quotation_id?: string | null
+          staff_id?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_orders_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "sales_quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_quotations: {
+        Row: {
+          business_id: string
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          date: string
+          id: string
+          notes: string | null
+          opportunity_id: string | null
+          quotation_number: string
+          staff_id: string | null
+          status: string
+          subtotal: number
+          tax_amount: number
+          total: number
+          valid_until: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          opportunity_id?: string | null
+          quotation_number: string
+          staff_id?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          total?: number
+          valid_until?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          opportunity_id?: string | null
+          quotation_number?: string
+          staff_id?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          total?: number
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_quotations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_quotations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_quotations_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_quotations_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_calls: {
+        Row: {
+          assigned_to: string | null
+          business_id: string
+          call_number: string
+          closed_at: string | null
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          description: string | null
+          id: string
+          opened_at: string
+          priority: string
+          resolution: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          business_id: string
+          call_number: string
+          closed_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          description?: string | null
+          id?: string
+          opened_at?: string
+          priority?: string
+          resolution?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          assigned_to?: string | null
+          business_id?: string
+          call_number?: string
+          closed_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          description?: string | null
+          id?: string
+          opened_at?: string
+          priority?: string
+          resolution?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_calls_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_calls_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_calls_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_group_members: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          staff_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          staff_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "user_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_group_members_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_members: {
+        Row: {
+          business_id: string
+          created_at: string
+          department: string | null
+          email: string | null
+          id: string
+          is_online: boolean
+          last_login: string | null
+          license_tier: Database["public"]["Enums"]["license_tier"] | null
+          name: string
+          permissions: Json | null
+          phone: string | null
+          pin: string | null
+          role: string
+          role_template_id: string | null
+          staff_id: string | null
+          status: string
+          user_type: Database["public"]["Enums"]["user_type"] | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          department?: string | null
           email?: string | null
           id?: string
           is_online?: boolean
           last_login?: string | null
-          name?: string
+          license_tier?: Database["public"]["Enums"]["license_tier"] | null
+          name: string
+          permissions?: Json | null
           phone?: string | null
           pin?: string | null
           role?: string
+          role_template_id?: string | null
           staff_id?: string | null
           status?: string
+          user_type?: Database["public"]["Enums"]["user_type"] | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: string
+          is_online?: boolean
+          last_login?: string | null
+          license_tier?: Database["public"]["Enums"]["license_tier"] | null
+          name?: string
+          permissions?: Json | null
+          phone?: string | null
+          pin?: string | null
+          role?: string
+          role_template_id?: string | null
+          staff_id?: string | null
+          status?: string
+          user_type?: Database["public"]["Enums"]["user_type"] | null
         }
         Relationships: [
           {
@@ -553,6 +2086,94 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_members_role_template_id_fkey"
+            columns: ["role_template_id"]
+            isOneToOne: false
+            referencedRelation: "role_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_transfers: {
+        Row: {
+          business_id: string
+          created_at: string
+          date: string
+          from_warehouse_id: string | null
+          id: string
+          notes: string | null
+          product_id: string | null
+          quantity: number
+          staff_id: string | null
+          status: string
+          to_warehouse_id: string | null
+          transfer_number: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          date?: string
+          from_warehouse_id?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          quantity?: number
+          staff_id?: string | null
+          status?: string
+          to_warehouse_id?: string | null
+          transfer_number: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          date?: string
+          from_warehouse_id?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          quantity?: number
+          staff_id?: string | null
+          status?: string
+          to_warehouse_id?: string | null
+          transfer_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_transfers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfers_from_warehouse_id_fkey"
+            columns: ["from_warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfers_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfers_to_warehouse_id_fkey"
+            columns: ["to_warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
             referencedColumns: ["id"]
           },
         ]
@@ -598,6 +2219,85 @@ export type Database = {
           },
         ]
       }
+      user_groups: {
+        Row: {
+          business_id: string
+          created_at: string
+          description: string | null
+          group_type: string
+          id: string
+          name: string
+          permissions: Json
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description?: string | null
+          group_type?: string
+          id?: string
+          name: string
+          permissions?: Json
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          group_type?: string
+          id?: string
+          name?: string
+          permissions?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_groups_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      warehouses: {
+        Row: {
+          address: string | null
+          business_id: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+        }
+        Insert: {
+          address?: string | null
+          business_id: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+        }
+        Update: {
+          address?: string | null
+          business_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warehouses_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -617,7 +2317,14 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      license_tier:
+        | "professional"
+        | "limited_financial"
+        | "limited_logistics"
+        | "limited_sales_crm"
+        | "starter"
+      permission_level: "full" | "read_only" | "none"
+      user_type: "superuser" | "standard" | "support_auditor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -744,6 +2451,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      license_tier: [
+        "professional",
+        "limited_financial",
+        "limited_logistics",
+        "limited_sales_crm",
+        "starter",
+      ],
+      permission_level: ["full", "read_only", "none"],
+      user_type: ["superuser", "standard", "support_auditor"],
+    },
   },
 } as const
