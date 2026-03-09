@@ -46,7 +46,7 @@ export default function Register() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="font-display text-2xl">Create your account</CardTitle>
-            <CardDescription>Start managing your business with NexusGH</CardDescription>
+            <CardDescription>Start managing your business with Nexus-GH</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
