@@ -86,7 +86,7 @@ export const generateInvoicePDF = (invoice: InvoiceData, business: BusinessData)
   // Line
   yPos += 30;
   doc.setLineWidth(0.5);
-  doc.setDrawColor(...lightGray);
+  doc.setDrawColor(128, 128, 128);
   doc.line(20, yPos, 190, yPos);
   
   // Amounts section
