@@ -103,8 +103,8 @@ export default function Onboarding() {
               <p className="text-xs text-muted-foreground">This is your admin login PIN. As the account owner, you won't be blocked by staff PIN screens.</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>PIN (4-6 digits)</Label>
-                  <Input type="password" placeholder="••••" maxLength={6} value={adminPin} onChange={e => setAdminPin(e.target.value.replace(/\D/g, ""))} required />
+                  <Label>PIN (6 digits)</Label>
+                  <Input type="password" placeholder="••••••" maxLength={6} value={adminPin} onChange={e => setAdminPin(e.target.value.replace(/\D/g, ""))} required />
                 </div>
                 <div className="space-y-2">
                   <Label>Confirm PIN</Label>
