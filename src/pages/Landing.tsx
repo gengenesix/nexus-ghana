@@ -399,7 +399,7 @@ export default function Landing() {
               <a href="#testimonials" className="hover:text-foreground transition-colors">Reviews</a>
               <Link to="/login" className="hover:text-foreground transition-colors">Sign In</Link>
             </div>
-            <p className="text-sm text-muted-foreground">© 2026 NexusGH. Made in Ghana 🇬🇭</p>
+            <p className="text-sm text-muted-foreground">© 2026 NexusGH. By GENESIS</p>
           </div>
         </div>
       </footer>
