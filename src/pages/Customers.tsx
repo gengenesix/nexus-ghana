@@ -14,7 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { GHANA_REGIONS } from "@/lib/ghana";
-import { Search, Plus, Loader2, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { exportCustomersCsv } from "@/lib/export";
+import CsvImportDialog from "@/components/CsvImportDialog";
+import { Search, Plus, Loader2, Trash2, ChevronLeft, ChevronRight, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 25;
