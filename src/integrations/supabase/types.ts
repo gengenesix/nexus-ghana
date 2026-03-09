@@ -256,6 +256,60 @@ export type Database = {
           },
         ]
       }
+      bank_reconciliations: {
+        Row: {
+          bank_account_id: string
+          business_id: string
+          created_at: string
+          difference: number
+          id: string
+          notes: string | null
+          statement_balance: number
+          statement_date: string
+          status: string
+          system_balance: number
+        }
+        Insert: {
+          bank_account_id: string
+          business_id: string
+          created_at?: string
+          difference?: number
+          id?: string
+          notes?: string | null
+          statement_balance?: number
+          statement_date?: string
+          status?: string
+          system_balance?: number
+        }
+        Update: {
+          bank_account_id?: string
+          business_id?: string
+          created_at?: string
+          difference?: number
+          id?: string
+          notes?: string | null
+          statement_balance?: number
+          statement_date?: string
+          status?: string
+          system_balance?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_reconciliations_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_reconciliations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bill_of_materials: {
         Row: {
           business_id: string
@@ -504,6 +558,74 @@ export type Database = {
           },
         ]
       }
+      commissions: {
+        Row: {
+          amount: number
+          base_amount: number
+          business_id: string
+          created_at: string
+          id: string
+          invoice_id: string | null
+          rate: number
+          sale_id: string | null
+          staff_id: string | null
+          status: string
+        }
+        Insert: {
+          amount?: number
+          base_amount?: number
+          business_id: string
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          rate?: number
+          sale_id?: string | null
+          staff_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          base_amount?: number
+          business_id?: string
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          rate?: number
+          sale_id?: string | null
+          staff_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_notes: {
         Row: {
           business_id: string
@@ -591,33 +713,39 @@ export type Database = {
         Row: {
           business_id: string
           created_at: string
+          credit_limit: number | null
           email: string | null
           id: string
           loyalty_points: number
           name: string
           notes: string | null
+          outstanding_balance: number | null
           phone: string | null
           region: string | null
         }
         Insert: {
           business_id: string
           created_at?: string
+          credit_limit?: number | null
           email?: string | null
           id?: string
           loyalty_points?: number
           name: string
           notes?: string | null
+          outstanding_balance?: number | null
           phone?: string | null
           region?: string | null
         }
         Update: {
           business_id?: string
           created_at?: string
+          credit_limit?: number | null
           email?: string | null
           id?: string
           loyalty_points?: number
           name?: string
           notes?: string | null
+          outstanding_balance?: number | null
           phone?: string | null
           region?: string | null
         }
@@ -1466,6 +1594,89 @@ export type Database = {
           },
         ]
       }
+      price_list_items: {
+        Row: {
+          discount_percent: number
+          id: string
+          min_quantity: number
+          price: number
+          price_list_id: string
+          product_id: string
+        }
+        Insert: {
+          discount_percent?: number
+          id?: string
+          min_quantity?: number
+          price?: number
+          price_list_id: string
+          product_id: string
+        }
+        Update: {
+          discount_percent?: number
+          id?: string
+          min_quantity?: number
+          price?: number
+          price_list_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_list_items_price_list_id_fkey"
+            columns: ["price_list_id"]
+            isOneToOne: false
+            referencedRelation: "price_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_list_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      price_lists: {
+        Row: {
+          business_id: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_lists_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_orders: {
         Row: {
           bom_id: string | null
@@ -1820,6 +2031,60 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reconciliation_items: {
+        Row: {
+          amount: number
+          created_at: string
+          date: string
+          description: string
+          id: string
+          matched: boolean
+          payment_id: string | null
+          reconciliation_id: string
+          reference: string | null
+          type: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          matched?: boolean
+          payment_id?: string | null
+          reconciliation_id: string
+          reference?: string | null
+          type?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          matched?: boolean
+          payment_id?: string | null
+          reconciliation_id?: string
+          reference?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reconciliation_items_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reconciliation_items_reconciliation_id_fkey"
+            columns: ["reconciliation_id"]
+            isOneToOne: false
+            referencedRelation: "bank_reconciliations"
             referencedColumns: ["id"]
           },
         ]
