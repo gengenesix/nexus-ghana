@@ -170,7 +170,7 @@ export default function Settings() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle className="font-display flex items-center gapLandmark><Zap className="h-5 w-5 text-primary" /> Subscription</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="font-display flex items-center gap-2"><Landmark className="h-5 w-5 text-primary" /> Subscription</CardTitle></CardHeader>
             <CardContent>
               <div className="flex items-center justify-between p-4 rounded-lg gold-gradient text-primary-foreground">
                 <div>
