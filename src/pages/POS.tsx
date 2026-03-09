@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatGHS, PAYMENT_METHODS } from "@/lib/ghana";
+import { generateReceiptPDF } from "@/lib/pdf";
 import { Search, Plus, Minus, Trash2, ShoppingCart, CreditCard, Printer, MessageCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
