@@ -110,12 +110,11 @@ export default function Landing() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-3">
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/25">
-              <Zap className="h-5 w-5 text-primary-foreground" />
+              <Landmark className="h-5 w-5 text-primary-foreground" />
               <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
             </div>
-            <span className="font-brand text-2xl font-bold tracking-tight">
-              <span className="gold-text">Nexus</span>
-              <span className="text-foreground">GH</span>
+            <span className="font-display text-2xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+              NexusGH
             </span>
           </Link>
           <div className="hidden items-center gap-8 md:flex">
