@@ -6,10 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { GHANA_REGIONS } from "@/lib/ghana";
-import { Zap, Loader2 } from "lucide-react";
+import { Landmark, Loader2 } from "lucide-react";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
 
 export default function Onboarding() {
   const [name, setName] = useState("");
