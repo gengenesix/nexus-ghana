@@ -5,7 +5,7 @@ import {
   ArrowRight, Check, Landmark, Star, Shield, Globe, Smartphone,
   Sparkles, TrendingUp, Clock, Phone, Mail, Download,
 } from "lucide-react";
-import { downloadUserGuide } from "@/lib/generateGuide";
+
 
 import heroDashboard from "@/assets/hero-dashboard.png";
 import featurePos from "@/assets/feature-pos.png";
@@ -413,13 +413,14 @@ export default function Landing() {
               </a>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-              <button
-                onClick={downloadUserGuide}
+              <a
+                href="/NexusGH_User_Guide.pdf"
+                download="NexusGH_User_Guide.pdf"
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 <Download className="h-4 w-4" />
                 Download User Guide
-              </button>
+              </a>
               <p className="text-sm text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
             </div>
           </div>
