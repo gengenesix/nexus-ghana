@@ -11,6 +11,8 @@ import { FileText, ShoppingBag, Truck, RotateCcw, Plus, ArrowRight, Loader2, Pac
 import { format } from "date-fns";
 import { toast } from "sonner";
 import QuotationDialog from "@/components/sales/QuotationDialog";
+import { PriceListsTab } from "@/components/sales/PriceListsTab";
+import { CommissionsTab } from "@/components/sales/CommissionsTab";
 
 export default function SalesOrders() {
   const { business } = useBusiness();
