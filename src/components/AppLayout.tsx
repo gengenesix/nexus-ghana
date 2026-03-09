@@ -4,7 +4,9 @@ import { MobileNav } from "@/components/MobileNav";
 import { Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
-
+import { GlobalSearch } from "@/components/GlobalSearch";
+import { NotificationsCenter } from "@/components/NotificationsCenter";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AppLayout() {
   const location = useLocation();
@@ -25,8 +27,12 @@ export function AppLayout() {
                   Nexus-GH
                 </span>
               </div>
+              <GlobalSearch />
             </div>
-            
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              <NotificationsCenter />
+            </div>
           </header>
 
           <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto">
