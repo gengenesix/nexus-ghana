@@ -20,6 +20,7 @@ import { exportInvoicesCsv } from "@/lib/export";
 import { Search, Plus, Eye, Send, Loader2, Download, RotateCcw, FileText, Clock, DollarSign, AlertTriangle, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { differenceInDays, format } from "date-fns";
+import RecurringInvoicesTab from "@/components/invoices/RecurringInvoicesTab";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
