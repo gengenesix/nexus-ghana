@@ -13,7 +13,7 @@ import { Upload, Download, FileText, Loader2, CheckCircle, AlertTriangle } from 
 interface CsvImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  type: "products" | "customers";
+  type: "products" | "customers" | "suppliers";
 }
 
 const FIELD_MAPS = {
@@ -24,6 +24,10 @@ const FIELD_MAPS = {
   customers: {
     required: ["name"],
     fields: { "name": "name", "phone": "phone", "email": "email", "region": "region", "notes": "notes" },
+  },
+  suppliers: {
+    required: ["name"],
+    fields: { "name": "name", "contact person": "contact_person", "phone": "phone", "location": "location", "products": "products_supplied" },
   },
 };
 
@@ -88,7 +92,7 @@ export default function CsvImportDialog({ open, onOpenChange, type }: CsvImportD
     let success = 0, failed = 0;
 
     const records = rows.map(mapRow).filter(Boolean) as Record<string, any>[];
-    const tableName = type === "products" ? "products" : "customers";
+    const tableName = type as "products" | "customers" | "suppliers";
 
     // Batch insert in chunks of 50
     for (let i = 0; i < records.length; i += 50) {

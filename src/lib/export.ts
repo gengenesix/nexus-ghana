@@ -131,9 +131,12 @@ export function parseCsv(text: string): { headers: string[]; rows: string[][] } 
   return { headers, rows };
 }
 
-export function generateCsvTemplate(type: "products" | "customers"): string {
+export function generateCsvTemplate(type: "products" | "customers" | "suppliers"): string {
   if (type === "products") {
     return "Name,SKU,Cost Price,Selling Price,Quantity,Reorder Level\nExample Product,SKU-001,5.00,10.00,100,10";
+  }
+  if (type === "suppliers") {
+    return "Name,Contact Person,Phone,Location,Products\nABC Trading,Mr. Mensah,0241234567,Tema,Rice & Cooking Oil";
   }
   return "Name,Phone,Email,Region,Notes\nKwame Asante,0241234567,kwame@example.com,Greater Accra,VIP customer";
 }
