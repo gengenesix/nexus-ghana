@@ -175,7 +175,9 @@ export default function POS() {
       if (selectedCustomerId) {
         const points = Math.floor(total / 10);
         if (points > 0) {
-          await supabase.rpc("increment_loyalty_points" as any, { _customer_id: selectedCustomerId, _points: points }).catch(() => {});
+          try {
+            await supabase.from("customers").update({ loyalty_points: points } as any).eq("id", selectedCustomerId);
+          } catch {}
         }
       }
 

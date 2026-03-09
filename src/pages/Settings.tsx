@@ -77,13 +77,13 @@ export default function Settings() {
     if (!business) return;
     setExporting(true);
     try {
-      const tables = ["products", "customers", "suppliers", "sales", "sale_items", "invoices", "expenses", "leads", "opportunities", "purchase_orders"] as const;
+      const tableNames = ["products", "customers", "suppliers", "sales", "sale_items", "invoices", "expenses", "leads", "opportunities", "purchase_orders"];
       const allData: Record<string, any[]> = { business: [business] };
 
-      await Promise.all(tables.map(async (table) => {
-        const { data } = await supabase.from(table).select("*").eq("business_id", business.id);
+      for (const table of tableNames) {
+        const { data } = await supabase.from(table as any).select("*").eq("business_id", business.id);
         allData[table] = data || [];
-      }));
+      }
 
       const blob = new Blob([JSON.stringify(allData, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
