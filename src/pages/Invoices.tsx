@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +13,13 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatGHS, calculateTaxes } from "@/lib/ghana";
 import { generateInvoicePDF } from "@/lib/pdf";
 import { exportInvoicesCsv } from "@/lib/export";
-import { Search, Plus, Eye, MessageCircle, Send, Loader2, Download, RotateCcw } from "lucide-react";
+import { Search, Plus, Eye, Send, Loader2, Download, RotateCcw, FileText, Clock, DollarSign, AlertTriangle, CreditCard } from "lucide-react";
 import { toast } from "sonner";
+import { differenceInDays, format } from "date-fns";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -33,6 +35,10 @@ export default function Invoices() {
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
 
   // Create form
   const [formCustomerId, setFormCustomerId] = useState("");
@@ -62,18 +68,60 @@ export default function Invoices() {
     enabled: !!business,
   });
 
+  const { data: payments = [] } = useQuery({
+    queryKey: ["payments-invoices", business?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("payments").select("*").eq("business_id", business!.id).eq("type", "incoming").order("date", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!business,
+  });
+
   const filteredByStatus = statusFilter === "all" ? invoices : invoices.filter((i: any) => i.status === statusFilter);
   const filtered = filteredByStatus.filter((i: any) => (i.customer_name || "").toLowerCase().includes(search.toLowerCase()) || i.invoice_number.toLowerCase().includes(search.toLowerCase()));
+
+  // KPI calculations
+  const kpis = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const totalInvoiced = invoices.reduce((s: number, i: any) => s + Number(i.total), 0);
+    const paid = invoices.filter((i: any) => i.status === "paid");
+    const totalPaid = paid.reduce((s: number, i: any) => s + Number(i.total), 0);
+    const unpaid = invoices.filter((i: any) => ["sent", "overdue", "partial"].includes(i.status));
+    const totalUnpaid = unpaid.reduce((s: number, i: any) => s + Number(i.total), 0);
+    const overdue = invoices.filter((i: any) => i.status !== "paid" && i.due_date < today);
+    const totalOverdue = overdue.reduce((s: number, i: any) => s + Number(i.total), 0);
+
+    // Aging buckets
+    const aging = { current: 0, thirtyDays: 0, sixtyDays: 0, ninetyPlus: 0 };
+    unpaid.forEach((inv: any) => {
+      const days = differenceInDays(new Date(), new Date(inv.due_date));
+      const amt = Number(inv.total);
+      if (days <= 0) aging.current += amt;
+      else if (days <= 30) aging.thirtyDays += amt;
+      else if (days <= 60) aging.sixtyDays += amt;
+      else aging.ninetyPlus += amt;
+    });
+
+    return { totalInvoiced, totalPaid, totalUnpaid, totalOverdue, overdueCount: overdue.length, paidCount: paid.length, aging };
+  }, [invoices]);
 
   const subtotalNum = Number(formSubtotal) || 0;
   const taxCalc = calculateTaxes(subtotalNum, taxes);
 
+  // Invoice payments
+  const invoicePayments = useMemo(() => {
+    if (!selectedInvoice) return [];
+    return payments.filter((p: any) => p.invoice_id === selectedInvoice.id);
+  }, [selectedInvoice, payments]);
+
+  const totalPaidForInvoice = invoicePayments.reduce((s: number, p: any) => s + Number(p.amount), 0);
+  const balanceDue = selectedInvoice ? Number(selectedInvoice.total) - totalPaidForInvoice : 0;
+
   const createMutation = useMutation({
     mutationFn: async () => {
-      // Generate invoice number via RPC
       const { data: invNum, error: rpcErr } = await supabase.rpc("generate_invoice_number");
       if (rpcErr) throw rpcErr;
-
       const customer = customers.find((c: any) => c.id === formCustomerId);
       const { error } = await supabase.from("invoices").insert({
         business_id: business!.id,
@@ -115,11 +163,46 @@ export default function Invoices() {
     },
   });
 
+  const recordPayment = useMutation({
+    mutationFn: async () => {
+      if (!selectedInvoice) return;
+      const amt = Number(paymentAmount) || 0;
+      if (amt <= 0) throw new Error("Enter a valid amount");
+      const payNum = `PAY-${Date.now().toString(36).toUpperCase()}`;
+      const { error } = await supabase.from("payments").insert({
+        business_id: business!.id,
+        payment_number: payNum,
+        invoice_id: selectedInvoice.id,
+        customer_id: selectedInvoice.customer_id,
+        amount: amt,
+        payment_method: paymentMethod,
+        type: "incoming",
+        status: "completed",
+        date: new Date().toISOString().split("T")[0],
+        notes: `Payment for ${selectedInvoice.invoice_number}`,
+      });
+      if (error) throw error;
+
+      // Update invoice status
+      const newPaid = totalPaidForInvoice + amt;
+      const invTotal = Number(selectedInvoice.total);
+      const newStatus = newPaid >= invTotal ? "paid" : "partial";
+      await supabase.from("invoices").update({ status: newStatus }).eq("id", selectedInvoice.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["payments-invoices"] });
+      setShowPayment(false);
+      setPaymentAmount("");
+      toast.success("Payment recorded!");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   const downloadInvoice = (invoice: any) => {
     generateInvoicePDF(invoice, business || { name: "Nexus-GH" });
   };
 
-  // Create Credit Note from Invoice
   const createCreditNote = useMutation({
     mutationFn: async (invoice: any) => {
       const creditNum = `CN-${Date.now().toString(36).toUpperCase()}`;
@@ -153,14 +236,69 @@ export default function Invoices() {
           <p className="text-muted-foreground text-sm">{invoices.length} invoices · {invoices.filter((i: any) => i.status === "overdue").length} overdue</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => { if (invoices.length > 0) exportInvoicesCsv(invoices); else toast.error("No invoices"); }}>
+          <Button variant="outline" size="sm" onClick={() => { if (invoices.length > 0) exportInvoicesCsv(invoices); else toast.error("No invoices"); }}>
             <Download className="h-4 w-4 mr-1" /> Export
           </Button>
-          <Button onClick={() => setShowCreate(true)} className="gold-gradient text-primary-foreground">
+          <Button onClick={() => setShowCreate(true)} size="sm" className="gold-gradient text-primary-foreground">
             <Plus className="h-4 w-4 mr-1" /> New Invoice
           </Button>
         </div>
       </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><FileText className="h-3.5 w-3.5" /> Total Invoiced</div>
+            <p className="text-xl font-bold">{formatGHS(kpis.totalInvoiced)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{invoices.length} invoices</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-xs mb-1 text-green-500"><DollarSign className="h-3.5 w-3.5" /> Collected</div>
+            <p className="text-xl font-bold text-green-500">{formatGHS(kpis.totalPaid)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{kpis.paidCount} paid</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-xs mb-1 text-yellow-500"><Clock className="h-3.5 w-3.5" /> Outstanding</div>
+            <p className="text-xl font-bold text-yellow-500">{formatGHS(kpis.totalUnpaid)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{invoices.length - kpis.paidCount} unpaid</p>
+          </CardContent>
+        </Card>
+        <Card className={kpis.overdueCount > 0 ? "border-destructive/30" : ""}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-xs mb-1 text-destructive"><AlertTriangle className="h-3.5 w-3.5" /> Overdue</div>
+            <p className="text-xl font-bold text-destructive">{formatGHS(kpis.totalOverdue)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{kpis.overdueCount} overdue</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Aging Summary */}
+      {kpis.totalUnpaid > 0 && (
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="font-display text-sm">Aging Summary</CardTitle></CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { label: "Current", value: kpis.aging.current, color: "bg-green-500" },
+                { label: "1-30 Days", value: kpis.aging.thirtyDays, color: "bg-yellow-500" },
+                { label: "31-60 Days", value: kpis.aging.sixtyDays, color: "bg-orange-500" },
+                { label: "90+ Days", value: kpis.aging.ninetyPlus, color: "bg-destructive" },
+              ].map(bucket => (
+                <div key={bucket.label} className="text-center">
+                  <div className={`h-1.5 rounded-full mb-2 ${bucket.color}`} style={{ opacity: bucket.value > 0 ? 1 : 0.2 }} />
+                  <p className="text-xs text-muted-foreground">{bucket.label}</p>
+                  <p className="text-sm font-bold">{formatGHS(bucket.value)}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {["all", "draft", "sent", "paid", "overdue"].map(status => (
@@ -172,7 +310,7 @@ export default function Invoices() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search invoices..." className="pl-10" value={search} onChange={e => setSearch(e.target.value)} />
+        <Input placeholder="Search by invoice # or customer..." className="pl-10" value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
       <Card>
@@ -186,47 +324,206 @@ export default function Invoices() {
                 <TableHead className="hidden md:table-cell">Due</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="w-[180px]"></TableHead>
+                <TableHead className="w-[200px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{isLoading ? "Loading..." : "No invoices yet."}</TableCell></TableRow>
-              ) : filtered.map((invoice: any) => (
-                <TableRow key={invoice.id}>
-                  <TableCell className="font-mono text-sm text-primary">{invoice.invoice_number}</TableCell>
-                  <TableCell className="font-medium">{invoice.customer_name}</TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">{invoice.date}</TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground">{invoice.due_date}</TableCell>
-                  <TableCell className="text-center">
-                    <Badge className={statusColors[invoice.status] + " capitalize"}>{invoice.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">{formatGHS(Number(invoice.total))}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Select value={invoice.status} onValueChange={(s) => updateStatus.mutate({ id: invoice.id, status: s })}>
-                        <SelectTrigger className="h-8 text-xs w-[100px]"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {["draft", "sent", "paid", "overdue", "partial"].map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 hover:bg-accent" onClick={() => downloadInvoice(invoice)} title="Download PDF">
-                         <Download className="h-4 w-4" />
-                       </Button>
-                       {(invoice.status === "paid" || invoice.status === "sent") && (
-                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-orange-500 hover:bg-orange-500/10" onClick={() => createCreditNote.mutate(invoice)} title="Create Credit Note" disabled={createCreditNote.isPending}>
-                           <RotateCcw className="h-4 w-4" />
-                         </Button>
-                       )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              ) : filtered.map((invoice: any) => {
+                const isOverdue = invoice.status !== "paid" && invoice.due_date < new Date().toISOString().split("T")[0];
+                return (
+                  <TableRow key={invoice.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedInvoice(invoice)}>
+                    <TableCell className="font-mono text-sm text-primary">{invoice.invoice_number}</TableCell>
+                    <TableCell className="font-medium">{invoice.customer_name}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground">{invoice.date}</TableCell>
+                    <TableCell className={`hidden md:table-cell ${isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}`}>{invoice.due_date}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge className={statusColors[invoice.status] + " capitalize"}>{invoice.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-medium">{formatGHS(Number(invoice.total))}</TableCell>
+                    <TableCell onClick={e => e.stopPropagation()}>
+                      <div className="flex gap-1">
+                        <Select value={invoice.status} onValueChange={(s) => updateStatus.mutate({ id: invoice.id, status: s })}>
+                          <SelectTrigger className="h-8 text-xs w-[90px]"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["draft", "sent", "paid", "overdue", "partial"].map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSelectedInvoice(invoice)} title="View"><Eye className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => downloadInvoice(invoice)} title="Download PDF"><Download className="h-4 w-4" /></Button>
+                        {["sent", "partial", "overdue"].includes(invoice.status) && (
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-green-500 hover:bg-green-500/10" onClick={() => { setSelectedInvoice(invoice); setPaymentAmount(String(Number(invoice.total))); setShowPayment(true); }} title="Record Payment">
+                            <CreditCard className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
+      {/* Invoice Detail Dialog */}
+      <Dialog open={!!selectedInvoice && !showPayment} onOpenChange={(open) => { if (!open) setSelectedInvoice(null); }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {selectedInvoice && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-display flex items-center gap-2">
+                  {selectedInvoice.invoice_number}
+                  <Badge className={statusColors[selectedInvoice.status] + " capitalize"}>{selectedInvoice.status}</Badge>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Customer</p>
+                    <p className="font-medium">{selectedInvoice.customer_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Invoice Date</p>
+                    <p className="font-medium">{selectedInvoice.date}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Due Date</p>
+                    <p className={`font-medium ${selectedInvoice.due_date < new Date().toISOString().split("T")[0] && selectedInvoice.status !== "paid" ? "text-destructive" : ""}`}>
+                      {selectedInvoice.due_date}
+                      {selectedInvoice.due_date < new Date().toISOString().split("T")[0] && selectedInvoice.status !== "paid" && (
+                        <span className="text-xs ml-1">({differenceInDays(new Date(), new Date(selectedInvoice.due_date))} days overdue)</span>
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Created</p>
+                    <p className="font-medium">{format(new Date(selectedInvoice.created_at), "dd MMM yyyy")}</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatGHS(Number(selectedInvoice.subtotal))}</span></div>
+                  {selectedInvoice.apply_vat && <div className="flex justify-between"><span className="text-muted-foreground">VAT (15%)</span><span>{formatGHS(Number(selectedInvoice.vat_amount))}</span></div>}
+                  {selectedInvoice.apply_nhil && <div className="flex justify-between"><span className="text-muted-foreground">NHIL (2.5%)</span><span>{formatGHS(Number(selectedInvoice.nhil_amount))}</span></div>}
+                  {selectedInvoice.apply_getfl && <div className="flex justify-between"><span className="text-muted-foreground">GETFL (1%)</span><span>{formatGHS(Number(selectedInvoice.getfl_amount))}</span></div>}
+                  <Separator />
+                  <div className="flex justify-between font-bold text-lg"><span>Total</span><span className="text-primary">{formatGHS(Number(selectedInvoice.total))}</span></div>
+                  {invoicePayments.length > 0 && (
+                    <>
+                      <div className="flex justify-between text-green-500"><span>Paid</span><span>{formatGHS(totalPaidForInvoice)}</span></div>
+                      <div className="flex justify-between font-bold"><span>Balance Due</span><span className={balanceDue > 0 ? "text-destructive" : "text-green-500"}>{formatGHS(balanceDue)}</span></div>
+                    </>
+                  )}
+                </div>
+
+                {selectedInvoice.notes && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Notes</p>
+                      <p className="text-sm">{selectedInvoice.notes}</p>
+                    </div>
+                  </>
+                )}
+
+                {/* Payment History */}
+                {invoicePayments.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-sm font-semibold mb-2">Payment History</p>
+                      <div className="space-y-2">
+                        {invoicePayments.map((p: any) => (
+                          <div key={p.id} className="flex items-center justify-between text-sm rounded-lg bg-secondary/50 px-3 py-2">
+                            <div>
+                              <p className="font-medium">{p.payment_number}</p>
+                              <p className="text-xs text-muted-foreground">{p.date} · {p.payment_method}</p>
+                            </div>
+                            <span className="font-medium text-green-500">{formatGHS(Number(p.amount))}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => downloadInvoice(selectedInvoice)}>
+                    <Download className="h-4 w-4 mr-1" /> PDF
+                  </Button>
+                  {["sent", "partial", "overdue"].includes(selectedInvoice.status) && (
+                    <Button className="flex-1 gold-gradient text-primary-foreground" onClick={() => { setPaymentAmount(String(balanceDue > 0 ? balanceDue : Number(selectedInvoice.total))); setShowPayment(true); }}>
+                      <CreditCard className="h-4 w-4 mr-1" /> Record Payment
+                    </Button>
+                  )}
+                  {(selectedInvoice.status === "paid" || selectedInvoice.status === "sent") && (
+                    <Button variant="outline" className="text-orange-500 hover:bg-orange-500/10" onClick={() => createCreditNote.mutate(selectedInvoice)} disabled={createCreditNote.isPending}>
+                      <RotateCcw className="h-4 w-4 mr-1" /> Credit Note
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Record Payment Dialog */}
+      <Dialog open={showPayment} onOpenChange={(open) => { if (!open) setShowPayment(false); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Record Payment</DialogTitle>
+          </DialogHeader>
+          {selectedInvoice && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-secondary/50 p-3 text-sm">
+                <p className="font-medium">{selectedInvoice.invoice_number}</p>
+                <p className="text-muted-foreground">{selectedInvoice.customer_name}</p>
+                <div className="flex justify-between mt-2">
+                  <span>Invoice Total</span>
+                  <span className="font-bold">{formatGHS(Number(selectedInvoice.total))}</span>
+                </div>
+                {totalPaidForInvoice > 0 && (
+                  <div className="flex justify-between">
+                    <span>Already Paid</span>
+                    <span className="text-green-500">{formatGHS(totalPaidForInvoice)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold">
+                  <span>Balance Due</span>
+                  <span className="text-primary">{formatGHS(balanceDue > 0 ? balanceDue : Number(selectedInvoice.total))}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Payment Amount (GHS) *</Label>
+                <Input type="number" placeholder="0.00" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Payment Method</Label>
+                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["cash", "MTN MoMo", "Telecel Cash", "AirtelTigo Money", "bank_transfer", "card", "cheque"].map(m => (
+                      <SelectItem key={m} value={m} className="capitalize">{m.replace("_", " ")}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button className="w-full gold-gradient text-primary-foreground" onClick={() => recordPayment.mutate()} disabled={!paymentAmount || recordPayment.isPending}>
+                {recordPayment.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CreditCard className="h-4 w-4 mr-2" /> Record Payment</>}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Invoice Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
