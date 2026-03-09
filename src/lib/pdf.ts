@@ -171,7 +171,7 @@ export const generateReceiptPDF = (receipt: ReceiptData, business: BusinessData)
   doc.text(business.name || 'NexusGH', 20, 22);
   
   // Receipt title
-  doc.setTextColor(...darkGray);
+  doc.setTextColor(51, 51, 51);
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text('RECEIPT', 150, 22);
