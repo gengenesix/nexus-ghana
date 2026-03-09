@@ -312,9 +312,9 @@ export default function Invoices() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
         {["all", "draft", "sent", "paid", "overdue"].map(status => (
-          <Button key={status} variant={statusFilter === status ? "default" : "secondary"} size="sm" className="capitalize" onClick={() => setStatusFilter(status)}>
+          <Button key={status} variant={statusFilter === status ? "default" : "secondary"} size="sm" className="capitalize shrink-0" onClick={() => setStatusFilter(status)}>
             {status} ({status === "all" ? invoices.length : invoices.filter((i: any) => i.status === status).length})
           </Button>
         ))}
