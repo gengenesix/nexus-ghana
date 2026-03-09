@@ -15,7 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { formatGHS, calculateTaxes } from "@/lib/ghana";
 import { generateInvoicePDF } from "@/lib/pdf";
-import { Search, Plus, Eye, MessageCircle, Send, Loader2, Download } from "lucide-react";
+import { exportInvoicesCsv } from "@/lib/export";
+import { Search, Plus, Eye, MessageCircle, Send, Loader2, Download, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
