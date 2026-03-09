@@ -78,7 +78,7 @@ const testimonials = [
   {
     name: "Ama Serwaa",
     role: "Owner, Serwaa's Cosmetics — Kumasi",
-    text: "NexusGH changed how I run my shop. I can track every cedi and my MoMo payments are sorted automatically.",
+    text: "Nexus-GH changed how I run my shop. I can track every cedi and my MoMo payments are sorted automatically.",
     rating: 5,
   },
   {
