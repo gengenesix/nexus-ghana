@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,8 +13,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { GHANA_REGIONS } from "@/lib/ghana";
-import { Building2, Receipt, CreditCard, Download, Landmark, Loader2 } from "lucide-react";
+import { Building2, Receipt, CreditCard, Download, Landmark, Loader2, FileJson } from "lucide-react";
 import { toast } from "sonner";
+import { exportSalesCsv, exportInventoryCsv, exportExpensesCsv, exportCustomersCsv, exportSuppliersCsv, exportInvoicesCsv } from "@/lib/export";
 
 export default function Settings() {
   const { business, updateBusiness } = useBusiness();
@@ -31,6 +34,7 @@ export default function Settings() {
   const [receiptHeader, setReceiptHeader] = useState("");
   const [receiptFooter, setReceiptFooter] = useState("");
   const [receiptShowLogo, setReceiptShowLogo] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (business) {
@@ -68,6 +72,42 @@ export default function Settings() {
       toast.success("Payment settings saved!");
     } catch (err: any) { toast.error(err.message); }
   };
+
+  const exportAllData = async () => {
+    if (!business) return;
+    setExporting(true);
+    try {
+      const tables = ["products", "customers", "suppliers", "sales", "sale_items", "invoices", "expenses", "leads", "opportunities", "purchase_orders"] as const;
+      const allData: Record<string, any[]> = { business: [business] };
+
+      await Promise.all(tables.map(async (table) => {
+        const { data } = await supabase.from(table).select("*").eq("business_id", business.id);
+        allData[table] = data || [];
+      }));
+
+      const blob = new Blob([JSON.stringify(allData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `nexus_backup_${business.name.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Full data backup exported!");
+    } catch (err: any) {
+      toast.error("Export failed: " + err.message);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const quickExports = [
+    { label: "Sales CSV", fn: async () => { const { data } = await supabase.from("sales").select("*").eq("business_id", business!.id); exportSalesCsv(data || []); toast.success("Sales exported!"); }},
+    { label: "Inventory CSV", fn: async () => { const { data } = await supabase.from("products").select("*").eq("business_id", business!.id); exportInventoryCsv(data || []); toast.success("Inventory exported!"); }},
+    { label: "Customers CSV", fn: async () => { const { data } = await supabase.from("customers").select("*").eq("business_id", business!.id); exportCustomersCsv(data || []); toast.success("Customers exported!"); }},
+    { label: "Suppliers CSV", fn: async () => { const { data } = await supabase.from("suppliers").select("*").eq("business_id", business!.id); exportSuppliersCsv(data || []); toast.success("Suppliers exported!"); }},
+    { label: "Invoices CSV", fn: async () => { const { data } = await supabase.from("invoices").select("*").eq("business_id", business!.id); exportInvoicesCsv(data || []); toast.success("Invoices exported!"); }},
+    { label: "Expenses CSV", fn: async () => { const { data } = await supabase.from("expenses").select("*").eq("business_id", business!.id); exportExpensesCsv(data || []); toast.success("Expenses exported!"); }},
+  ];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -164,8 +204,18 @@ export default function Settings() {
             <CardHeader><CardTitle className="font-display flex items-center gap-2"><Download className="h-5 w-5 text-primary" /> Data & Backup</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">Export your business data for backup or migration.</p>
-              <div className="flex gap-2">
-                <Button variant="secondary"><Download className="h-4 w-4 mr-1" /> Export All Data (JSON)</Button>
+              <Button onClick={exportAllData} disabled={exporting} className="gold-gradient text-primary-foreground">
+                {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileJson className="h-4 w-4 mr-1" />}
+                {exporting ? "Exporting..." : "Export Full Backup (JSON)"}
+              </Button>
+              <Separator />
+              <p className="text-sm font-medium">Quick Exports</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {quickExports.map(ex => (
+                  <Button key={ex.label} variant="outline" size="sm" onClick={ex.fn}>
+                    <Download className="h-3.5 w-3.5 mr-1" /> {ex.label}
+                  </Button>
+                ))}
               </div>
             </CardContent>
           </Card>
