@@ -192,6 +192,8 @@ export default function Customers() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <CsvImportDialog open={showImport} onOpenChange={setShowImport} type="customers" />
     </div>
   );
 }
