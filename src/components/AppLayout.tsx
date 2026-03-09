@@ -19,7 +19,9 @@ export function AppLayout() {
           <header className="sticky top-0 z-40 flex h-14 items-center border-b border-border bg-background/80 backdrop-blur-md px-4 md:px-6">
             <SidebarTrigger className="mr-4 hidden md:flex" />
             <div className="flex items-center gap-2 md:hidden">
-              <span className="font-display text-lg font-bold gold-text">NexusGH</span>
+              <span className="font-display text-lg font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+                NexusGH
+              </span>
             </div>
           </header>
 
