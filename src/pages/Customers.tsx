@@ -14,7 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { GHANA_REGIONS } from "@/lib/ghana";
-import { Search, Plus, Loader2, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { exportCustomersCsv } from "@/lib/export";
+import CsvImportDialog from "@/components/CsvImportDialog";
+import { Search, Plus, Loader2, Trash2, ChevronLeft, ChevronRight, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 25;
@@ -26,6 +28,7 @@ export default function Customers() {
   const debouncedSearch = useDebounce(search, 350);
   const { page, from, to, nextPage, prevPage, resetPage } = usePagination(PAGE_SIZE);
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [formName, setFormName] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formEmail, setFormEmail] = useState("");
@@ -107,9 +110,13 @@ export default function Customers() {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Customers</h1>
           <p className="text-muted-foreground text-sm">{totalCount} customers</p>
         </div>
-        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
-          <Plus className="h-4 w-4 mr-1" /> Add Customer
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
+          <Button variant="outline" onClick={() => { if (customers.length > 0) exportCustomersCsv(customers); else toast.error("No customers to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
+          <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
+            <Plus className="h-4 w-4 mr-1" /> Add Customer
+          </Button>
+        </div>
       </div>
 
       <div className="relative">
@@ -185,6 +192,8 @@ export default function Customers() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <CsvImportDialog open={showImport} onOpenChange={setShowImport} type="customers" />
     </div>
   );
 }

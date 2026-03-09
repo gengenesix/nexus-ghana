@@ -70,6 +70,37 @@ export default function SalesOrders() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  // Convert Sales Order → Invoice (SAP document chain)
+  const convertToInvoice = useMutation({
+    mutationFn: async (order: any) => {
+      const invoiceNum = `INV-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase()}`;
+      const { error: invErr } = await supabase.from("invoices").insert({
+        business_id: business!.id,
+        invoice_number: invoiceNum,
+        customer_name: order.customer_name,
+        customer_id: order.customer_id,
+        date: new Date().toISOString().split("T")[0],
+        due_date: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
+        subtotal: order.subtotal,
+        vat_amount: order.tax_amount || 0,
+        total: order.total,
+        status: "sent",
+        notes: `Created from Sales Order ${order.order_number}`,
+      });
+      if (invErr) throw invErr;
+
+      // Update order status to "invoiced"
+      const { error: updateErr } = await supabase.from("sales_orders").update({ status: "invoiced" }).eq("id", order.id);
+      if (updateErr) throw updateErr;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Sales Order converted to Invoice — view it in Invoices module");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   return (
     <div className="space-y-6">
       <div>
@@ -127,7 +158,7 @@ export default function SalesOrders() {
           <Card><CardContent className="pt-4">
             {salesOrders.length > 0 ? (
               <Table>
-                <TableHeader><TableRow><TableHead>Order #</TableHead><TableHead>Customer</TableHead><TableHead>Date</TableHead><TableHead>Source</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                <TableHeader><TableRow><TableHead>Order #</TableHead><TableHead>Customer</TableHead><TableHead>Date</TableHead><TableHead>Source</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead><TableHead className="w-28"></TableHead></TableRow></TableHeader>
                 <TableBody>{salesOrders.map((o: any) => (
                   <TableRow key={o.id}>
                     <TableCell className="font-mono">{o.order_number}</TableCell>
@@ -136,6 +167,13 @@ export default function SalesOrders() {
                     <TableCell>{o.quotation_id ? <Badge variant="secondary" className="text-xs">From Quote</Badge> : <Badge variant="outline" className="text-xs">Direct</Badge>}</TableCell>
                     <TableCell className="text-right font-mono">GHS {Number(o.total).toLocaleString()}</TableCell>
                     <TableCell><Badge variant="outline" className="capitalize">{o.status}</Badge></TableCell>
+                    <TableCell>
+                      {o.status === "open" && (
+                        <Button variant="outline" size="sm" onClick={() => convertToInvoice.mutate(o)} disabled={convertToInvoice.isPending}>
+                          {convertToInvoice.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><FileText className="h-3.5 w-3.5 mr-1" />To Invoice</>}
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}</TableBody>
               </Table>
