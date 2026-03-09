@@ -368,7 +368,7 @@ export default function Landing() {
                 <br />Your Business?
               </h2>
               <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto">
-                Join hundreds of Ghanaian entrepreneurs already using NexusGH to grow their business.
+                Join hundreds of Ghanaian entrepreneurs already using Nexus-GH to grow their business.
               </p>
               <Button size="lg" className="mt-10 h-14 px-12 text-base font-bold gold-gradient text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-[1.02]" asChild>
                 <Link to="/register">
