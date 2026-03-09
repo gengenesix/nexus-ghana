@@ -73,7 +73,7 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="password"
-                placeholder="Enter your staff PIN"
+                placeholder="Enter your 6-digit PIN"
                 maxLength={6}
                 className="pl-10 text-center text-xl tracking-widest"
                 value={pin}
@@ -96,7 +96,7 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
             {isLoading ? "Verifying..." : "Continue"}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            Staff members can continue with the PIN assigned by the administrator
+            Enter the 6-digit PIN assigned by your administrator
           </p>
         </CardContent>
       </Card>

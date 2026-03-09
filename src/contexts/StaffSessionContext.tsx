@@ -19,14 +19,18 @@ const StaffSessionContext = createContext<StaffSessionContextType | undefined>(u
 
 // Role-based access control rules
 const ROLE_PERMISSIONS: Record<string, string[]> = {
+  Administrator: ["dashboard", "pos", "inventory", "invoices", "customers", "suppliers", "expenses", "reports", "staff", "settings"],
   Manager: ["dashboard", "pos", "inventory", "invoices", "customers", "suppliers", "expenses", "reports", "staff", "settings"],
+  Supervisor: ["dashboard", "pos", "inventory", "invoices", "customers", "reports"],
   Cashier: ["pos", "customers"],
+  "Sales Rep": ["pos", "customers", "invoices"],
+  Warehouse: ["inventory", "suppliers"],
+  Accountant: ["expenses", "invoices", "reports"],
   Staff: ["pos", "inventory"],
 };
 
 export function StaffSessionProvider({ children }: { children: ReactNode }) {
   const [staff, setStaff] = useState<StaffSession | null>(() => {
-    // Restore from sessionStorage on mount
     const saved = sessionStorage.getItem("nexus_staff_session");
     return saved ? JSON.parse(saved) : null;
   });
@@ -54,9 +58,13 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    // Mark staff as offline
+    if (staff) {
+      supabase.rpc("staff_logout", { _staff_id: staff.id }).then(() => {});
+    }
     setStaff(null);
     sessionStorage.removeItem("nexus_staff_session");
-  }, []);
+  }, [staff]);
 
   const canAccess = useCallback((feature: string): boolean => {
     if (!staff) return false;

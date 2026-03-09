@@ -29,7 +29,7 @@ export default function Onboarding() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) { toast.error("Business name is required"); return; }
-    if (adminPin.length < 4) { toast.error("PIN must be at least 4 digits"); return; }
+    if (adminPin.length < 6) { toast.error("PIN must be 6 digits"); return; }
     if (adminPin !== confirmPin) { toast.error("PINs do not match"); return; }
 
     try {
@@ -99,12 +99,12 @@ export default function Onboarding() {
                 <Textarea placeholder="Business address" value={address} onChange={e => setAddress(e.target.value)} />
               </div>
               <Separator className="my-2" />
-              <p className="text-sm font-medium text-foreground">Set Your Admin PIN</p>
-              <p className="text-xs text-muted-foreground">You'll use this PIN to assign/manage staff access. You won't be blocked by staff PIN as account owner.</p>
+              <p className="text-sm font-medium text-foreground">Set Your Admin PIN (6 digits)</p>
+              <p className="text-xs text-muted-foreground">This is your admin login PIN. As the account owner, you won't be blocked by staff PIN screens.</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>PIN (4-6 digits)</Label>
-                  <Input type="password" placeholder="••••" maxLength={6} value={adminPin} onChange={e => setAdminPin(e.target.value.replace(/\D/g, ""))} required />
+                  <Label>PIN (6 digits)</Label>
+                  <Input type="password" placeholder="••••••" maxLength={6} value={adminPin} onChange={e => setAdminPin(e.target.value.replace(/\D/g, ""))} required />
                 </div>
                 <div className="space-y-2">
                   <Label>Confirm PIN</Label>
