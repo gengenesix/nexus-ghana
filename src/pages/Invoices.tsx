@@ -247,7 +247,17 @@ export default function Invoices() {
         </div>
       </div>
 
-      {/* KPI Cards */}
+      <Tabs value={activeMainTab} onValueChange={setActiveMainTab}>
+        <TabsList>
+          <TabsTrigger value="invoices">All Invoices</TabsTrigger>
+          <TabsTrigger value="recurring">Recurring</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="recurring">
+          <RecurringInvoicesTab />
+        </TabsContent>
+
+        <TabsContent value="invoices" className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
