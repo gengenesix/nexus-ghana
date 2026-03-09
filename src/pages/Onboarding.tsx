@@ -20,14 +20,32 @@ export default function Onboarding() {
   const [email, setEmail] = useState("");
   const [region, setRegion] = useState("");
   const [address, setAddress] = useState("");
+  const [adminPin, setAdminPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
   const { createBusiness } = useBusiness();
+  const { user } = useAuth();
+  const { loginWithPin } = useStaffSession();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) { toast.error("Business name is required"); return; }
+    if (adminPin.length < 4) { toast.error("PIN must be at least 4 digits"); return; }
+    if (adminPin !== confirmPin) { toast.error("PINs do not match"); return; }
     try {
-      await createBusiness.mutateAsync({ name: name.trim(), phone, email, region, address });
+      const biz = await createBusiness.mutateAsync({ name: name.trim(), phone, email, region, address });
+      // Auto-create the owner as a Manager staff member with their chosen PIN
+      const fullName = user?.user_metadata?.full_name || user?.email || "Admin";
+      await supabase.from("staff_members").insert({
+        business_id: biz.id,
+        name: fullName,
+        role: "Manager",
+        pin: adminPin,
+        email: user?.email || "",
+        status: "active",
+      });
+      // Auto-login as the admin staff
+      await loginWithPin(biz.id, adminPin);
       toast.success("Business created! Welcome to Nexus-GH 🎉");
       navigate("/dashboard");
     } catch (err: any) {
