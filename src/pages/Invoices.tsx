@@ -210,9 +210,14 @@ export default function Invoices() {
                           {["draft", "sent", "paid", "overdue", "partial"].map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
                         </SelectContent>
                       </Select>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 hover:bg-accent" onClick={() => downloadInvoice(invoice)}>
-                        <Download className="h-4 w-4" />
-                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 hover:bg-accent" onClick={() => downloadInvoice(invoice)} title="Download PDF">
+                         <Download className="h-4 w-4" />
+                       </Button>
+                       {(invoice.status === "paid" || invoice.status === "sent") && (
+                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-orange-500 hover:bg-orange-500/10" onClick={() => createCreditNote.mutate(invoice)} title="Create Credit Note" disabled={createCreditNote.isPending}>
+                           <RotateCcw className="h-4 w-4" />
+                         </Button>
+                       )}
                     </div>
                   </TableCell>
                 </TableRow>
