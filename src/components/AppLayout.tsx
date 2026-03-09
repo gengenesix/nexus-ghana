@@ -32,6 +32,7 @@ export function AppLayout() {
             </div>
             <div className="flex items-center gap-1">
               <ThemeToggle />
+              <ApprovalInbox />
               <NotificationsCenter />
             </div>
           </header>
