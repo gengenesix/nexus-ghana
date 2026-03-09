@@ -29,6 +29,7 @@ export default function Inventory() {
   const debouncedSearch = useDebounce(search, 350);
   const { page, from, to, nextPage, prevPage, resetPage } = usePagination(PAGE_SIZE);
   const [showAdd, setShowAdd] = useState(false);
+  const [inventoryTab, setInventoryTab] = useState("products");
   const [showImport, setShowImport] = useState(false);
   const [showAdjust, setShowAdjust] = useState(false);
   const [adjustProduct, setAdjustProduct] = useState<any>(null);
