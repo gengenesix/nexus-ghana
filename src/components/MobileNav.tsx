@@ -42,7 +42,7 @@ export function MobileNav() {
               <SheetContent side="bottom" className="bg-card border-border">
                 <div className="flex items-center gap-2 mb-4">
                   <Landmark className="h-5 w-5 text-primary" />
-                  <span className="font-curly text-lg gold-text">NexusGH</span>
+                  <span className="font-curly text-lg gold-text">Nexus-GH</span>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   {moreItems.map((mi) => (

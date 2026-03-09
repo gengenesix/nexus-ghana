@@ -39,7 +39,7 @@ export function AppSidebar() {
         </div>
         {!collapsed && (
           <span className="font-curly text-xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-            NexusGH
+            Nexus-GH
           </span>
         )}
       </div>

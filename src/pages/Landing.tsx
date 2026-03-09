@@ -175,7 +175,7 @@ export default function Landing() {
             <div className="relative rounded-2xl glass-card-strong p-2 sm:p-3 glass-glow">
               <img
                 src={heroDashboard}
-                alt="NexusGH Dashboard showing sales analytics and business metrics"
+                alt="Nexus-GH Dashboard showing sales analytics and business metrics"
                 className="w-full rounded-xl"
                 loading="eager"
               />

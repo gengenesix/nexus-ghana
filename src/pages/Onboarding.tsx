@@ -37,7 +37,7 @@ export default function Onboarding() {
       <div className="w-full max-w-lg animate-fade-in">
         <div className="flex items-center justify-center gap-2 mb-8">
           <Zap className="h-10 w-10 text-primary" />
-          <span className="font-display text-3xl font-bold gold-text">NexusGH</span>
+          <span className="font-curly text-3xl gold-text">Nexus-GH</span>
         </div>
         <Card>
           <CardHeader className="text-center">

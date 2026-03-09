@@ -68,7 +68,7 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">© 2026 NexusGH. By GENESIS</p>
+        <p className="mt-6 text-center text-xs text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
       </div>
     </div>
   );

@@ -251,7 +251,7 @@ export default function POS() {
             <div className="flex gap-2">
               <Button variant="secondary" size="sm" className="flex-1 transition-all duration-200 hover:scale-105" onClick={downloadReceipt}><Printer className="h-4 w-4 mr-1" /> PDF</Button>
               <Button variant="secondary" size="sm" className="flex-1" asChild>
-                <a href={`https://wa.me/?text=${encodeURIComponent(`${business?.name || "NexusGH"} Receipt #${lastReceipt}\nTotal: ${formatGHS(total)}`)}`} target="_blank" rel="noreferrer">
+                <a href={`https://wa.me/?text=${encodeURIComponent(`${business?.name || "Nexus-GH"} Receipt #${lastReceipt}\nTotal: ${formatGHS(total)}`)}`} target="_blank" rel="noreferrer">
                   <MessageCircle className="h-4 w-4 mr-1" /> WhatsApp
                 </a>
               </Button>
