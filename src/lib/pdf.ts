@@ -48,7 +48,7 @@ export const generateInvoicePDF = (invoice: InvoiceData, business: BusinessData)
   const lightGray = [128, 128, 128];
   
   // Header
-  doc.setFillColor(...primaryGold);
+  doc.setFillColor(255, 193, 7);
   doc.rect(0, 0, 220, 40, 'F');
   
   // Company name
