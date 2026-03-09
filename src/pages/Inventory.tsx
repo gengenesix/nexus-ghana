@@ -193,7 +193,17 @@ export default function Inventory() {
         </div>
       </div>
 
-      {lowStockCount > 0 && (
+      <Tabs value={inventoryTab} onValueChange={setInventoryTab}>
+        <TabsList>
+          <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="serials">Serial / Batch</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="serials">
+          <SerialBatchTab />
+        </TabsContent>
+
+        <TabsContent value="products" className="space-y-6">
         <Card className="border-warning/30 bg-warning/5">
           <CardContent className="p-4 flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
