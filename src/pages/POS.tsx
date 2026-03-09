@@ -23,6 +23,7 @@ interface CartItem {
 
 export default function POS() {
   const { business } = useBusiness();
+  const { staff } = useStaffSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
