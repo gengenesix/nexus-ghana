@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,10 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Headphones, AlertCircle, Clock, CheckCircle2, Plus } from "lucide-react";
 import { format } from "date-fns";
+import ServiceCallDialog from "@/components/service/ServiceCallDialog";
 
 export default function ServiceModule() {
   const { business } = useBusiness();
   const [activeTab, setActiveTab] = useState("calls");
+  const [callOpen, setCallOpen] = useState(false);
 
   const { data: serviceCalls = [] } = useQuery({
     queryKey: ["service_calls", business?.id],
@@ -49,7 +51,7 @@ export default function ServiceModule() {
         </TabsList>
 
         <TabsContent value="calls" className="space-y-4">
-          <div className="flex justify-between"><h3 className="font-semibold">Service Calls</h3><Button><Plus className="h-4 w-4 mr-1" />New Call</Button></div>
+          <div className="flex justify-between"><h3 className="font-semibold">Service Calls</h3><Button onClick={() => setCallOpen(true)}><Plus className="h-4 w-4 mr-1" />New Call</Button></div>
           <Card><CardContent className="pt-4">
             {serviceCalls.length > 0 ? (
               <Table>
@@ -59,7 +61,7 @@ export default function ServiceModule() {
                     <TableCell className="font-mono">{sc.call_number}</TableCell>
                     <TableCell>{sc.customer_name}</TableCell>
                     <TableCell>{sc.subject}</TableCell>
-                    <TableCell><Badge variant={sc.priority === "high" ? "destructive" : "outline"} className="capitalize">{sc.priority}</Badge></TableCell>
+                    <TableCell><Badge variant={sc.priority === "high" || sc.priority === "critical" ? "destructive" : "outline"} className="capitalize">{sc.priority}</Badge></TableCell>
                     <TableCell><Badge variant="outline" className="capitalize">{sc.status}</Badge></TableCell>
                     <TableCell className="text-xs">{format(new Date(sc.opened_at), "MMM d, HH:mm")}</TableCell>
                   </TableRow>
@@ -74,6 +76,8 @@ export default function ServiceModule() {
         <TabsContent value="contracts"><Card><CardContent className="text-center py-12 text-muted-foreground"><CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Service contracts and SLA management.</p></CardContent></Card></TabsContent>
         <TabsContent value="equipment"><Card><CardContent className="text-center py-12 text-muted-foreground"><Headphones className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Customer equipment cards and service history.</p></CardContent></Card></TabsContent>
       </Tabs>
+
+      <ServiceCallDialog open={callOpen} onOpenChange={setCallOpen} />
     </div>
   );
 }

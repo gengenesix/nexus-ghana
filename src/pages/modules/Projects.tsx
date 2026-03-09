@@ -3,17 +3,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { useBusiness } from "@/hooks/useBusiness";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { FolderKanban, ListTodo, Clock, Plus } from "lucide-react";
-import { format } from "date-fns";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { FolderKanban, ListTodo, Clock, Plus, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import ProjectDialog from "@/components/projects/ProjectDialog";
 
 export default function Projects() {
   const { business } = useBusiness();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("projects");
+  const [dialog, setDialog] = useState<{ open: boolean; project?: any }>({ open: false });
 
   const { data: projects = [] } = useQuery({
     queryKey: ["projects", business?.id],
@@ -23,6 +25,15 @@ export default function Projects() {
       return data;
     },
     enabled: !!business?.id,
+  });
+
+  const deleteProject = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("projects").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["projects"] }); toast.success("Project deleted"); },
+    onError: (err: any) => toast.error(err.message),
   });
 
   const statusColors: Record<string, string> = { planning: "bg-blue-500/10 text-blue-500", in_progress: "bg-yellow-500/10 text-yellow-500", review: "bg-purple-500/10 text-purple-500", completed: "bg-green-500/10 text-green-500", on_hold: "bg-orange-500/10 text-orange-500" };
@@ -48,11 +59,11 @@ export default function Projects() {
         </TabsList>
 
         <TabsContent value="projects" className="space-y-4">
-          <div className="flex justify-between"><h3 className="font-semibold">Projects</h3><Button><Plus className="h-4 w-4 mr-1" />New Project</Button></div>
+          <div className="flex justify-between"><h3 className="font-semibold">Projects</h3><Button onClick={() => setDialog({ open: true })}><Plus className="h-4 w-4 mr-1" />New Project</Button></div>
           {projects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {projects.map((p: any) => (
-                <Card key={p.id} className="cursor-pointer hover:border-primary/50">
+                <Card key={p.id} className="hover:border-primary/50 group relative">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">{p.name}</CardTitle>
@@ -66,6 +77,10 @@ export default function Projects() {
                       <span>Spent: GHS {Number(p.actual_cost).toLocaleString()}</span>
                     </div>
                     {p.budget > 0 && <Progress value={Math.min((p.actual_cost / p.budget) * 100, 100)} className="h-1.5" />}
+                    <div className="absolute top-2 right-12 opacity-0 group-hover:opacity-100 flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setDialog({ open: true, project: p })}><Pencil className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteProject.mutate(p.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -78,6 +93,8 @@ export default function Projects() {
         <TabsContent value="tasks"><Card><CardContent className="text-center py-12 text-muted-foreground"><ListTodo className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Task management — create a project first.</p></CardContent></Card></TabsContent>
         <TabsContent value="timeline"><Card><CardContent className="text-center py-12 text-muted-foreground"><Clock className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Gantt chart timeline — coming soon.</p></CardContent></Card></TabsContent>
       </Tabs>
+
+      <ProjectDialog open={dialog.open} onOpenChange={(o) => setDialog({ open: o })} project={dialog.project} />
     </div>
   );
 }
