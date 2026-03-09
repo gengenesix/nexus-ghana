@@ -349,6 +349,12 @@ export default function SalesOrders() {
             )}
           </CardContent></Card>
         </TabsContent>
+        <TabsContent value="pricelists" className="space-y-4">
+          <PriceListsTab />
+        </TabsContent>
+        <TabsContent value="commissions" className="space-y-4">
+          <CommissionsTab />
+        </TabsContent>
       </Tabs>
 
       <QuotationDialog open={quotationOpen} onOpenChange={setQuotationOpen} />
