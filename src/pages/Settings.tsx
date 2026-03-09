@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { GHANA_REGIONS } from "@/lib/ghana";
-import { Building2, Receipt, CreditCard, Download, Zap, Loader2 } from "lucide-react";
+import { Building2, Receipt, CreditCard, Download, Landmark, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Settings() {
