@@ -223,43 +223,18 @@ export default function POS() {
         </Card>
       </div>
 
-      <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="font-display text-center">Sale Receipt</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 text-sm">
-            <div className="text-center">
-              <p className="font-bold text-primary text-lg">{business?.name || "Nexus-GH"}</p>
-              <p className="text-muted-foreground text-xs">Receipt #{lastReceipt}</p>
-            </div>
-            <Separator />
-            {cart.map(item => (
-              <div key={item.id} className="flex justify-between">
-                <span>{item.name} x{item.qty}</span>
-                <span>{formatGHS(item.price * item.qty)}</span>
-              </div>
-            ))}
-            <Separator />
-            <div className="flex justify-between font-bold text-lg">
-              <span>Total</span>
-              <span className="text-primary">{formatGHS(total)}</span>
-            </div>
-            <p className="text-center text-xs text-muted-foreground">
-              Paid via {PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label}
-            </p>
-            <div className="flex gap-2">
-              <Button variant="secondary" size="sm" className="flex-1 transition-all duration-200 hover:scale-105" onClick={downloadReceipt}><Printer className="h-4 w-4 mr-1" /> PDF</Button>
-              <Button variant="secondary" size="sm" className="flex-1" asChild>
-                <a href={`https://wa.me/?text=${encodeURIComponent(`${business?.name || "Nexus-GH"} Receipt #${lastReceipt}\nTotal: ${formatGHS(total)}`)}`} target="_blank" rel="noreferrer">
-                  <MessageCircle className="h-4 w-4 mr-1" /> WhatsApp
-                </a>
-              </Button>
-            </div>
-            <Button className="w-full" onClick={newSale}>New Sale</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ReceiptDialog
+        open={showReceipt}
+        onOpenChange={setShowReceipt}
+        cart={cart}
+        total={total}
+        subtotal={subtotal}
+        discountAmount={discountAmount}
+        paymentMethod={paymentMethod}
+        receiptNumber={lastReceipt}
+        business={business}
+        onNewSale={newSale}
+      />
     </div>
   );
 }
