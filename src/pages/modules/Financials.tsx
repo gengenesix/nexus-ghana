@@ -161,6 +161,10 @@ export default function Financials() {
             ))}
           </div>
         </TabsContent>
+
+        <TabsContent value="fx">
+          <ExchangeRatesTab />
+        </TabsContent>
       </Tabs>
 
       <AccountDialog open={accountDialog.open} onOpenChange={(o) => setAccountDialog({ open: o })} account={accountDialog.account} />
