@@ -138,7 +138,7 @@ export default function Landing() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="mx-auto mb-8 inline-flex items-center gap-2 rounded-full glass-card px-5 py-2 text-sm font-medium text-primary">
-              <Sparkles className="h-4 w-4" />
+              <Landmark className="h-4 w-4" />
               Built for Ghana's Next Generation of Entrepreneurs
             </div>
             <h1 className="mx-auto max-w-5xl font-brand text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-8xl leading-[0.95]">
