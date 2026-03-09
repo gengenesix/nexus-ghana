@@ -11,6 +11,7 @@ import { Landmark, ArrowDownLeft, ArrowUpRight, RefreshCcw, Plus } from "lucide-
 import { format } from "date-fns";
 import BankAccountDialog from "@/components/banking/BankAccountDialog";
 import PaymentDialog from "@/components/banking/PaymentDialog";
+import { BankReconciliationTab } from "@/components/banking/BankReconciliationTab";
 
 export default function Banking() {
   const { business } = useBusiness();
