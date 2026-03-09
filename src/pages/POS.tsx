@@ -85,6 +85,7 @@ export default function POS() {
           total,
           payment_method: paymentMethod,
           receipt_number: receiptNum,
+          staff_id: staff?.id || null,
         })
         .select()
         .single();
