@@ -12,7 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { formatGHS } from "@/lib/ghana";
-import { Search, Plus, Edit, Trash2, AlertTriangle, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { exportInventoryCsv } from "@/lib/export";
+import CsvImportDialog from "@/components/CsvImportDialog";
+import { Search, Plus, Edit, Trash2, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 25;
