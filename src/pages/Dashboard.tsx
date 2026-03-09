@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
 import { StatCard } from "@/components/StatCard";
@@ -6,52 +6,46 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatGHS } from "@/lib/ghana";
 import {
-  ShoppingCart, FileText, Package, Users, Plus, TrendingUp, AlertTriangle, ArrowRight,
+  ShoppingCart, FileText, AlertTriangle, Users, Plus, TrendingUp, ArrowRight,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useNavigate } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { business } = useBusiness();
 
-  const { data: products = [] } = useQuery({
-    queryKey: ["products", business?.id],
+  // Single efficient query for stats — counts only, no full row fetches
+  const { data: stats } = useQuery({
+    queryKey: ["dashboard-stats", business?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("business_id", business!.id);
-      if (error) throw error;
-      return data;
+      const today = new Date().toISOString().split("T")[0];
+      const [todaySales, unpaidInvoices, lowStockItems, totalCustomers] = await Promise.all([
+        supabase.from("sales").select("total").eq("business_id", business!.id).gte("created_at", today),
+        supabase.from("invoices").select("total, status").eq("business_id", business!.id).in("status", ["sent", "overdue", "partial"]),
+        supabase.from("products").select("id, name, qty, reorder_level").eq("business_id", business!.id),
+        supabase.from("customers").select("id", { count: "exact", head: true }).eq("business_id", business!.id),
+      ]);
+      return {
+        todayTotal: (todaySales.data || []).reduce((s, r) => s + Number(r.total), 0),
+        todayCount: todaySales.data?.length ?? 0,
+        unpaidCount: unpaidInvoices.data?.length ?? 0,
+        unpaidTotal: (unpaidInvoices.data || []).reduce((s, i) => s + Number(i.total), 0),
+        lowStock: (lowStockItems.data || []).filter(p => p.qty <= p.reorder_level),
+        customerCount: totalCustomers.count ?? 0,
+      };
     },
     enabled: !!business,
+    staleTime: 30_000,
   });
 
-  const { data: customers = [] } = useQuery({
-    queryKey: ["customers-count", business?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("customers").select("id").eq("business_id", business!.id);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!business,
-  });
-
-  const { data: invoices = [] } = useQuery({
-    queryKey: ["invoices-summary", business?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("invoices").select("*").eq("business_id", business!.id).in("status", ["sent", "overdue", "partial"]);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!business,
-  });
-
+  // Recent sales — limited to 10
   const { data: recentSales = [] } = useQuery({
     queryKey: ["recent-sales", business?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sales")
-        .select("*, customers(name)")
+        .select("id, total, payment_method, created_at, customers(name)")
         .eq("business_id", business!.id)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -59,53 +53,46 @@ export default function Dashboard() {
       return data;
     },
     enabled: !!business,
+    staleTime: 30_000,
   });
 
-  const { data: todaySales = [] } = useQuery({
-    queryKey: ["today-sales", business?.id],
-    queryFn: async () => {
-      const today = new Date().toISOString().split("T")[0];
-      const { data, error } = await supabase
-        .from("sales")
-        .select("total")
-        .eq("business_id", business!.id)
-        .gte("created_at", today);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!business,
-  });
-
-  // Weekly sales for chart
+  // Weekly chart — single RPC call aggregated in DB
   const { data: weeklySales = [] } = useQuery({
     queryKey: ["weekly-sales", business?.id],
     queryFn: async () => {
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      const now = new Date();
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+
+      const { data, error } = await supabase
+        .from("sales")
+        .select("total, created_at")
+        .eq("business_id", business!.id)
+        .gte("created_at", sevenDaysAgo.toISOString())
+        .order("created_at");
+
+      if (error) throw error;
+
+      // Aggregate client-side from a single query
+      const buckets: Record<string, number> = {};
       const result = [];
       for (let i = 6; i >= 0; i--) {
-        const d = new Date(now);
+        const d = new Date();
         d.setDate(d.getDate() - i);
-        const dayStr = d.toISOString().split("T")[0];
-        const nextDay = new Date(d);
-        nextDay.setDate(nextDay.getDate() + 1);
-        const { data } = await supabase
-          .from("sales")
-          .select("total")
-          .eq("business_id", business!.id)
-          .gte("created_at", dayStr)
-          .lt("created_at", nextDay.toISOString().split("T")[0]);
-        const totalSales = (data || []).reduce((s, r) => s + Number(r.total), 0);
-        result.push({ day: days[d.getDay()], sales: totalSales });
+        const key = d.toISOString().split("T")[0];
+        buckets[key] = 0;
+        result.push({ day: days[d.getDay()], date: key, sales: 0 });
       }
-      return result;
+      (data || []).forEach((s) => {
+        const key = s.created_at.split("T")[0];
+        if (buckets[key] !== undefined) buckets[key] += Number(s.total);
+      });
+      return result.map((r) => ({ ...r, sales: buckets[r.date] ?? 0 }));
     },
     enabled: !!business,
+    staleTime: 60_000,
   });
-
-  const todayTotal = todaySales.reduce((s, r) => s + Number(r.total), 0);
-  const lowStock = products.filter(p => p.qty <= p.reorder_level);
-  const unpaidTotal = invoices.reduce((s, i) => s + Number(i.total), 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -125,10 +112,10 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Today's Sales" value={formatGHS(todayTotal)} icon={ShoppingCart} trend={`${todaySales.length} transactions`} trendUp={todayTotal > 0} />
-        <StatCard title="Unpaid Invoices" value={String(invoices.length)} icon={FileText} trend={`${formatGHS(unpaidTotal)} outstanding`} />
-        <StatCard title="Low Stock Items" value={String(lowStock.length)} icon={AlertTriangle} trend={lowStock.length > 0 ? "Needs reorder" : "All stocked"} />
-        <StatCard title="Total Customers" value={String(customers.length)} icon={Users} trend="All time" trendUp={customers.length > 0} />
+        <StatCard title="Today's Sales" value={formatGHS(stats?.todayTotal ?? 0)} icon={ShoppingCart} trend={`${stats?.todayCount ?? 0} transactions`} trendUp={(stats?.todayTotal ?? 0) > 0} />
+        <StatCard title="Unpaid Invoices" value={String(stats?.unpaidCount ?? 0)} icon={FileText} trend={`${formatGHS(stats?.unpaidTotal ?? 0)} outstanding`} />
+        <StatCard title="Low Stock Items" value={String(stats?.lowStock?.length ?? 0)} icon={AlertTriangle} trend={(stats?.lowStock?.length ?? 0) > 0 ? "Needs reorder" : "All stocked"} />
+        <StatCard title="Total Customers" value={String(stats?.customerCount ?? 0)} icon={Users} trend="All time" trendUp={(stats?.customerCount ?? 0) > 0} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -158,10 +145,10 @@ export default function Dashboard() {
             <CardTitle className="font-display text-base">Low Stock Alerts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {lowStock.length === 0 ? (
+            {(stats?.lowStock?.length ?? 0) === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">All products well stocked ✅</p>
             ) : (
-              lowStock.slice(0, 5).map((p, i) => (
+              (stats?.lowStock ?? []).slice(0, 5).map((p) => (
                 <div key={p.id} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-md bg-destructive/10 text-xs font-bold text-destructive">{p.qty}</span>
