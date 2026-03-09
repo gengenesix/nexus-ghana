@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zap, Loader2 } from "lucide-react";
+import { Landmark, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Login() {
@@ -30,11 +30,16 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-background">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md animate-fade-in">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Zap className="h-10 w-10 text-primary" />
-          <span className="font-display text-3xl font-bold gold-text">NexusGH</span>
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/25 shrink-0">
+            <Landmark className="h-6 w-6 text-primary-foreground" />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
+          </div>
+          <span className="font-display text-3xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+            NexusGH
+          </span>
         </div>
 
         <Card>
@@ -62,6 +67,8 @@ export default function Login() {
             </p>
           </CardContent>
         </Card>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">© 2026 NexusGH. By GENESIS</p>
       </div>
     </div>
   );
