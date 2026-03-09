@@ -13,7 +13,7 @@ import { Upload, Download, FileText, Loader2, CheckCircle, AlertTriangle } from 
 interface CsvImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  type: "products" | "customers";
+  type: "products" | "customers" | "suppliers";
 }
 
 const FIELD_MAPS = {
