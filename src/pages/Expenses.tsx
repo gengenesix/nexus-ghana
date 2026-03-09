@@ -65,7 +65,12 @@ export default function Expenses() {
     return result;
   }, [dateFiltered, catFilter, paidByFilter, search]);
 
-  const { page, totalPages, paginatedData, setPage, nextPage, prevPage } = usePagination(filtered, 20);
+  const PAGE_SIZE = 20;
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginatedData = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const nextPage = () => setPage(p => Math.min(p + 1, totalPages));
+  const prevPage = () => setPage(p => Math.max(p - 1, 1));
   const totalExpenses = dateFiltered.reduce((s: number, e: any) => s + Number(e.amount), 0);
   const avgPerDay = useMemo(() => {
     const days = differenceInDays(new Date(dateTo), new Date(dateFrom)) || 1;

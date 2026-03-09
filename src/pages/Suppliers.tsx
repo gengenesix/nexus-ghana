@@ -60,7 +60,13 @@ export default function Suppliers() {
     (s.location || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  const { page, totalPages, paginatedData, setPage, nextPage, prevPage } = usePagination(filtered, 20);
+  const PAGE_SIZE = 20;
+  const [pageNum, setPageNum] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginatedData = filtered.slice((pageNum - 1) * PAGE_SIZE, pageNum * PAGE_SIZE);
+  const page = pageNum;
+  const nextPage = () => setPageNum(p => Math.min(p + 1, totalPages));
+  const prevPage = () => setPageNum(p => Math.max(p - 1, 1));
 
   // Supplier metrics
   const supplierMetrics = useMemo(() => {
