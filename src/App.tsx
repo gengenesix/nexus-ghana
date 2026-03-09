@@ -24,14 +24,27 @@ import Reports from "./pages/Reports";
 import Staff from "./pages/Staff";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+// ERP Modules
+import Administration from "./pages/modules/Administration";
+import Financials from "./pages/modules/Financials";
+import CRM from "./pages/modules/CRM";
+import SalesOrders from "./pages/modules/SalesOrders";
+import Purchasing from "./pages/modules/Purchasing";
+import Production from "./pages/modules/Production";
+import MRP from "./pages/modules/MRP";
+import Projects from "./pages/modules/Projects";
+import ServiceModule from "./pages/modules/ServiceModule";
+import HumanResources from "./pages/modules/HumanResources";
+import Banking from "./pages/modules/Banking";
+import Warehouses from "./pages/modules/Warehouses";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,        // 30s — avoid redundant refetches
-      gcTime: 5 * 60_000,       // 5min — keep cache alive
-      retry: 2,                 // retry failed requests
-      refetchOnWindowFocus: false, // don't hammer DB on tab switch
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      retry: 2,
+      refetchOnWindowFocus: false,
     },
   },
 });
@@ -60,6 +73,20 @@ const App = () => (
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/staff" element={<Staff />} />
                 <Route path="/settings" element={<Settings />} />
+                {/* ERP Module Routes */}
+                <Route path="/administration" element={<Administration />} />
+                <Route path="/financials" element={<Financials />} />
+                <Route path="/crm" element={<CRM />} />
+                <Route path="/sales-orders" element={<SalesOrders />} />
+                <Route path="/purchasing" element={<Purchasing />} />
+                <Route path="/production" element={<Production />} />
+                <Route path="/mrp" element={<MRP />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/service" element={<ServiceModule />} />
+                <Route path="/hr" element={<HumanResources />} />
+                <Route path="/banking" element={<Banking />} />
+                <Route path="/warehouses" element={<Warehouses />} />
+                <Route path="/opportunities" element={<CRM />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
