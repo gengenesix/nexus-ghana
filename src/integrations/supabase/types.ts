@@ -136,6 +136,53 @@ export type Database = {
           },
         ]
       }
+      attachments: {
+        Row: {
+          business_id: string
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          mime_type: string | null
+          record_id: string
+          record_type: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          mime_type?: string | null
+          record_id: string
+          record_type?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          mime_type?: string | null
+          record_id?: string
+          record_type?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attachments_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -910,6 +957,44 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exchange_rates: {
+        Row: {
+          business_id: string
+          created_at: string
+          effective_date: string
+          from_currency: string
+          id: string
+          rate: number
+          to_currency: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          effective_date?: string
+          from_currency?: string
+          id?: string
+          rate?: number
+          to_currency?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          effective_date?: string
+          from_currency?: string
+          id?: string
+          rate?: number
+          to_currency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_rates_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
         ]
@@ -2089,6 +2174,75 @@ export type Database = {
           },
         ]
       }
+      recurring_invoices: {
+        Row: {
+          apply_getfl: boolean
+          apply_nhil: boolean
+          apply_vat: boolean
+          business_id: string
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          end_date: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          last_generated: string | null
+          next_date: string
+          notes: string | null
+          subtotal: number
+        }
+        Insert: {
+          apply_getfl?: boolean
+          apply_nhil?: boolean
+          apply_vat?: boolean
+          business_id: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_generated?: string | null
+          next_date?: string
+          notes?: string | null
+          subtotal?: number
+        }
+        Update: {
+          apply_getfl?: boolean
+          apply_nhil?: boolean
+          apply_vat?: boolean
+          business_id?: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_generated?: string | null
+          next_date?: string
+          notes?: string | null
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_invoices_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_templates: {
         Row: {
           business_id: string
@@ -2401,6 +2555,63 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      serial_numbers: {
+        Row: {
+          batch_number: string | null
+          business_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          received_date: string | null
+          serial_number: string
+          sold_date: string | null
+          status: string
+          warranty_end: string | null
+        }
+        Insert: {
+          batch_number?: string | null
+          business_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          received_date?: string | null
+          serial_number: string
+          sold_date?: string | null
+          status?: string
+          warranty_end?: string | null
+        }
+        Update: {
+          batch_number?: string | null
+          business_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          received_date?: string | null
+          serial_number?: string
+          sold_date?: string | null
+          status?: string
+          warranty_end?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "serial_numbers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "serial_numbers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
