@@ -128,9 +128,13 @@ export default function Inventory() {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Inventory</h1>
           <p className="text-muted-foreground text-sm">{totalCount} products · {lowStockCount} low stock</p>
         </div>
-        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
-          <Plus className="h-4 w-4 mr-1" /> Add Product
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
+          <Button variant="outline" onClick={() => { if (products.length > 0) exportInventoryCsv(products); else toast.error("No products to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
+          <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
+            <Plus className="h-4 w-4 mr-1" /> Add Product
+          </Button>
+        </div>
       </div>
 
       {lowStockCount > 0 && (
