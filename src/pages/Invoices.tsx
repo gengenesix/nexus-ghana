@@ -34,6 +34,7 @@ export default function Invoices() {
   const { business } = useBusiness();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [activeMainTab, setActiveMainTab] = useState("invoices");
   const [showCreate, setShowCreate] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
