@@ -9,10 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Landmark, ArrowDownLeft, ArrowUpRight, RefreshCcw, Plus } from "lucide-react";
 import { format } from "date-fns";
+import BankAccountDialog from "@/components/banking/BankAccountDialog";
+import PaymentDialog from "@/components/banking/PaymentDialog";
 
 export default function Banking() {
   const { business } = useBusiness();
   const [activeTab, setActiveTab] = useState("accounts");
+  const [bankDialogOpen, setBankDialogOpen] = useState(false);
+  const [paymentDialog, setPaymentDialog] = useState<{ open: boolean; type: "incoming" | "outgoing" }>({ open: false, type: "incoming" });
 
   const { data: bankAccounts = [] } = useQuery({
     queryKey: ["bank_accounts", business?.id],
@@ -61,7 +65,7 @@ export default function Banking() {
         </TabsList>
 
         <TabsContent value="accounts" className="space-y-4">
-          <div className="flex justify-between"><h3 className="font-semibold">Bank Accounts</h3><Button><Plus className="h-4 w-4 mr-1" />Add Account</Button></div>
+          <div className="flex justify-between"><h3 className="font-semibold">Bank Accounts</h3><Button onClick={() => setBankDialogOpen(true)}><Plus className="h-4 w-4 mr-1" />Add Account</Button></div>
           <Card><CardContent className="pt-4">
             {bankAccounts.length > 0 ? (
               <Table>
@@ -70,7 +74,7 @@ export default function Banking() {
                   <TableRow key={ba.id}>
                     <TableCell className="font-medium">{ba.name}</TableCell>
                     <TableCell>{ba.bank_name}</TableCell>
-                    <TableCell className="capitalize">{ba.account_type}</TableCell>
+                    <TableCell className="capitalize">{ba.account_type.replace("_", " ")}</TableCell>
                     <TableCell>{ba.currency}</TableCell>
                     <TableCell className="text-right font-mono">GHS {Number(ba.balance).toLocaleString()}</TableCell>
                     <TableCell><Badge variant={ba.is_active ? "default" : "secondary"}>{ba.is_active ? "Active" : "Inactive"}</Badge></TableCell>
@@ -83,28 +87,57 @@ export default function Banking() {
           </CardContent></Card>
         </TabsContent>
 
-        <TabsContent value="incoming"><Card><CardContent className="pt-4">
-          {payments.filter((p: any) => p.type === "incoming").length > 0 ? (
-            <Table>
-              <TableHeader><TableRow><TableHead>Payment #</TableHead><TableHead>Date</TableHead><TableHead>Method</TableHead><TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-              <TableBody>{payments.filter((p: any) => p.type === "incoming").map((p: any) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-mono">{p.payment_number}</TableCell>
-                  <TableCell>{format(new Date(p.date), "MMM d, yyyy")}</TableCell>
-                  <TableCell className="capitalize">{p.payment_method}</TableCell>
-                  <TableCell className="text-right font-mono text-green-500">+GHS {Number(p.amount).toLocaleString()}</TableCell>
-                  <TableCell><Badge variant="outline" className="capitalize">{p.status}</Badge></TableCell>
-                </TableRow>
-              ))}</TableBody>
-            </Table>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground"><ArrowDownLeft className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No incoming payments recorded.</p></div>
-          )}
-        </CardContent></Card></TabsContent>
+        <TabsContent value="incoming" className="space-y-4">
+          <div className="flex justify-between"><h3 className="font-semibold">Incoming Payments</h3><Button onClick={() => setPaymentDialog({ open: true, type: "incoming" })}><Plus className="h-4 w-4 mr-1" />Record Payment</Button></div>
+          <Card><CardContent className="pt-4">
+            {payments.filter((p: any) => p.type === "incoming").length > 0 ? (
+              <Table>
+                <TableHeader><TableRow><TableHead>Payment #</TableHead><TableHead>Date</TableHead><TableHead>Method</TableHead><TableHead>Reference</TableHead><TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                <TableBody>{payments.filter((p: any) => p.type === "incoming").map((p: any) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-mono">{p.payment_number}</TableCell>
+                    <TableCell>{format(new Date(p.date), "MMM d, yyyy")}</TableCell>
+                    <TableCell className="capitalize">{p.payment_method.replace("_", " ")}</TableCell>
+                    <TableCell>{p.reference || "—"}</TableCell>
+                    <TableCell className="text-right font-mono text-green-500">+GHS {Number(p.amount).toLocaleString()}</TableCell>
+                    <TableCell><Badge variant="outline" className="capitalize">{p.status}</Badge></TableCell>
+                  </TableRow>
+                ))}</TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground"><ArrowDownLeft className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No incoming payments recorded.</p></div>
+            )}
+          </CardContent></Card>
+        </TabsContent>
 
-        <TabsContent value="outgoing"><Card><CardContent className="text-center py-12 text-muted-foreground"><ArrowUpRight className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Outgoing payments — vendor payments and expenses.</p></CardContent></Card></TabsContent>
+        <TabsContent value="outgoing" className="space-y-4">
+          <div className="flex justify-between"><h3 className="font-semibold">Outgoing Payments</h3><Button onClick={() => setPaymentDialog({ open: true, type: "outgoing" })}><Plus className="h-4 w-4 mr-1" />Record Payment</Button></div>
+          <Card><CardContent className="pt-4">
+            {payments.filter((p: any) => p.type === "outgoing").length > 0 ? (
+              <Table>
+                <TableHeader><TableRow><TableHead>Payment #</TableHead><TableHead>Date</TableHead><TableHead>Method</TableHead><TableHead>Reference</TableHead><TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                <TableBody>{payments.filter((p: any) => p.type === "outgoing").map((p: any) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-mono">{p.payment_number}</TableCell>
+                    <TableCell>{format(new Date(p.date), "MMM d, yyyy")}</TableCell>
+                    <TableCell className="capitalize">{p.payment_method.replace("_", " ")}</TableCell>
+                    <TableCell>{p.reference || "—"}</TableCell>
+                    <TableCell className="text-right font-mono text-red-500">-GHS {Number(p.amount).toLocaleString()}</TableCell>
+                    <TableCell><Badge variant="outline" className="capitalize">{p.status}</Badge></TableCell>
+                  </TableRow>
+                ))}</TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground"><ArrowUpRight className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No outgoing payments recorded.</p></div>
+            )}
+          </CardContent></Card>
+        </TabsContent>
+
         <TabsContent value="reconciliation"><Card><CardContent className="text-center py-12 text-muted-foreground"><RefreshCcw className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Bank reconciliation — match transactions to statements.</p></CardContent></Card></TabsContent>
       </Tabs>
+
+      <BankAccountDialog open={bankDialogOpen} onOpenChange={setBankDialogOpen} />
+      <PaymentDialog open={paymentDialog.open} onOpenChange={(o) => setPaymentDialog(p => ({ ...p, open: o }))} type={paymentDialog.type} />
     </div>
   );
 }

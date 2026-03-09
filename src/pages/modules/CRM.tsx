@@ -7,11 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useBusiness } from "@/hooks/useBusiness";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { Users, Target, Activity, Mail, Plus, Search, Loader2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Users, Target, Activity, Mail, Plus, Search, Loader2, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import LeadDialog from "@/components/crm/LeadDialog";
+import OpportunityDialog from "@/components/crm/OpportunityDialog";
+import ActivityDialog from "@/components/crm/ActivityDialog";
 
-const LEAD_STAGES = ["new", "contacted", "qualified", "proposal", "negotiation", "won", "lost"];
 const STAGE_COLORS: Record<string, string> = {
   new: "bg-blue-500/10 text-blue-500", contacted: "bg-yellow-500/10 text-yellow-500",
   qualified: "bg-purple-500/10 text-purple-500", proposal: "bg-orange-500/10 text-orange-500",
@@ -20,8 +23,12 @@ const STAGE_COLORS: Record<string, string> = {
 
 export default function CRM() {
   const { business } = useBusiness();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("leads");
   const [search, setSearch] = useState("");
+  const [leadDialog, setLeadDialog] = useState<{ open: boolean; lead?: any }>({ open: false });
+  const [oppDialog, setOppDialog] = useState<{ open: boolean; opp?: any }>({ open: false });
+  const [activityOpen, setActivityOpen] = useState(false);
 
   const { data: leads = [], isLoading: leadsLoading } = useQuery({
     queryKey: ["leads", business?.id],
@@ -51,6 +58,24 @@ export default function CRM() {
       return data;
     },
     enabled: !!business?.id,
+  });
+
+  const deleteLead = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("leads").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["leads"] }); toast.success("Lead deleted"); },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const deleteOpp = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("opportunities").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["opportunities"] }); toast.success("Opportunity deleted"); },
+    onError: (err: any) => toast.error(err.message),
   });
 
   const pipelineValue = opportunities.filter((o: any) => o.status === "open").reduce((sum: number, o: any) => sum + Number(o.value || 0), 0);
@@ -83,52 +108,47 @@ export default function CRM() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search leads..." className="pl-10" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <Button><Plus className="h-4 w-4 mr-1" />New Lead</Button>
+            <Button onClick={() => setLeadDialog({ open: true })}><Plus className="h-4 w-4 mr-1" />New Lead</Button>
           </div>
-          <Card>
-            <CardContent className="pt-4">
-              {leadsLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
-              ) : leads.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Company</TableHead>
-                      <TableHead>Source</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Value</TableHead>
-                      <TableHead>Date</TableHead>
+          <Card><CardContent className="pt-4">
+            {leadsLoading ? (
+              <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
+            ) : leads.length > 0 ? (
+              <Table>
+                <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Company</TableHead><TableHead>Source</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Value</TableHead><TableHead>Date</TableHead><TableHead className="w-20"></TableHead></TableRow></TableHeader>
+                <TableBody>
+                  {leads.filter((l: any) => l.name.toLowerCase().includes(search.toLowerCase())).map((lead: any) => (
+                    <TableRow key={lead.id}>
+                      <TableCell className="font-medium">{lead.name}</TableCell>
+                      <TableCell>{lead.company || "—"}</TableCell>
+                      <TableCell>{lead.source || "—"}</TableCell>
+                      <TableCell><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STAGE_COLORS[lead.status] || ""}`}>{lead.status}</span></TableCell>
+                      <TableCell className="text-right font-mono">GHS {Number(lead.value || 0).toLocaleString()}</TableCell>
+                      <TableCell className="text-xs">{format(new Date(lead.created_at), "MMM d, yyyy")}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setLeadDialog({ open: true, lead })}><Pencil className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteLead.mutate(lead.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {leads.filter((l: any) => l.name.toLowerCase().includes(search.toLowerCase())).map((lead: any) => (
-                      <TableRow key={lead.id}>
-                        <TableCell className="font-medium">{lead.name}</TableCell>
-                        <TableCell>{lead.company || "—"}</TableCell>
-                        <TableCell>{lead.source || "—"}</TableCell>
-                        <TableCell><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STAGE_COLORS[lead.status] || ""}`}>{lead.status}</span></TableCell>
-                        <TableCell className="text-right font-mono">GHS {Number(lead.value || 0).toLocaleString()}</TableCell>
-                        <TableCell className="text-xs">{format(new Date(lead.created_at), "MMM d, yyyy")}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="font-semibold text-lg">No Leads Yet</h3>
-                  <p className="text-sm">Start capturing leads to build your sales pipeline.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <h3 className="font-semibold text-lg">No Leads Yet</h3>
+                <p className="text-sm">Start capturing leads to build your sales pipeline.</p>
+              </div>
+            )}
+          </CardContent></Card>
         </TabsContent>
 
         <TabsContent value="opportunities" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="font-semibold">Opportunity Pipeline</h3>
-            <Button><Plus className="h-4 w-4 mr-1" />New Opportunity</Button>
+            <Button onClick={() => setOppDialog({ open: true })}><Plus className="h-4 w-4 mr-1" />New Opportunity</Button>
           </div>
           {opportunities.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -136,11 +156,15 @@ export default function CRM() {
                 <div key={stage} className="space-y-2">
                   <h4 className="text-sm font-medium capitalize px-1">{stage.replace("_", " ")}</h4>
                   {opportunities.filter((o: any) => o.stage === stage).map((opp: any) => (
-                    <Card key={opp.id} className="cursor-pointer hover:border-primary/50">
+                    <Card key={opp.id} className="cursor-pointer hover:border-primary/50 group relative">
                       <CardContent className="p-3">
                         <p className="font-medium text-sm">{opp.name}</p>
                         <p className="text-xs text-muted-foreground mt-1">GHS {Number(opp.value).toLocaleString()}</p>
                         <Badge variant="outline" className="mt-2 text-xs">{opp.probability}%</Badge>
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setOppDialog({ open: true, opp })}><Pencil className="h-3 w-3" /></Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteOpp.mutate(opp.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -156,18 +180,26 @@ export default function CRM() {
           )}
         </TabsContent>
 
-        <TabsContent value="activities">
+        <TabsContent value="activities" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold">Activity Log</h3>
+            <Button onClick={() => setActivityOpen(true)}><Plus className="h-4 w-4 mr-1" />Log Activity</Button>
+          </div>
           <Card><CardContent className="pt-6">
             {activities.length > 0 ? (
               <div className="space-y-3">
                 {activities.map((act: any) => (
                   <div key={act.id} className="flex items-start gap-3 p-3 border rounded-lg">
                     <Activity className="h-4 w-4 mt-1 text-primary" />
-                    <div>
-                      <p className="text-sm font-medium">{act.subject}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{act.subject}</p>
+                        <Badge variant="outline" className="text-xs capitalize">{act.type}</Badge>
+                      </div>
                       <p className="text-xs text-muted-foreground">{act.description}</p>
                       <p className="text-xs text-muted-foreground mt-1">{format(new Date(act.created_at), "MMM d, HH:mm")}</p>
                     </div>
+                    {act.completed && <Badge className="bg-green-500/10 text-green-500 text-xs">Done</Badge>}
                   </div>
                 ))}
               </div>
@@ -188,6 +220,10 @@ export default function CRM() {
           </CardContent></Card>
         </TabsContent>
       </Tabs>
+
+      <LeadDialog open={leadDialog.open} onOpenChange={(o) => setLeadDialog({ open: o })} lead={leadDialog.lead} />
+      <OpportunityDialog open={oppDialog.open} onOpenChange={(o) => setOppDialog({ open: o })} opportunity={oppDialog.opp} />
+      <ActivityDialog open={activityOpen} onOpenChange={setActivityOpen} />
     </div>
   );
 }
