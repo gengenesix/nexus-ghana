@@ -154,7 +154,7 @@ export default function Invoices() {
                 <TableHead className="hidden md:table-cell">Due</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="w-[140px]"></TableHead>
+                <TableHead className="w-[180px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
