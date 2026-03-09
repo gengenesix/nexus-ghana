@@ -136,7 +136,7 @@ export default function POS() {
       payment_method: PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label || paymentMethod,
     };
     
-    generateReceiptPDF(receiptData, business || { name: "NexusGH" });
+    generateReceiptPDF(receiptData, business || { name: "Nexus-GH" });
   };
 
   return (
