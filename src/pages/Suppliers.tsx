@@ -72,23 +72,7 @@ export default function Suppliers() {
     },
   });
 
-  const handleImport = async (rows: Record<string, string>[]) => {
-    const records = rows.map(r => ({
-      business_id: business!.id,
-      name: r["Name"] || r["name"] || "",
-      contact_person: r["Contact Person"] || r["contact_person"] || "",
-      phone: r["Phone"] || r["phone"] || "",
-      location: r["Location"] || r["location"] || "",
-      products_supplied: r["Products"] || r["products_supplied"] || "",
-    })).filter(r => r.name);
 
-    for (let i = 0; i < records.length; i += 50) {
-      const chunk = records.slice(i, i + 50);
-      const { error } = await supabase.from("suppliers").insert(chunk);
-      if (error) throw error;
-    }
-    queryClient.invalidateQueries({ queryKey: ["suppliers"] });
-  };
 
   return (
     <div className="space-y-6 animate-fade-in">
