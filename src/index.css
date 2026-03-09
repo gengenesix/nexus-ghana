@@ -164,9 +164,18 @@
     box-shadow: 0 8px 32px hsl(220 40% 4% / 0.4), inset 0 1px 0 hsl(220 20% 40% / 0.15);
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
   }
+  .light .glass-card {
+    background: hsl(0 0% 100% / 0.7);
+    border: 1px solid hsl(220 13% 80% / 0.5);
+    box-shadow: 0 8px 32px hsl(220 14% 50% / 0.15), inset 0 1px 0 hsl(0 0% 100% / 0.8);
+  }
   .glass-card:hover {
     border-color: hsl(220 20% 40% / 0.5);
     box-shadow: 0 12px 40px hsl(220 40% 4% / 0.5), inset 0 1px 0 hsl(220 20% 50% / 0.2);
+  }
+  .light .glass-card:hover {
+    border-color: hsl(220 13% 70% / 0.6);
+    box-shadow: 0 12px 40px hsl(220 14% 50% / 0.2), inset 0 1px 0 hsl(0 0% 100% / 0.9);
   }
   .glass-card-strong {
     background: hsl(220 35% 14% / 0.6);
@@ -175,21 +184,40 @@
     border: 1px solid hsl(220 20% 35% / 0.4);
     box-shadow: 0 8px 32px hsl(220 40% 4% / 0.5), inset 0 1px 0 hsl(220 20% 50% / 0.1);
   }
+  .light .glass-card-strong {
+    background: hsl(0 0% 100% / 0.85);
+    border: 1px solid hsl(220 13% 80% / 0.6);
+    box-shadow: 0 8px 32px hsl(220 14% 50% / 0.2), inset 0 1px 0 hsl(0 0% 100% / 0.9);
+  }
   .glass-nav {
     background: hsl(220 40% 6% / 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid hsl(220 20% 20% / 0.4);
   }
+  .light .glass-nav {
+    background: hsl(0 0% 100% / 0.8);
+    border-bottom: 1px solid hsl(220 13% 85% / 0.6);
+  }
   .glass-glow {
     box-shadow: 0 0 40px hsl(37 90% 55% / 0.15), 0 8px 32px hsl(220 40% 4% / 0.4);
     transition: box-shadow 0.3s ease;
   }
+  .light .glass-glow {
+    box-shadow: 0 0 40px hsl(37 90% 45% / 0.2), 0 8px 32px hsl(220 14% 50% / 0.15);
+  }
   .glass-glow:hover {
     box-shadow: 0 0 50px hsl(37 90% 55% / 0.25), 0 12px 40px hsl(220 40% 4% / 0.5);
   }
+  .light .glass-glow:hover {
+    box-shadow: 0 0 50px hsl(37 90% 45% / 0.3), 0 12px 40px hsl(220 14% 50% / 0.2);
+  }
   .font-brand {
     font-family: 'Outfit', 'Space Grotesk', system-ui, sans-serif;
+  }
+  .font-display {
+    font-family: 'Outfit', 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.04em;
   }
   .hover-lift {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -197,6 +225,9 @@
   .hover-lift:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px hsl(220 40% 4% / 0.3);
+  }
+  .light .hover-lift:hover {
+    box-shadow: 0 8px 25px hsl(220 14% 50% / 0.2);
   }
 }
 
