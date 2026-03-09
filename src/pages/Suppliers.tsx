@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { exportSuppliersCsv } from "@/lib/export";
 import { formatGHS } from "@/lib/ghana";
 import CsvImportDialog from "@/components/CsvImportDialog";
-import { usePagination } from "@/hooks/usePagination";
+
 import { format } from "date-fns";
 
 export default function Suppliers() {
