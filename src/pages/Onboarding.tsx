@@ -57,7 +57,9 @@ export default function Onboarding() {
     <div className="flex min-h-screen items-center justify-center p-4 bg-background">
       <div className="w-full max-w-lg animate-fade-in">
         <div className="flex items-center justify-center gap-2 mb-8">
-          <Zap className="h-10 w-10 text-primary" />
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/25">
+            <Landmark className="h-7 w-7 text-primary-foreground" />
+          </div>
           <span className="font-curly text-3xl gold-text">Nexus-GH</span>
         </div>
         <Card>
