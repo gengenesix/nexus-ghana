@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBusiness } from "@/hooks/useBusiness";
 import { useStaffSession } from "@/contexts/StaffSessionContext";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
@@ -28,18 +29,21 @@ const allNavItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const { business } = useBusiness();
   const { staff, logout: staffLogout, canAccess } = useStaffSession();
+  const isBusinessOwner = !!user && !!business && business.owner_id === user.id;
 
-  // Filter nav items based on role permissions
-  const navItems = allNavItems.filter(item => canAccess(item.feature));
+  const navItems = isBusinessOwner
+    ? allNavItems
+    : allNavItems.filter((item) => canAccess(item.feature));
 
   const handleLogout = () => {
-    staffLogout(); // Clear staff session
-    signOut();     // Sign out from Supabase auth
+    staffLogout();
+    signOut();
   };
 
-  const handleClockOut = () => {
+  const handleSwitchStaff = () => {
     staffLogout();
   };
 
@@ -57,7 +61,6 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* Staff Info */}
       {staff && !collapsed && (
         <div className="px-4 pb-3">
           <div className="flex items-center gap-2 rounded-lg bg-secondary/50 px-3 py-2">
@@ -96,15 +99,15 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-3 space-y-2">
         <Separator className="mb-1 bg-sidebar-border" />
-        {/* Clock Out (staff session only) */}
-        <button
-          onClick={handleClockOut}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground transition-all hover:bg-yellow-500/10 hover:text-yellow-500"
-        >
-          <UserCircle className="h-5 w-5 shrink-0" />
-          {!collapsed && <span>Clock Out</span>}
-        </button>
-        {/* Full Sign Out */}
+        {staff && (
+          <button
+            onClick={handleSwitchStaff}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground transition-all hover:bg-yellow-500/10 hover:text-yellow-500"
+          >
+            <UserCircle className="h-5 w-5 shrink-0" />
+            {!collapsed && <span>Switch Staff User</span>}
+          </button>
+        )}
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground transition-all hover:bg-destructive/10 hover:text-destructive"

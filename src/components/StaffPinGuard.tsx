@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useBusiness } from "@/hooks/useBusiness";
+import { useAuth } from "@/contexts/AuthContext";
 import { useStaffSession } from "@/contexts/StaffSessionContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +14,12 @@ interface StaffPinGuardProps {
 
 export function StaffPinGuard({ children }: StaffPinGuardProps) {
   const { business } = useBusiness();
+  const { user } = useAuth();
   const { staff, isStaffLoggedIn, loginWithPin } = useStaffSession();
   const [pin, setPin] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const isBusinessOwner = !!user && !!business && business.owner_id === user.id;
 
   const handlePinSubmit = async () => {
     if (!business || pin.length < 4) return;
@@ -25,9 +29,9 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
     setIsLoading(false);
 
     if (result) {
-      toast.success(`Welcome, ${result.name}!`);
+      toast.success(`Welcome, ${result.name}`);
     } else {
-      toast.error("Invalid PIN. Please try again.");
+      toast.error("Invalid staff PIN. Please try again.");
       setPin("");
     }
   };
@@ -38,7 +42,12 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
     }
   };
 
-  // If staff is already logged in, render children
+  // Business owners/admins should never be blocked by staff PIN
+  if (isBusinessOwner) {
+    return <>{children}</>;
+  }
+
+  // Active staff session can access app
   if (isStaffLoggedIn && staff) {
     return <>{children}</>;
   }
@@ -54,7 +63,7 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
             </div>
           </div>
           <div>
-            <CardTitle className="font-display text-2xl">Staff Login</CardTitle>
+            <CardTitle className="font-display text-2xl">Staff Access</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">{business?.name || "Nexus-GH"}</p>
           </div>
         </CardHeader>
@@ -64,7 +73,7 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="password"
-                placeholder="Enter your 4-digit PIN"
+                placeholder="Enter your staff PIN"
                 maxLength={6}
                 className="pl-10 text-center text-xl tracking-widest"
                 value={pin}
@@ -84,10 +93,10 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
             ) : (
               <UserCircle className="h-4 w-4 mr-2" />
             )}
-            {isLoading ? "Verifying..." : "Clock In"}
+            {isLoading ? "Verifying..." : "Continue"}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            Enter your staff PIN to access the system
+            Staff members can continue with the PIN assigned by the administrator
           </p>
         </CardContent>
       </Card>
