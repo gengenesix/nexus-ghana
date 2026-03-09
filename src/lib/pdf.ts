@@ -194,7 +194,7 @@ export const generateReceiptPDF = (receipt: ReceiptData, business: BusinessData)
   
   // Line under header
   doc.setLineWidth(0.5);
-  doc.setDrawColor(...lightGray);
+  doc.setDrawColor(128, 128, 128);
   doc.line(20, yPos + 5, 190, yPos + 5);
   
   // Items
