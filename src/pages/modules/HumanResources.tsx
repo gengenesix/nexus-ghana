@@ -201,6 +201,9 @@ export default function HumanResources() {
 
         <TabsContent value="reviews"><Card><CardContent className="text-center py-12 text-muted-foreground"><Award className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Performance reviews — structured review forms.</p></CardContent></Card></TabsContent>
         <TabsContent value="training"><Card><CardContent className="text-center py-12 text-muted-foreground"><GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Training records and certifications.</p></CardContent></Card></TabsContent>
+        <TabsContent value="orgchart">
+          <OrgChart employees={employees} />
+        </TabsContent>
       </Tabs>
 
       <EmployeeDialog open={dialog.open} onOpenChange={(o) => setDialog({ open: o })} employee={dialog.employee} />
