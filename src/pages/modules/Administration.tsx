@@ -78,14 +78,14 @@ export default function Administration() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 gap-1">
-          <TabsTrigger value="company" className="flex items-center gap-1.5"><Settings className="h-3.5 w-3.5" />Company</TabsTrigger>
-          <TabsTrigger value="roles" className="flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" />Roles</TabsTrigger>
-          <TabsTrigger value="authorization" className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" />Authorization</TabsTrigger>
-          <TabsTrigger value="numbering" className="flex items-center gap-1.5"><Hash className="h-3.5 w-3.5" />Numbering</TabsTrigger>
-          <TabsTrigger value="approvals" className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" />Approvals</TabsTrigger>
-          <TabsTrigger value="audit" className="flex items-center gap-1.5"><History className="h-3.5 w-3.5" />Audit Log</TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-1.5"><Bell className="h-3.5 w-3.5" />Alerts</TabsTrigger>
+        <TabsList>
+          <TabsTrigger value="company"><Settings className="h-3.5 w-3.5 mr-1 hidden sm:inline-block" />Company</TabsTrigger>
+          <TabsTrigger value="roles"><Shield className="h-3.5 w-3.5 mr-1 hidden sm:inline-block" />Roles</TabsTrigger>
+          <TabsTrigger value="authorization"><Lock className="h-3.5 w-3.5 mr-1 hidden sm:inline-block" />Auth</TabsTrigger>
+          <TabsTrigger value="numbering"><Hash className="h-3.5 w-3.5 mr-1 hidden sm:inline-block" />Numbers</TabsTrigger>
+          <TabsTrigger value="approvals"><CheckCircle className="h-3.5 w-3.5 mr-1 hidden sm:inline-block" />Approvals</TabsTrigger>
+          <TabsTrigger value="audit"><History className="h-3.5 w-3.5 mr-1 hidden sm:inline-block" />Audit</TabsTrigger>
+          <TabsTrigger value="notifications"><Bell className="h-3.5 w-3.5 mr-1 hidden sm:inline-block" />Alerts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="company" className="space-y-4">
