@@ -114,7 +114,7 @@ export default function Landing() {
               <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
             </div>
             <span className="font-curly text-2xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-              NexusGH
+              Nexus-GH
             </span>
           </Link>
           <div className="hidden items-center gap-8 md:flex">
