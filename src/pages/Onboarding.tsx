@@ -25,7 +25,7 @@ export default function Onboarding() {
     if (!name.trim()) { toast.error("Business name is required"); return; }
     try {
       await createBusiness.mutateAsync({ name: name.trim(), phone, email, region, address });
-      toast.success("Business created! Welcome to NexusGH 🎉");
+      toast.success("Business created! Welcome to Nexus-GH 🎉");
       navigate("/dashboard");
     } catch (err: any) {
       toast.error(err.message || "Failed to create business");
