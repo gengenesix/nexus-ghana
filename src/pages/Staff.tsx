@@ -386,6 +386,7 @@ export default function Staff() {
               <Select value={formRole} onValueChange={setFormRole}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__separator_basic" disabled><span className="text-xs font-semibold text-muted-foreground">— Basic Roles —</span></SelectItem>
                   {DEFAULT_ROLES.map(r => (
                     <SelectItem key={r} value={r}>
                       <span className="flex items-center gap-2">
@@ -393,6 +394,10 @@ export default function Staff() {
                         {r}
                       </span>
                     </SelectItem>
+                  ))}
+                  <SelectItem value="__separator_enterprise" disabled><span className="text-xs font-semibold text-muted-foreground">— Enterprise Roles —</span></SelectItem>
+                  {EXTENDED_ROLES.filter(r => !DEFAULT_ROLES.includes(r)).map(r => (
+                    <SelectItem key={r} value={r}>{r}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
