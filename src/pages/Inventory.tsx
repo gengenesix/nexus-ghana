@@ -369,6 +369,8 @@ export default function Inventory() {
       </Dialog>
 
       <CsvImportDialog open={showImport} onOpenChange={setShowImport} type="products" />
+      </TabsContent>
+      </Tabs>
     </div>
   );
 }
