@@ -237,7 +237,7 @@ export const generateReceiptPDF = (receipt: ReceiptData, business: BusinessData)
   // Footer
   const pageHeight = doc.internal.pageSize.height;
   doc.setFontSize(10);
-  doc.setTextColor(...lightGray);
+  doc.setTextColor(128, 128, 128);
   doc.text('Thank you for your business!', 20, pageHeight - 30);
   doc.text('Powered by NexusGH Business Management System', 20, pageHeight - 20);
   
