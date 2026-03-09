@@ -204,6 +204,7 @@ export default function Inventory() {
         </TabsContent>
 
         <TabsContent value="products" className="space-y-6">
+      {lowStockCount > 0 && (
         <Card className="border-warning/30 bg-warning/5">
           <CardContent className="p-4 flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
