@@ -92,7 +92,7 @@ export default function CsvImportDialog({ open, onOpenChange, type }: CsvImportD
     let success = 0, failed = 0;
 
     const records = rows.map(mapRow).filter(Boolean) as Record<string, any>[];
-    const tableName = type === "products" ? "products" : "customers";
+    const tableName = type as "products" | "customers" | "suppliers";
 
     // Batch insert in chunks of 50
     for (let i = 0; i < records.length; i += 50) {
