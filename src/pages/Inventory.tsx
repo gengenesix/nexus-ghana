@@ -12,9 +12,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatGHS } from "@/lib/ghana";
 import { exportInventoryCsv } from "@/lib/export";
 import CsvImportDialog from "@/components/CsvImportDialog";
+import SerialBatchTab from "@/components/inventory/SerialBatchTab";
 import { Search, Plus, Edit, Trash2, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Download, Upload, PackagePlus, PackageMinus } from "lucide-react";
 import { toast } from "sonner";
 
