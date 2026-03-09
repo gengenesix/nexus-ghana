@@ -4,6 +4,7 @@ import { MobileNav } from "@/components/MobileNav";
 import { Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AppLayout() {
   const location = useLocation();
