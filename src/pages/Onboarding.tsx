@@ -29,7 +29,7 @@ export default function Onboarding() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) { toast.error("Business name is required"); return; }
-    if (adminPin.length < 4) { toast.error("PIN must be at least 4 digits"); return; }
+    if (adminPin.length < 6) { toast.error("PIN must be 6 digits"); return; }
     if (adminPin !== confirmPin) { toast.error("PINs do not match"); return; }
 
     try {
