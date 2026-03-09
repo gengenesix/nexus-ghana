@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import AccountDialog from "@/components/financials/AccountDialog";
 import JournalEntryDialog from "@/components/financials/JournalEntryDialog";
 import SeedChartOfAccounts from "@/components/financials/SeedChartOfAccounts";
+import ExchangeRatesTab from "@/components/financials/ExchangeRatesTab";
 
 export default function Financials() {
   const { business } = useBusiness();
