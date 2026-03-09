@@ -124,6 +124,21 @@ export default function POS() {
     setShowReceipt(false);
   };
 
+  const downloadReceipt = () => {
+    if (cart.length === 0) return;
+    
+    const receiptData = {
+      receipt_number: lastReceipt,
+      items: cart,
+      subtotal,
+      discount_amount: discountAmount,
+      total,
+      payment_method: PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label || paymentMethod,
+    };
+    
+    generateReceiptPDF(receiptData, business || { name: "NexusGH" });
+  };
+
   return (
     <div className="animate-fade-in">
       <h1 className="text-2xl md:text-3xl font-display font-bold mb-4">Point of Sale</h1>
