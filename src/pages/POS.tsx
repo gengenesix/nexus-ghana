@@ -244,7 +244,7 @@ export default function POS() {
           {filtered.length === 0 ? (
             <p className="text-center text-muted-foreground py-12">No products found. Add products in Inventory first.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
               {filtered.map((product: any) => (
                 <button
                   key={product.id}
