@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, ShoppingCart, Package, FileText, Users, Truck,
-  Receipt, BarChart3, UserCog, Settings, LogOut, Zap,
+  Receipt, BarChart3, UserCog, Settings, LogOut, Landmark,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -34,13 +34,12 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <div className="flex items-center gap-3 px-4 py-5">
         <div className="relative flex h-9 w-9 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/25 shrink-0">
-          <Zap className="h-4 w-4 text-primary-foreground" />
+          <Landmark className="h-5 w-5 text-primary-foreground" />
           <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
         </div>
         {!collapsed && (
-          <span className="font-brand text-xl font-bold tracking-tight">
-            <span className="gold-text">Nexus</span>
-            <span className="text-foreground">GH</span>
+          <span className="font-display text-xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+            NexusGH
           </span>
         )}
       </div>
