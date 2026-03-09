@@ -39,7 +39,7 @@ export default function Register() {
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
           </div>
           <span className="font-curly text-3xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-            NexusGH
+            Nexus-GH
           </span>
         </div>
 
