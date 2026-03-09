@@ -18,6 +18,14 @@ import { formatDistanceToNow } from "date-fns";
 
 const DEFAULT_ROLES = ["Administrator", "Manager", "Supervisor", "Cashier", "Sales Rep", "Warehouse", "Accountant", "Staff"];
 
+// Extended roles from SAP-style role templates
+const EXTENDED_ROLES = [
+  "System Administrator", "CFO / Finance Manager", "Accountant",
+  "Sales Manager", "Sales Representative", "Purchasing Manager",
+  "Warehouse Manager", "Production Planner", "HR Manager",
+  "Project Manager", "Service Technician", "Executive / CEO",
+];
+
 const ROLE_DESCRIPTIONS: Record<string, string> = {
   Administrator: "Full system access — manage staff, settings, reports",
   Manager: "Dashboard, POS, inventory, invoices, customers, suppliers, expenses, reports, staff",
@@ -378,6 +386,7 @@ export default function Staff() {
               <Select value={formRole} onValueChange={setFormRole}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__separator_basic" disabled><span className="text-xs font-semibold text-muted-foreground">— Basic Roles —</span></SelectItem>
                   {DEFAULT_ROLES.map(r => (
                     <SelectItem key={r} value={r}>
                       <span className="flex items-center gap-2">
@@ -385,6 +394,10 @@ export default function Staff() {
                         {r}
                       </span>
                     </SelectItem>
+                  ))}
+                  <SelectItem value="__separator_enterprise" disabled><span className="text-xs font-semibold text-muted-foreground">— Enterprise Roles —</span></SelectItem>
+                  {EXTENDED_ROLES.filter(r => !DEFAULT_ROLES.includes(r)).map(r => (
+                    <SelectItem key={r} value={r}>{r}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -444,7 +457,12 @@ export default function Staff() {
               <Select value={formRole} onValueChange={setFormRole}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__separator_basic2" disabled><span className="text-xs font-semibold text-muted-foreground">— Basic Roles —</span></SelectItem>
                   {DEFAULT_ROLES.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                  <SelectItem value="__separator_enterprise2" disabled><span className="text-xs font-semibold text-muted-foreground">— Enterprise Roles —</span></SelectItem>
+                  {EXTENDED_ROLES.filter(r => !DEFAULT_ROLES.includes(r)).map(r => (
+                    <SelectItem key={r} value={r}>{r}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
