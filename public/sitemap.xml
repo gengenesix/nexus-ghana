@@ -1,67 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://nexus-gh.vercel.app/</loc>
+    <loc>https://nexus-ghana.vercel.app/</loc>
     <priority>1.0</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/login</loc>
+    <loc>https://nexus-ghana.vercel.app/login</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/register</loc>
+    <loc>https://nexus-ghana.vercel.app/register</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/dashboard</loc>
+    <loc>https://nexus-ghana.vercel.app/dashboard</loc>
     <priority>0.9</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/pos</loc>
+    <loc>https://nexus-ghana.vercel.app/pos</loc>
     <priority>0.7</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/inventory</loc>
+    <loc>https://nexus-ghana.vercel.app/inventory</loc>
     <priority>0.7</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/invoices</loc>
+    <loc>https://nexus-ghana.vercel.app/invoices</loc>
     <priority>0.7</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/customers</loc>
+    <loc>https://nexus-ghana.vercel.app/customers</loc>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/suppliers</loc>
+    <loc>https://nexus-ghana.vercel.app/suppliers</loc>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/expenses</loc>
+    <loc>https://nexus-ghana.vercel.app/expenses</loc>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/reports</loc>
+    <loc>https://nexus-ghana.vercel.app/reports</loc>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/staff</loc>
+    <loc>https://nexus-ghana.vercel.app/staff</loc>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://nexus-gh.vercel.app/settings</loc>
+    <loc>https://nexus-ghana.vercel.app/settings</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
