@@ -123,20 +123,7 @@ export default function POS() {
     setShowReceipt(false);
   };
 
-  const downloadReceipt = () => {
-    if (cart.length === 0) return;
-    
-    const receiptData = {
-      receipt_number: lastReceipt,
-      items: cart,
-      subtotal,
-      discount_amount: discountAmount,
-      total,
-      payment_method: PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label || paymentMethod,
-    };
-    
-    generateReceiptPDF(receiptData, business || { name: "Nexus-GH" });
-  };
+
 
   return (
     <div className="animate-fade-in">
