@@ -4,18 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useBusiness } from "@/hooks/useBusiness";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FolderKanban, ListTodo, Clock, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 import ProjectDialog from "@/components/projects/ProjectDialog";
+import { GanttChart } from "@/components/projects/GanttChart";
 
 export default function Projects() {
   const { business } = useBusiness();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("projects");
   const [dialog, setDialog] = useState<{ open: boolean; project?: any }>({ open: false });
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
 
   const { data: projects = [] } = useQuery({
     queryKey: ["projects", business?.id],
@@ -25,6 +29,18 @@ export default function Projects() {
       return data;
     },
     enabled: !!business?.id,
+  });
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ["project_tasks", business?.id],
+    queryFn: async () => {
+      const projectIds = projects.map((p: any) => p.id);
+      if (projectIds.length === 0) return [];
+      const { data, error } = await supabase.from("project_tasks").select("*").in("project_id", projectIds).order("created_at");
+      if (error) throw error;
+      return data;
+    },
+    enabled: projects.length > 0,
   });
 
   const deleteProject = useMutation({
@@ -37,6 +53,9 @@ export default function Projects() {
   });
 
   const statusColors: Record<string, string> = { planning: "bg-blue-500/10 text-blue-500", in_progress: "bg-yellow-500/10 text-yellow-500", review: "bg-purple-500/10 text-purple-500", completed: "bg-green-500/10 text-green-500", on_hold: "bg-orange-500/10 text-orange-500" };
+
+  const filteredTasks = selectedProject ? tasks.filter((t: any) => t.project_id === selectedProject) : tasks;
+  const selectedProj = selectedProject ? projects.find((p: any) => p.id === selectedProject) : null;
 
   return (
     <div className="space-y-6">
@@ -55,7 +74,7 @@ export default function Projects() {
         <TabsList>
           <TabsTrigger value="projects">All Projects</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline (Gantt)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="projects" className="space-y-4">
@@ -63,7 +82,7 @@ export default function Projects() {
           {projects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {projects.map((p: any) => (
-                <Card key={p.id} className="hover:border-primary/50 group relative">
+                <Card key={p.id} className="hover:border-primary/50 group relative cursor-pointer" onClick={() => { setSelectedProject(p.id); setActiveTab("tasks"); }}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">{p.name}</CardTitle>
@@ -78,8 +97,8 @@ export default function Projects() {
                     </div>
                     {p.budget > 0 && <Progress value={Math.min((p.actual_cost / p.budget) * 100, 100)} className="h-1.5" />}
                     <div className="absolute top-2 right-12 opacity-0 group-hover:opacity-100 flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setDialog({ open: true, project: p })}><Pencil className="h-3 w-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteProject.mutate(p.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setDialog({ open: true, project: p }); }}><Pencil className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); deleteProject.mutate(p.id); }}><Trash2 className="h-3 w-3 text-destructive" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -90,8 +109,62 @@ export default function Projects() {
           )}
         </TabsContent>
 
-        <TabsContent value="tasks"><Card><CardContent className="text-center py-12 text-muted-foreground"><ListTodo className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Task management — create a project first.</p></CardContent></Card></TabsContent>
-        <TabsContent value="timeline"><Card><CardContent className="text-center py-12 text-muted-foreground"><Clock className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Gantt chart timeline — coming soon.</p></CardContent></Card></TabsContent>
+        <TabsContent value="tasks" className="space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold">Tasks</h3>
+              {selectedProject && (
+                <Badge variant="secondary" className="cursor-pointer" onClick={() => setSelectedProject(null)}>
+                  {selectedProj?.name} ✕
+                </Badge>
+              )}
+            </div>
+          </div>
+          <Card><CardContent className="pt-4">
+            {filteredTasks.length > 0 ? (
+              <Table>
+                <TableHeader><TableRow><TableHead>Task</TableHead><TableHead>Project</TableHead><TableHead>Priority</TableHead><TableHead>Status</TableHead><TableHead>Start</TableHead><TableHead>Due</TableHead><TableHead className="text-right">Hours</TableHead></TableRow></TableHeader>
+                <TableBody>{filteredTasks.map((t: any) => {
+                  const proj = projects.find((p: any) => p.id === t.project_id);
+                  return (
+                    <TableRow key={t.id}>
+                      <TableCell className="font-medium">{t.title}</TableCell>
+                      <TableCell className="text-muted-foreground">{proj?.name || "—"}</TableCell>
+                      <TableCell><Badge variant="outline" className="capitalize">{t.priority || "medium"}</Badge></TableCell>
+                      <TableCell><Badge className={`capitalize ${statusColors[t.status] || ""}`}>{t.status.replace("_", " ")}</Badge></TableCell>
+                      <TableCell>{t.start_date ? format(new Date(t.start_date), "MMM d") : "—"}</TableCell>
+                      <TableCell>{t.due_date ? format(new Date(t.due_date), "MMM d") : "—"}</TableCell>
+                      <TableCell className="text-right font-mono">{t.hours_actual || 0}/{t.hours_estimated || 0}</TableCell>
+                    </TableRow>
+                  );
+                })}</TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground"><ListTodo className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>{selectedProject ? "No tasks for this project." : "No tasks yet."}</p></div>
+            )}
+          </CardContent></Card>
+        </TabsContent>
+
+        <TabsContent value="timeline" className="space-y-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-semibold">Gantt Timeline</h3>
+            {projects.map((p: any) => (
+              <Badge
+                key={p.id}
+                variant={selectedProject === p.id ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => setSelectedProject(selectedProject === p.id ? null : p.id)}
+              >
+                {p.name}
+              </Badge>
+            ))}
+          </div>
+          <GanttChart
+            tasks={filteredTasks}
+            projectStart={selectedProj?.start_date}
+            projectEnd={selectedProj?.end_date}
+          />
+        </TabsContent>
       </Tabs>
 
       <ProjectDialog open={dialog.open} onOpenChange={(o) => setDialog({ open: o })} project={dialog.project} />

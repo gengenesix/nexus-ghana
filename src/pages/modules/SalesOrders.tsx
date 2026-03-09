@@ -11,6 +11,8 @@ import { FileText, ShoppingBag, Truck, RotateCcw, Plus, ArrowRight, Loader2, Pac
 import { format } from "date-fns";
 import { toast } from "sonner";
 import QuotationDialog from "@/components/sales/QuotationDialog";
+import { PriceListsTab } from "@/components/sales/PriceListsTab";
+import { CommissionsTab } from "@/components/sales/CommissionsTab";
 
 export default function SalesOrders() {
   const { business } = useBusiness();
@@ -196,11 +198,13 @@ export default function SalesOrders() {
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="quotations">Quotations ({quotations.length})</TabsTrigger>
           <TabsTrigger value="orders">Orders ({salesOrders.length})</TabsTrigger>
           <TabsTrigger value="deliveries">Deliveries ({deliveries.length})</TabsTrigger>
           <TabsTrigger value="returns">Credit Notes ({creditNotes.length})</TabsTrigger>
+          <TabsTrigger value="pricelists">Price Lists</TabsTrigger>
+          <TabsTrigger value="commissions">Commissions</TabsTrigger>
         </TabsList>
 
         {/* Quotations Tab */}
@@ -344,6 +348,12 @@ export default function SalesOrders() {
               <div className="text-center py-12 text-muted-foreground"><RotateCcw className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No credit notes yet. Create one from the Invoices module to process a return.</p></div>
             )}
           </CardContent></Card>
+        </TabsContent>
+        <TabsContent value="pricelists" className="space-y-4">
+          <PriceListsTab />
+        </TabsContent>
+        <TabsContent value="commissions" className="space-y-4">
+          <CommissionsTab />
         </TabsContent>
       </Tabs>
 

@@ -11,6 +11,7 @@ import { Landmark, ArrowDownLeft, ArrowUpRight, RefreshCcw, Plus } from "lucide-
 import { format } from "date-fns";
 import BankAccountDialog from "@/components/banking/BankAccountDialog";
 import PaymentDialog from "@/components/banking/PaymentDialog";
+import { BankReconciliationTab } from "@/components/banking/BankReconciliationTab";
 
 export default function Banking() {
   const { business } = useBusiness();
@@ -133,7 +134,9 @@ export default function Banking() {
           </CardContent></Card>
         </TabsContent>
 
-        <TabsContent value="reconciliation"><Card><CardContent className="text-center py-12 text-muted-foreground"><RefreshCcw className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Bank reconciliation — match transactions to statements.</p></CardContent></Card></TabsContent>
+        <TabsContent value="reconciliation" className="space-y-4">
+          <BankReconciliationTab bankAccounts={bankAccounts} payments={payments} />
+        </TabsContent>
       </Tabs>
 
       <BankAccountDialog open={bankDialogOpen} onOpenChange={setBankDialogOpen} />
