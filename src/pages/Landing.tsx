@@ -412,9 +412,16 @@ export default function Landing() {
                 gengenesix@gmail.com
               </a>
             </div>
-            <p className="text-sm text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
-          </div>
-        </div>
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+              <button
+                onClick={downloadUserGuide}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Download User Guide
+              </button>
+              <p className="text-sm text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
+            </div>
       </footer>
     </div>
   );
