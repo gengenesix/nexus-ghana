@@ -510,10 +510,13 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          is_online: boolean
+          last_login: string | null
           name: string
           phone: string | null
           pin: string | null
           role: string
+          staff_id: string | null
           status: string
         }
         Insert: {
@@ -521,10 +524,13 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_online?: boolean
+          last_login?: string | null
           name: string
           phone?: string | null
           pin?: string | null
           role?: string
+          staff_id?: string | null
           status?: string
         }
         Update: {
@@ -532,10 +538,13 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_online?: boolean
+          last_login?: string | null
           name?: string
           phone?: string | null
           pin?: string | null
           role?: string
+          staff_id?: string | null
           status?: string
         }
         Relationships: [
@@ -596,6 +605,7 @@ export type Database = {
     Functions: {
       generate_invoice_number: { Args: never; Returns: string }
       get_business_id: { Args: never; Returns: string }
+      staff_logout: { Args: { _staff_id: string }; Returns: undefined }
       verify_staff_pin: {
         Args: { _business_id: string; _pin: string }
         Returns: {
