@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,10 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Factory, Layers, ClipboardList, Calendar, Plus } from "lucide-react";
 import { format } from "date-fns";
+import ProductionOrderDialog from "@/components/production/ProductionOrderDialog";
 
 export default function Production() {
   const { business } = useBusiness();
   const [activeTab, setActiveTab] = useState("bom");
+  const [prodOrderOpen, setProdOrderOpen] = useState(false);
 
   const { data: boms = [] } = useQuery({
     queryKey: ["bill_of_materials", business?.id],
@@ -75,7 +77,7 @@ export default function Production() {
         </TabsContent>
 
         <TabsContent value="orders" className="space-y-4">
-          <div className="flex justify-between"><h3 className="font-semibold">Production Orders</h3><Button><Plus className="h-4 w-4 mr-1" />New Order</Button></div>
+          <div className="flex justify-between"><h3 className="font-semibold">Production Orders</h3><Button onClick={() => setProdOrderOpen(true)}><Plus className="h-4 w-4 mr-1" />New Order</Button></div>
           <Card><CardContent className="pt-4">
             {prodOrders.length > 0 ? (
               <Table>
@@ -84,7 +86,7 @@ export default function Production() {
                   <TableRow key={po.id}>
                     <TableCell className="font-mono">{po.order_number}</TableCell>
                     <TableCell>{po.quantity}</TableCell>
-                    <TableCell>{format(new Date(po.planned_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>{po.planned_date ? format(new Date(po.planned_date), "MMM d, yyyy") : "—"}</TableCell>
                     <TableCell><Badge variant="outline" className="capitalize">{po.status}</Badge></TableCell>
                   </TableRow>
                 ))}</TableBody>
@@ -99,6 +101,8 @@ export default function Production() {
           <Card><CardContent className="text-center py-12 text-muted-foreground"><Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" /><h3 className="font-semibold text-lg">Production Scheduling</h3><p className="text-sm">Plan production runs against capacity. Create production orders first.</p></CardContent></Card>
         </TabsContent>
       </Tabs>
+
+      <ProductionOrderDialog open={prodOrderOpen} onOpenChange={setProdOrderOpen} />
     </div>
   );
 }
