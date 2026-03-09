@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
@@ -11,16 +11,23 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { formatGHS, EXPENSE_CATEGORIES, PAYMENT_METHODS } from "@/lib/ghana";
-import { Plus, Search, Loader2, Trash2 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { formatGHS, EXPENSE_CATEGORIES } from "@/lib/ghana";
+import { Plus, Search, Loader2, Trash2, Download, Calendar } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import { toast } from "sonner";
+import { exportExpensesCsv } from "@/lib/export";
+import { format, subMonths } from "date-fns";
+
+const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)", "hsl(280, 60%, 50%)", "hsl(20, 80%, 50%)", "hsl(170, 60%, 40%)", "hsl(330, 70%, 50%)"];
+const tooltipStyle = { background: "hsl(220, 35%, 12%)", border: "1px solid hsl(220, 20%, 20%)", borderRadius: 8, color: "hsl(210, 40%, 96%)" };
 
 export default function Expenses() {
   const { business } = useBusiness();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
+  const [dateFrom, setDateFrom] = useState(() => format(subMonths(new Date(), 1), "yyyy-MM-dd"));
+  const [dateTo, setDateTo] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [formDate, setFormDate] = useState(new Date().toISOString().split("T")[0]);
   const [formAmount, setFormAmount] = useState("");
   const [formCategory, setFormCategory] = useState("");
@@ -37,11 +44,17 @@ export default function Expenses() {
     enabled: !!business,
   });
 
-  const filtered = expenses.filter((e: any) => (e.description || "").toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase()));
-  const totalExpenses = expenses.reduce((s: number, e: any) => s + Number(e.amount), 0);
+  const dateFiltered = useMemo(() => expenses.filter((e: any) => e.date >= dateFrom && e.date <= dateTo), [expenses, dateFrom, dateTo]);
+  const filtered = dateFiltered.filter((e: any) => (e.description || "").toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase()));
+  const totalExpenses = dateFiltered.reduce((s: number, e: any) => s + Number(e.amount), 0);
 
-  // Group by month for chart
-  const monthlyData = expenses.reduce((acc: any[], e: any) => {
+  // Category pie chart
+  const catMap: Record<string, number> = {};
+  dateFiltered.forEach((e: any) => { catMap[e.category] = (catMap[e.category] || 0) + Number(e.amount); });
+  const catData = Object.entries(catMap).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+
+  // Monthly bar chart
+  const monthlyData = dateFiltered.reduce((acc: any[], e: any) => {
     const month = new Date(e.date).toLocaleString("en", { month: "short" });
     const existing = acc.find(a => a.month === month);
     if (existing) existing.amount += Number(e.amount);
@@ -86,29 +99,79 @@ export default function Expenses() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-display font-bold">Expenses</h1>
-          <p className="text-muted-foreground text-sm">Total: {formatGHS(totalExpenses)}</p>
+          <p className="text-muted-foreground text-sm">Period total: {formatGHS(totalExpenses)}</p>
         </div>
-        <Button onClick={() => setShowAdd(true)} className="gold-gradient text-primary-foreground">
-          <Plus className="h-4 w-4 mr-1" /> Log Expense
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => { exportExpensesCsv(dateFiltered); toast.success("Exported!"); }}>
+            <Download className="h-4 w-4 mr-1" /> Export
+          </Button>
+          <Button onClick={() => setShowAdd(true)} size="sm" className="gold-gradient text-primary-foreground">
+            <Plus className="h-4 w-4 mr-1" /> Log Expense
+          </Button>
+        </div>
       </div>
 
-      {monthlyData.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle className="font-display text-base">Monthly Expenses</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
-                <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" fontSize={12} />
-                <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
-                <Tooltip contentStyle={{ background: "hsl(220, 35%, 12%)", border: "1px solid hsl(220, 20%, 20%)", borderRadius: 8, color: "hsl(210, 40%, 96%)" }} formatter={(v: number) => [formatGHS(v), "Expenses"]} />
-                <Bar dataKey="amount" fill="hsl(0, 72%, 51%)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
+      {/* Date range filter */}
+      <Card>
+        <CardContent className="p-4 flex flex-wrap items-end gap-3">
+          <Calendar className="h-4 w-4 text-muted-foreground mt-5" />
+          <div className="space-y-1">
+            <Label className="text-xs">From</Label>
+            <Input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-[150px] h-9" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">To</Label>
+            <Input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="w-[150px] h-9" />
+          </div>
+          <span className="text-xs text-muted-foreground pb-2">{dateFiltered.length} records</span>
+        </CardContent>
+      </Card>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        {monthlyData.length > 0 && (
+          <Card className="lg:col-span-2">
+            <CardHeader><CardTitle className="font-display text-base">Monthly Expenses</CardTitle></CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
+                  <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" fontSize={12} />
+                  <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [formatGHS(v), "Expenses"]} />
+                  <Bar dataKey="amount" fill="hsl(0, 72%, 51%)" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {catData.length > 0 && (
+          <Card>
+            <CardHeader><CardTitle className="font-display text-base">By Category</CardTitle></CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={catData} cx="50%" cy="50%" innerRadius={35} outerRadius={65} paddingAngle={4} dataKey="value">
+                    {catData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="space-y-1 mt-1">
+                {catData.slice(0, 5).map((d, i) => (
+                  <div key={d.name} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                      <span>{d.name}</span>
+                    </div>
+                    <span className="text-muted-foreground">{formatGHS(d.value)}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -130,7 +193,7 @@ export default function Expenses() {
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{isLoading ? "Loading..." : "No expenses yet."}</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{isLoading ? "Loading..." : "No expenses in this period."}</TableCell></TableRow>
               ) : filtered.map((expense: any) => (
                 <TableRow key={expense.id}>
                   <TableCell className="text-muted-foreground">{expense.date}</TableCell>

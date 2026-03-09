@@ -10,14 +10,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Trash2, Loader2 } from "lucide-react";
+import { Search, Plus, Trash2, Loader2, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { exportSuppliersCsv } from "@/lib/export";
+import { CsvImportDialog } from "@/components/CsvImportDialog";
 
 export default function Suppliers() {
   const { business } = useBusiness();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [formName, setFormName] = useState("");
   const [formContact, setFormContact] = useState("");
   const [formPhone, setFormPhone] = useState("");
@@ -69,6 +72,24 @@ export default function Suppliers() {
     },
   });
 
+  const handleImport = async (rows: Record<string, string>[]) => {
+    const records = rows.map(r => ({
+      business_id: business!.id,
+      name: r["Name"] || r["name"] || "",
+      contact_person: r["Contact Person"] || r["contact_person"] || "",
+      phone: r["Phone"] || r["phone"] || "",
+      location: r["Location"] || r["location"] || "",
+      products_supplied: r["Products"] || r["products_supplied"] || "",
+    })).filter(r => r.name);
+
+    for (let i = 0; i < records.length; i += 50) {
+      const chunk = records.slice(i, i + 50);
+      const { error } = await supabase.from("suppliers").insert(chunk);
+      if (error) throw error;
+    }
+    queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -76,9 +97,17 @@ export default function Suppliers() {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Suppliers</h1>
           <p className="text-muted-foreground text-sm">{suppliers.length} suppliers</p>
         </div>
-        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
-          <Plus className="h-4 w-4 mr-1" /> Add Supplier
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowImport(true)}>
+            <Upload className="h-4 w-4 mr-1" /> Import
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => { exportSuppliersCsv(suppliers); toast.success("Exported!"); }}>
+            <Download className="h-4 w-4 mr-1" /> Export
+          </Button>
+          <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground" size="sm">
+            <Plus className="h-4 w-4 mr-1" /> Add Supplier
+          </Button>
+        </div>
       </div>
 
       <div className="relative">
@@ -134,6 +163,13 @@ export default function Suppliers() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <CsvImportDialog
+        open={showImport}
+        onOpenChange={setShowImport}
+        type="suppliers"
+        onImport={handleImport}
+      />
     </div>
   );
 }

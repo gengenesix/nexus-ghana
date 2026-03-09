@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatGHS } from "@/lib/ghana";
 import {
-  ShoppingCart, FileText, AlertTriangle, Users, Plus, TrendingUp, ArrowRight,
-  Briefcase, Receipt, Factory, CreditCard,
+  ShoppingCart, FileText, AlertTriangle, Users, Plus, TrendingUp, TrendingDown, ArrowRight,
+  Briefcase, Receipt, Factory, CreditCard, Target, Percent,
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import { useNavigate } from "react-router-dom";
 
 const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)"];
@@ -24,22 +24,33 @@ export default function Dashboard() {
     queryKey: ["dashboard-stats", business?.id],
     queryFn: async () => {
       const today = new Date().toISOString().split("T")[0];
-      const [todaySales, unpaidInvoices, lowStockItems, totalCustomers, openLeads, openPOs, activeProduction, bankAccounts] = await Promise.all([
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+      const [todaySales, yesterdaySales, unpaidInvoices, lowStockItems, totalCustomers, openLeads, openPOs, activeProduction, bankAccounts, monthExpenses] = await Promise.all([
         supabase.from("sales").select("total").eq("business_id", business!.id).gte("created_at", today),
+        supabase.from("sales").select("total").eq("business_id", business!.id).gte("created_at", yesterday).lt("created_at", today),
         supabase.from("invoices").select("total, status").eq("business_id", business!.id).in("status", ["sent", "overdue", "partial"]),
-        supabase.from("products").select("id, name, qty, reorder_level").eq("business_id", business!.id),
+        supabase.from("products").select("id, name, qty, reorder_level, cost_price, selling_price").eq("business_id", business!.id),
         supabase.from("customers").select("id", { count: "exact", head: true }).eq("business_id", business!.id),
         supabase.from("leads").select("id", { count: "exact", head: true }).eq("business_id", business!.id).in("status", ["new", "contacted", "qualified"]),
         supabase.from("purchase_orders").select("total, status").eq("business_id", business!.id).in("status", ["draft", "sent", "confirmed"]),
         supabase.from("production_orders").select("id", { count: "exact", head: true }).eq("business_id", business!.id).in("status", ["planned", "in_progress"]),
         supabase.from("bank_accounts").select("balance, name").eq("business_id", business!.id).eq("is_active", true),
+        supabase.from("expenses").select("amount").eq("business_id", business!.id).gte("date", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0]),
       ]);
+      const todayTotal = (todaySales.data || []).reduce((s, r) => s + Number(r.total), 0);
+      const yesterdayTotal = (yesterdaySales.data || []).reduce((s, r) => s + Number(r.total), 0);
+      const products = lowStockItems.data || [];
+      const totalCost = products.reduce((s, p) => s + Number(p.cost_price) * p.qty, 0);
+      const totalRetail = products.reduce((s, p) => s + Number(p.selling_price) * p.qty, 0);
+      const monthExpTotal = (monthExpenses.data || []).reduce((s, e) => s + Number(e.amount), 0);
       return {
-        todayTotal: (todaySales.data || []).reduce((s, r) => s + Number(r.total), 0),
+        todayTotal,
         todayCount: todaySales.data?.length ?? 0,
+        yesterdayTotal,
+        growthPct: yesterdayTotal > 0 ? ((todayTotal - yesterdayTotal) / yesterdayTotal * 100) : todayTotal > 0 ? 100 : 0,
         unpaidCount: unpaidInvoices.data?.length ?? 0,
         unpaidTotal: (unpaidInvoices.data || []).reduce((s, i) => s + Number(i.total), 0),
-        lowStock: (lowStockItems.data || []).filter(p => p.qty <= p.reorder_level),
+        lowStock: products.filter(p => p.qty <= p.reorder_level),
         customerCount: totalCustomers.count ?? 0,
         openLeads: openLeads.count ?? 0,
         openPOsTotal: (openPOs.data || []).reduce((s, p) => s + Number(p.total), 0),
@@ -47,6 +58,10 @@ export default function Dashboard() {
         activeProduction: activeProduction.count ?? 0,
         totalBankBalance: (bankAccounts.data || []).reduce((s, b) => s + Number(b.balance), 0),
         bankAccountCount: bankAccounts.data?.length ?? 0,
+        inventoryCost: totalCost,
+        inventoryRetail: totalRetail,
+        profitMargin: totalRetail > 0 ? ((totalRetail - totalCost) / totalRetail * 100) : 0,
+        monthExpenses: monthExpTotal,
       };
     },
     enabled: !!business,
@@ -99,6 +114,8 @@ export default function Dashboard() {
   recentSales.forEach((s: any) => { paymentMap[s.payment_method] = (paymentMap[s.payment_method] || 0) + Number(s.total); });
   const paymentData = Object.entries(paymentMap).map(([name, value]) => ({ name, value }));
 
+  const growthPct = stats?.growthPct ?? 0;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -118,15 +135,79 @@ export default function Dashboard() {
 
       {/* Primary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Today's Sales" value={formatGHS(stats?.todayTotal ?? 0)} icon={ShoppingCart} trend={`${stats?.todayCount ?? 0} transactions`} trendUp={(stats?.todayTotal ?? 0) > 0} />
+        <StatCard
+          title="Today's Sales"
+          value={formatGHS(stats?.todayTotal ?? 0)}
+          icon={ShoppingCart}
+          trend={growthPct !== 0 ? `${growthPct > 0 ? "+" : ""}${growthPct.toFixed(0)}% vs yesterday` : `${stats?.todayCount ?? 0} transactions`}
+          trendUp={growthPct >= 0}
+        />
         <StatCard title="Unpaid Invoices" value={String(stats?.unpaidCount ?? 0)} icon={FileText} trend={`${formatGHS(stats?.unpaidTotal ?? 0)} outstanding`} />
         <StatCard title="Low Stock Items" value={String(stats?.lowStock?.length ?? 0)} icon={AlertTriangle} trend={(stats?.lowStock?.length ?? 0) > 0 ? "Needs reorder" : "All stocked"} />
         <StatCard title="Total Customers" value={String(stats?.customerCount ?? 0)} icon={Users} trend="All time" trendUp={(stats?.customerCount ?? 0) > 0} />
       </div>
 
+      {/* Financial snapshot row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Percent className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{(stats?.profitMargin ?? 0).toFixed(1)}%</p>
+                <p className="text-xs text-muted-foreground">Inventory Margin</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Target className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{formatGHS(stats?.inventoryRetail ?? 0)}</p>
+                <p className="text-xs text-muted-foreground">Stock Value (Retail)</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+                {(stats?.monthExpenses ?? 0) > (stats?.todayTotal ?? 0) * 30
+                  ? <TrendingDown className="h-5 w-5 text-destructive" />
+                  : <TrendingUp className="h-5 w-5 text-green-500" />}
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{formatGHS(stats?.monthExpenses ?? 0)}</p>
+                <p className="text-xs text-muted-foreground">This Month Expenses</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/banking")}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <CreditCard className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{formatGHS(stats?.totalBankBalance ?? 0)}</p>
+                <p className="text-xs text-muted-foreground">{stats?.bankAccountCount ?? 0} Bank Accounts</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Secondary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/modules/crm")}>
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/crm")}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Briefcase className="h-5 w-5 text-primary" />
@@ -137,7 +218,7 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/modules/purchasing")}>
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/purchasing")}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Receipt className="h-5 w-5 text-primary" />
@@ -148,7 +229,7 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/modules/production")}>
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/production")}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Factory className="h-5 w-5 text-primary" />
@@ -159,14 +240,14 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/modules/banking")}>
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/reports")}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <CreditCard className="h-5 w-5 text-primary" />
+              <TrendingUp className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{formatGHS(stats?.totalBankBalance ?? 0)}</p>
-              <p className="text-xs text-muted-foreground">{stats?.bankAccountCount ?? 0} Bank Accounts</p>
+              <p className="text-sm font-semibold">View Reports</p>
+              <p className="text-xs text-muted-foreground">P&L, Balance Sheet, Aging</p>
             </div>
           </CardContent>
         </Card>
@@ -180,13 +261,19 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={weeklySales}>
+              <AreaChart data={weeklySales}>
+                <defs>
+                  <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(37, 90%, 55%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(37, 90%, 55%)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
                 <XAxis dataKey="day" stroke="hsl(215, 15%, 55%)" fontSize={12} />
                 <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [formatGHS(value), "Sales"]} />
-                <Bar dataKey="sales" fill="hsl(37, 90%, 55%)" radius={[6, 6, 0, 0]} />
-              </BarChart>
+                <Area type="monotone" dataKey="sales" stroke="hsl(37, 90%, 55%)" strokeWidth={2} fill="url(#salesGradient)" />
+              </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
