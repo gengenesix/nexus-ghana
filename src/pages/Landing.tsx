@@ -113,7 +113,7 @@ export default function Landing() {
               <Landmark className="h-5 w-5 text-primary-foreground" />
               <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
             </div>
-            <span className="font-display text-2xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+            <span className="font-curly text-2xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
               NexusGH
             </span>
           </Link>
