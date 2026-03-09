@@ -23,7 +23,16 @@ import Staff from "./pages/Staff";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,        // 30s — avoid redundant refetches
+      gcTime: 5 * 60_000,       // 5min — keep cache alive
+      retry: 2,                 // retry failed requests
+      refetchOnWindowFocus: false, // don't hammer DB on tab switch
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
