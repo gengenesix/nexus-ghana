@@ -97,6 +97,7 @@ export default function HumanResources() {
           <TabsTrigger value="leave">Leave {pendingLeaves > 0 && <Badge variant="destructive" className="ml-1 h-5 px-1.5 text-[10px]">{pendingLeaves}</Badge>}</TabsTrigger>
           <TabsTrigger value="reviews">Reviews</TabsTrigger>
           <TabsTrigger value="training">Training</TabsTrigger>
+          <TabsTrigger value="orgchart">Org Chart</TabsTrigger>
         </TabsList>
 
         <TabsContent value="employees" className="space-y-4">
