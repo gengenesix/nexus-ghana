@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ interface CartItem {
 
 export default function POS() {
   const { business } = useBusiness();
+  const { staff } = useStaffSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -83,6 +85,7 @@ export default function POS() {
           total,
           payment_method: paymentMethod,
           receipt_number: receiptNum,
+          staff_id: staff?.id || null,
         })
         .select()
         .single();

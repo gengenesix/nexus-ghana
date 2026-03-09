@@ -4,8 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { StaffSessionProvider } from "@/contexts/StaffSessionContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BusinessGuard } from "@/components/BusinessGuard";
+import { StaffPinGuard } from "@/components/StaffPinGuard";
 import { AppLayout } from "@/components/AppLayout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -41,25 +43,27 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-            <Route element={<ProtectedRoute><BusinessGuard><AppLayout /></BusinessGuard></ProtectedRoute>}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/pos" element={<POS />} />
-              <Route path="/inventory" element={<Inventory />} />
-              <Route path="/invoices" element={<Invoices />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/suppliers" element={<Suppliers />} />
-              <Route path="/expenses" element={<Expenses />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/staff" element={<Staff />} />
-              <Route path="/settings" element={<Settings />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <StaffSessionProvider>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+              <Route element={<ProtectedRoute><BusinessGuard><StaffPinGuard><AppLayout /></StaffPinGuard></BusinessGuard></ProtectedRoute>}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/pos" element={<POS />} />
+                <Route path="/inventory" element={<Inventory />} />
+                <Route path="/invoices" element={<Invoices />} />
+                <Route path="/customers" element={<Customers />} />
+                <Route path="/suppliers" element={<Suppliers />} />
+                <Route path="/expenses" element={<Expenses />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/staff" element={<Staff />} />
+                <Route path="/settings" element={<Settings />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </StaffSessionProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
