@@ -191,8 +191,8 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {[
-              { value: "500+", label: "Businesses", icon: Users },
-              { value: "₵2.4M+", label: "Sales Processed", icon: TrendingUp },
+              { value: "50+", label: "Businesses", icon: Users },
+              { value: "₵200k+", label: "Sales Processed", icon: TrendingUp },
               { value: "16", label: "Regions Covered", icon: Globe },
               { value: "99.9%", label: "Uptime", icon: Shield },
             ].map((stat) => (
