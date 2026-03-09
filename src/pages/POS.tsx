@@ -222,7 +222,7 @@ export default function POS() {
       <div className="grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
           {/* Search & SKU quick-add */}
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search products..." className="pl-10" value={search} onChange={e => setSearch(e.target.value)} />
@@ -230,7 +230,7 @@ export default function POS() {
             <div className="flex gap-1">
               <Input
                 placeholder="SKU quick-add"
-                className="w-36"
+                className="flex-1 sm:w-36"
                 value={skuSearch}
                 onChange={e => setSkuSearch(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleSkuAdd()}
