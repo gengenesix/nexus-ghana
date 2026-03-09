@@ -11,7 +11,7 @@ const pageVariants = {
     y: 0,
     transition: {
       duration: 0.35,
-      ease: [0.25, 0.46, 0.45, 0.94],
+      ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
     },
   },
   exit: {
