@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, ShoppingCart, Package, FileText, Users, Truck,
-  Receipt, BarChart3, UserCog, Settings, LogOut, Zap,
+  Receipt, BarChart3, UserCog, Settings, LogOut, Landmark,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
