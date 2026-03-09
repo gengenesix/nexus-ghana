@@ -12,13 +12,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Users, Circle, RefreshCw, Key } from "lucide-react";
+import { formatGHS } from "@/lib/ghana";
+import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Users, Circle, RefreshCw, Key, BarChart3, Award } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 
 const DEFAULT_ROLES = ["Administrator", "Manager", "Supervisor", "Cashier", "Sales Rep", "Warehouse", "Accountant", "Staff"];
 
-// Extended roles from SAP-style role templates
 const EXTENDED_ROLES = [
   "System Administrator", "CFO / Finance Manager", "Accountant",
   "Sales Manager", "Sales Representative", "Purchasing Manager",
@@ -37,6 +38,9 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
   Staff: "POS and inventory access only",
 };
 
+const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)", "hsl(280, 65%, 55%)"];
+const tooltipStyle = { background: "hsl(220, 35%, 12%)", border: "1px solid hsl(220, 20%, 20%)", borderRadius: 8, color: "hsl(210, 40%, 96%)" };
+
 export default function Staff() {
   const { business } = useBusiness();
   const queryClient = useQueryClient();
@@ -49,6 +53,8 @@ export default function Staff() {
   const [newPin, setNewPin] = useState("");
   const [confirmNewPin, setConfirmNewPin] = useState("");
   const [showPin, setShowPin] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
+  const [detailStaff, setDetailStaff] = useState<any>(null);
 
   // Form state
   const [formName, setFormName] = useState("");
@@ -71,7 +77,35 @@ export default function Staff() {
       return data;
     },
     enabled: !!business,
-    refetchInterval: 30000, // Refresh every 30s for online status
+    refetchInterval: 30000,
+  });
+
+  // Sales data for performance metrics
+  const { data: sales = [] } = useQuery({
+    queryKey: ["staff-sales", business?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("sales").select("id, total, staff_id, created_at").eq("business_id", business!.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!business,
+  });
+
+  // Detail staff sales
+  const { data: detailSales = [] } = useQuery({
+    queryKey: ["staff-detail-sales", detailStaff?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sales")
+        .select("id, total, payment_method, created_at")
+        .eq("business_id", business!.id)
+        .eq("staff_id", detailStaff!.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!detailStaff?.id && !!business,
   });
 
   const filtered = staffMembers.filter((s: any) =>
@@ -82,6 +116,21 @@ export default function Staff() {
 
   const onlineCount = staffMembers.filter((s: any) => s.is_online).length;
   const activeCount = staffMembers.filter((s: any) => s.status === "active").length;
+
+  // Staff performance map
+  const staffPerfMap: Record<string, { txCount: number; revenue: number }> = {};
+  staffMembers.forEach((s: any) => { staffPerfMap[s.id] = { txCount: 0, revenue: 0 }; });
+  sales.forEach((s: any) => {
+    if (s.staff_id && staffPerfMap[s.staff_id]) {
+      staffPerfMap[s.staff_id].txCount += 1;
+      staffPerfMap[s.staff_id].revenue += Number(s.total);
+    }
+  });
+
+  // Role distribution
+  const roleCountMap: Record<string, number> = {};
+  staffMembers.forEach((s: any) => { roleCountMap[s.role] = (roleCountMap[s.role] || 0) + 1; });
+  const roleDistribution = Object.entries(roleCountMap).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
 
   const generateStaffId = (name: string) => {
     return name.trim().toLowerCase().replace(/\s+/g, ".").replace(/[^a-z.]/g, "");
@@ -97,10 +146,8 @@ export default function Staff() {
       if (formPin.length < 6) throw new Error("PIN must be 6 digits");
       if (formPin !== formConfirmPin) throw new Error("PINs do not match");
       const staffId = formStaffId.trim() || generateStaffId(formName);
-      // Check uniqueness
       const existing = staffMembers.find((s: any) => s.staff_id === staffId);
       if (existing) throw new Error(`Staff ID "${staffId}" already exists`);
-
       const { error } = await supabase.from("staff_members").insert({
         business_id: business!.id,
         name: formName.trim(),
@@ -194,6 +241,13 @@ export default function Staff() {
     setShowResetPin(true);
   };
 
+  const openDetail = (s: any) => {
+    setDetailStaff(s);
+    setShowDetail(true);
+  };
+
+  const detailPerf = detailStaff ? staffPerfMap[detailStaff.id] : null;
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -212,7 +266,7 @@ export default function Staff() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{staffMembers.length}</p>
@@ -237,6 +291,12 @@ export default function Staff() {
             <p className="text-xs text-muted-foreground">Inactive</p>
           </CardContent>
         </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-primary">{Object.keys(roleCountMap).length}</p>
+            <p className="text-xs text-muted-foreground">Roles Used</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Search */}
@@ -252,6 +312,7 @@ export default function Staff() {
           <TabsTrigger value="online">Online ({onlineCount})</TabsTrigger>
           <TabsTrigger value="active">Active ({activeCount})</TabsTrigger>
           <TabsTrigger value="inactive">Inactive ({staffMembers.length - activeCount})</TabsTrigger>
+          <TabsTrigger value="performance" className="flex items-center gap-1"><BarChart3 className="h-3.5 w-3.5" />Performance</TabsTrigger>
         </TabsList>
 
         {["all", "online", "active", "inactive"].map(tab => (
@@ -265,8 +326,9 @@ export default function Staff() {
                       <TableHead>Staff ID</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Role</TableHead>
-                      <TableHead className="hidden md:table-cell">Phone</TableHead>
-                      <TableHead className="hidden md:table-cell">Last Login</TableHead>
+                      <TableHead className="hidden md:table-cell">Sales</TableHead>
+                      <TableHead className="hidden md:table-cell">Revenue</TableHead>
+                      <TableHead className="hidden lg:table-cell">Last Login</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -280,56 +342,58 @@ export default function Staff() {
                       if (rows.length === 0) {
                         return (
                           <TableRow>
-                            <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                               {isLoading ? "Loading..." : "No staff members found."}
                             </TableCell>
                           </TableRow>
                         );
                       }
 
-                      return rows.map((s: any) => (
-                        <TableRow key={s.id} className={s.status !== "active" ? "opacity-50" : ""}>
-                          <TableCell>
-                            <div className="flex items-center gap-1.5">
+                      return rows.map((s: any) => {
+                        const perf = staffPerfMap[s.id] || { txCount: 0, revenue: 0 };
+                        return (
+                          <TableRow key={s.id} className={`${s.status !== "active" ? "opacity-50" : ""} cursor-pointer hover:bg-accent/50`} onClick={() => openDetail(s)}>
+                            <TableCell>
                               <Circle className={`h-2.5 w-2.5 fill-current ${s.is_online ? "text-green-500" : "text-muted-foreground/30"}`} />
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-mono text-xs text-muted-foreground">{s.staff_id || "—"}</TableCell>
-                          <TableCell className="font-medium">{s.name}</TableCell>
-                          <TableCell>
-                            <Badge variant={s.role === "Administrator" || s.role === "Manager" ? "default" : "secondary"} className={s.role === "Administrator" ? "bg-primary/20 text-primary border-primary/30" : ""}>
-                              {s.role === "Administrator" && <Shield className="h-3 w-3 mr-1" />}
-                              {s.role}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell text-muted-foreground text-sm">{s.phone || "—"}</TableCell>
-                          <TableCell className="hidden md:table-cell text-muted-foreground text-xs">
-                            {s.last_login ? formatDistanceToNow(new Date(s.last_login), { addSuffix: true }) : "Never"}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(s)} title="Edit">
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openResetPin(s.id)} title="Reset PIN">
-                                <Key className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className={`h-8 w-8 ${s.status === "active" ? "text-yellow-500" : "text-green-500"}`}
-                                onClick={() => toggleStatus.mutate({ id: s.id, status: s.status })}
-                                title={s.status === "active" ? "Deactivate" : "Activate"}
-                              >
-                                <RefreshCw className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(s.id)} title="Delete">
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ));
+                            </TableCell>
+                            <TableCell className="font-mono text-xs text-muted-foreground">{s.staff_id || "—"}</TableCell>
+                            <TableCell className="font-medium">{s.name}</TableCell>
+                            <TableCell>
+                              <Badge variant={s.role === "Administrator" || s.role === "Manager" ? "default" : "secondary"} className={s.role === "Administrator" ? "bg-primary/20 text-primary border-primary/30" : ""}>
+                                {s.role === "Administrator" && <Shield className="h-3 w-3 mr-1" />}
+                                {s.role}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell text-sm">{perf.txCount}</TableCell>
+                            <TableCell className="hidden md:table-cell text-sm font-medium text-primary">{formatGHS(perf.revenue)}</TableCell>
+                            <TableCell className="hidden lg:table-cell text-muted-foreground text-xs">
+                              {s.last_login ? formatDistanceToNow(new Date(s.last_login), { addSuffix: true }) : "Never"}
+                            </TableCell>
+                            <TableCell className="text-right" onClick={e => e.stopPropagation()}>
+                              <div className="flex items-center justify-end gap-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(s)} title="Edit">
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openResetPin(s.id)} title="Reset PIN">
+                                  <Key className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={`h-8 w-8 ${s.status === "active" ? "text-yellow-500" : "text-green-500"}`}
+                                  onClick={() => toggleStatus.mutate({ id: s.id, status: s.status })}
+                                  title={s.status === "active" ? "Deactivate" : "Activate"}
+                                >
+                                  <RefreshCw className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(s.id)} title="Delete">
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      });
                     })()}
                   </TableBody>
                 </Table>
@@ -337,6 +401,59 @@ export default function Staff() {
             </Card>
           </TabsContent>
         ))}
+
+        {/* Performance Tab */}
+        <TabsContent value="performance" className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4">
+            {roleDistribution.length > 0 && (
+              <Card>
+                <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> Role Distribution</CardTitle></CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={roleDistribution}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
+                      <XAxis dataKey="name" stroke="hsl(215, 15%, 55%)" fontSize={10} angle={-30} textAnchor="end" height={60} />
+                      <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} allowDecimals={false} />
+                      <Tooltip contentStyle={tooltipStyle} />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]} name="Staff Count">
+                        {roleDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            )}
+            <Card>
+              <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><Award className="h-5 w-5 text-primary" /> Top Performers</CardTitle></CardHeader>
+              <CardContent>
+                {(() => {
+                  const ranked = staffMembers
+                    .map((s: any) => ({ ...s, ...(staffPerfMap[s.id] || { txCount: 0, revenue: 0 }) }))
+                    .filter((s: any) => s.revenue > 0)
+                    .sort((a: any, b: any) => b.revenue - a.revenue)
+                    .slice(0, 5);
+                  if (ranked.length === 0) return <p className="text-center text-muted-foreground py-8">No sales data yet</p>;
+                  return (
+                    <div className="space-y-3">
+                      {ranked.map((s: any, i: number) => (
+                        <div key={s.id} className="flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-2">
+                          <div className="flex items-center gap-3">
+                            <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${i < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{i + 1}</span>
+                            <div>
+                              <p className="text-sm font-medium">{s.name}</p>
+                              <p className="text-xs text-muted-foreground">{s.txCount} transactions</p>
+                            </div>
+                          </div>
+                          <span className="text-sm font-bold text-primary">{formatGHS(s.revenue)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Role Reference */}
@@ -356,6 +473,49 @@ export default function Staff() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Staff Detail Dialog */}
+      <Dialog open={showDetail} onOpenChange={setShowDetail}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Circle className={`h-3 w-3 fill-current ${detailStaff?.is_online ? "text-green-500" : "text-muted-foreground/30"}`} />
+              {detailStaff?.name}
+            </DialogTitle>
+            <DialogDescription>{detailStaff?.role} · ID: {detailStaff?.staff_id || "—"}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              <Card><CardContent className="p-3 text-center"><p className="text-lg font-bold">{detailPerf?.txCount || 0}</p><p className="text-xs text-muted-foreground">Sales</p></CardContent></Card>
+              <Card><CardContent className="p-3 text-center"><p className="text-lg font-bold text-primary">{formatGHS(detailPerf?.revenue || 0)}</p><p className="text-xs text-muted-foreground">Revenue</p></CardContent></Card>
+              <Card><CardContent className="p-3 text-center"><p className="text-lg font-bold">{detailPerf && detailPerf.txCount > 0 ? formatGHS(detailPerf.revenue / detailPerf.txCount) : "—"}</p><p className="text-xs text-muted-foreground">Avg Order</p></CardContent></Card>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div><span className="text-muted-foreground">Phone:</span> {detailStaff?.phone || "—"}</div>
+              <div><span className="text-muted-foreground">Email:</span> {detailStaff?.email || "—"}</div>
+              <div><span className="text-muted-foreground">Status:</span> <Badge variant={detailStaff?.status === "active" ? "default" : "secondary"}>{detailStaff?.status}</Badge></div>
+              <div><span className="text-muted-foreground">Last Login:</span> {detailStaff?.last_login ? formatDistanceToNow(new Date(detailStaff.last_login), { addSuffix: true }) : "Never"}</div>
+            </div>
+            {detailSales.length > 0 && (
+              <>
+                <Separator />
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Recent Sales</h4>
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {detailSales.map((s: any) => (
+                      <div key={s.id} className="flex items-center justify-between text-sm py-1.5 px-2 rounded bg-secondary/30">
+                        <span className="text-muted-foreground text-xs">{new Date(s.created_at).toLocaleDateString()}</span>
+                        <Badge variant="outline" className="text-xs">{s.payment_method}</Badge>
+                        <span className="font-medium text-primary">{formatGHS(Number(s.total))}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Staff Dialog */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>

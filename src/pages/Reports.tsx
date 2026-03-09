@@ -11,12 +11,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { formatGHS } from "@/lib/ghana";
 import { exportSalesCsv, exportInventoryCsv, exportExpensesCsv, exportProfitLossCsv } from "@/lib/export";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, Legend } from "recharts";
-import { Download, TrendingUp, TrendingDown, Award, Calendar, FileSpreadsheet } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area } from "recharts";
+import { Download, TrendingUp, TrendingDown, Award, Calendar, FileSpreadsheet, Users, DollarSign } from "lucide-react";
 import { toast } from "sonner";
-import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { format, subMonths } from "date-fns";
 
-const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)"];
+const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)", "hsl(280, 65%, 55%)", "hsl(180, 60%, 40%)"];
 const tooltipStyle = { background: "hsl(220, 35%, 12%)", border: "1px solid hsl(220, 20%, 20%)", borderRadius: 8, color: "hsl(210, 40%, 96%)" };
 
 export default function Reports() {
@@ -67,7 +67,6 @@ export default function Reports() {
     enabled: !!business,
   });
 
-  // Chart of accounts for financial statements
   const { data: accounts = [] } = useQuery({
     queryKey: ["coa-report", business?.id],
     queryFn: async () => {
@@ -82,6 +81,26 @@ export default function Reports() {
     queryKey: ["invoices-report", business?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from("invoices").select("*").eq("business_id", business!.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!business,
+  });
+
+  const { data: staffMembers = [] } = useQuery({
+    queryKey: ["staff-report", business?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("staff_members").select("id, name, role").eq("business_id", business!.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!business,
+  });
+
+  const { data: payments = [] } = useQuery({
+    queryKey: ["payments-report", business?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("payments").select("*").eq("business_id", business!.id).order("date");
       if (error) throw error;
       return data;
     },
@@ -188,6 +207,43 @@ export default function Reports() {
     { name: "90+ Days", value: agingBuckets.over90 },
   ];
 
+  // Staff Performance
+  const staffSalesMap: Record<string, { name: string; role: string; txCount: number; revenue: number; avgOrder: number }> = {};
+  staffMembers.forEach((s: any) => {
+    staffSalesMap[s.id] = { name: s.name, role: s.role, txCount: 0, revenue: 0, avgOrder: 0 };
+  });
+  sales.forEach((s: any) => {
+    if (s.staff_id && staffSalesMap[s.staff_id]) {
+      staffSalesMap[s.staff_id].txCount += 1;
+      staffSalesMap[s.staff_id].revenue += Number(s.total);
+    }
+  });
+  const staffPerformance = Object.values(staffSalesMap)
+    .map(s => ({ ...s, avgOrder: s.txCount > 0 ? s.revenue / s.txCount : 0 }))
+    .sort((a, b) => b.revenue - a.revenue);
+  const topStaffChart = staffPerformance.filter(s => s.revenue > 0).slice(0, 8);
+
+  // Cash Flow
+  const cashFlowMonthly: Record<string, { inflow: number; outflow: number }> = {};
+  payments.forEach((p: any) => {
+    const d = new Date(p.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (!cashFlowMonthly[key]) cashFlowMonthly[key] = { inflow: 0, outflow: 0 };
+    if (p.type === "incoming") cashFlowMonthly[key].inflow += Number(p.amount);
+    else cashFlowMonthly[key].outflow += Number(p.amount);
+  });
+  const cashFlowData = Object.keys(cashFlowMonthly).sort().map(key => {
+    const d = new Date(key + "-01");
+    return {
+      month: d.toLocaleString("en", { month: "short", year: "2-digit" }),
+      inflow: cashFlowMonthly[key].inflow,
+      outflow: cashFlowMonthly[key].outflow,
+      net: cashFlowMonthly[key].inflow - cashFlowMonthly[key].outflow,
+    };
+  });
+  const totalInflow = payments.filter((p: any) => p.type === "incoming").reduce((s: number, p: any) => s + Number(p.amount), 0);
+  const totalOutflow = payments.filter((p: any) => p.type === "outgoing").reduce((s: number, p: any) => s + Number(p.amount), 0);
+
   const handleExportSales = () => { exportSalesCsv(sales); toast.success("Sales exported!"); };
   const handleExportInventory = () => { exportInventoryCsv(products); toast.success("Inventory exported!"); };
   const handleExportExpenses = () => { exportExpensesCsv(expenses); toast.success("Expenses exported!"); };
@@ -203,13 +259,15 @@ export default function Reports() {
       </div>
 
       <Tabs defaultValue="pnl">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-8 gap-1">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-10 gap-1">
           <TabsTrigger value="pnl">P&L</TabsTrigger>
           <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>
           <TabsTrigger value="trial-balance">Trial Balance</TabsTrigger>
+          <TabsTrigger value="cash-flow">Cash Flow</TabsTrigger>
           <TabsTrigger value="aging">Aging</TabsTrigger>
+          <TabsTrigger value="staff-perf">Staff</TabsTrigger>
           <TabsTrigger value="sales">Sales</TabsTrigger>
-          <TabsTrigger value="top-products">Top Products</TabsTrigger>
+          <TabsTrigger value="top-products">Products</TabsTrigger>
           <TabsTrigger value="inventory">Inventory</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
         </TabsList>
@@ -265,7 +323,6 @@ export default function Reports() {
                 <p className="text-center text-muted-foreground py-8">Set up your Chart of Accounts in Financials module first.</p>
               ) : (
                 <>
-                  {/* Assets */}
                   <div>
                     <h3 className="font-semibold text-sm mb-2 text-primary">ASSETS</h3>
                     <Table>
@@ -284,7 +341,6 @@ export default function Reports() {
                       </TableBody>
                     </Table>
                   </div>
-                  {/* Liabilities */}
                   <div>
                     <h3 className="font-semibold text-sm mb-2 text-destructive">LIABILITIES</h3>
                     <Table>
@@ -303,7 +359,6 @@ export default function Reports() {
                       </TableBody>
                     </Table>
                   </div>
-                  {/* Equity */}
                   <div>
                     <h3 className="font-semibold text-sm mb-2">EQUITY</h3>
                     <Table>
@@ -380,6 +435,46 @@ export default function Reports() {
           </Card>
         </TabsContent>
 
+        {/* Cash Flow Statement */}
+        <TabsContent value="cash-flow" className="space-y-4">
+          <div className="grid sm:grid-cols-3 gap-4">
+            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Inflows</p><p className="text-2xl font-display font-bold text-green-500">{formatGHS(totalInflow)}</p></CardContent></Card>
+            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Outflows</p><p className="text-2xl font-display font-bold text-destructive">{formatGHS(totalOutflow)}</p></CardContent></Card>
+            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Net Cash Flow</p><p className={`text-2xl font-display font-bold ${totalInflow - totalOutflow >= 0 ? "text-green-500" : "text-destructive"}`}>{formatGHS(totalInflow - totalOutflow)}</p></CardContent></Card>
+          </div>
+          {cashFlowData.length > 0 ? (
+            <Card>
+              <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><DollarSign className="h-5 w-5 text-primary" /> Monthly Cash Flow</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={320}>
+                  <AreaChart data={cashFlowData}>
+                    <defs>
+                      <linearGradient id="inflowGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="outflowGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(0, 72%, 51%)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(0, 72%, 51%)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
+                    <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" fontSize={12} />
+                    <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
+                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                    <Legend />
+                    <Area type="monotone" dataKey="inflow" stroke="hsl(142, 76%, 36%)" fill="url(#inflowGrad)" strokeWidth={2} name="Inflows" />
+                    <Area type="monotone" dataKey="outflow" stroke="hsl(0, 72%, 51%)" fill="url(#outflowGrad)" strokeWidth={2} name="Outflows" />
+                    <Line type="monotone" dataKey="net" stroke="hsl(37, 90%, 55%)" strokeWidth={2} dot={{ r: 4 }} name="Net" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card><CardContent className="py-12 text-center text-muted-foreground">No payment data recorded yet. Record payments in the Banking module.</CardContent></Card>
+          )}
+        </TabsContent>
+
         {/* Aging Report */}
         <TabsContent value="aging" className="space-y-4">
           <div className="grid sm:grid-cols-5 gap-3">
@@ -406,6 +501,65 @@ export default function Reports() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Staff Performance */}
+        <TabsContent value="staff-perf" className="space-y-4">
+          <div className="grid sm:grid-cols-3 gap-4">
+            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Staff Members</p><p className="text-2xl font-display font-bold">{staffMembers.length}</p></CardContent></Card>
+            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Avg Revenue / Staff</p><p className="text-2xl font-display font-bold text-primary">{formatGHS(staffPerformance.length > 0 ? totalRevenue / staffPerformance.filter(s => s.revenue > 0).length || 0 : 0)}</p></CardContent></Card>
+            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Top Performer</p><p className="text-lg font-display font-bold text-primary">{staffPerformance[0]?.name || "—"}</p></CardContent></Card>
+          </div>
+          {topStaffChart.length > 0 && (
+            <Card>
+              <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> Revenue by Staff Member</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={topStaffChart} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
+                    <XAxis type="number" stroke="hsl(215, 15%, 55%)" fontSize={11} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
+                    <YAxis type="category" dataKey="name" width={120} stroke="hsl(215, 15%, 55%)" fontSize={11} />
+                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                    <Bar dataKey="revenue" fill="hsl(37, 90%, 55%)" radius={[0, 6, 6, 0]} name="Revenue" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+          <Card>
+            <CardHeader><CardTitle className="font-display text-base">Staff Leaderboard</CardTitle></CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead className="text-right">Transactions</TableHead>
+                    <TableHead className="text-right">Revenue</TableHead>
+                    <TableHead className="text-right">Avg Order</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {staffPerformance.map((s, i) => (
+                    <TableRow key={s.name}>
+                      <TableCell>
+                        <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${i < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{i + 1}</span>
+                      </TableCell>
+                      <TableCell className="font-medium">{s.name}</TableCell>
+                      <TableCell><Badge variant="outline" className="text-xs">{s.role}</Badge></TableCell>
+                      <TableCell className="text-right">{s.txCount}</TableCell>
+                      <TableCell className="text-right font-bold text-primary">{formatGHS(s.revenue)}</TableCell>
+                      <TableCell className="text-right text-muted-foreground">{formatGHS(s.avgOrder)}</TableCell>
+                    </TableRow>
+                  ))}
+                  {staffPerformance.length === 0 && (
+                    <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No staff data available</TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
