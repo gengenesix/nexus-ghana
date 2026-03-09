@@ -96,7 +96,7 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
             {isLoading ? "Verifying..." : "Continue"}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            Staff members can continue with the PIN assigned by the administrator
+            Enter the 6-digit PIN assigned by your administrator
           </p>
         </CardContent>
       </Card>
