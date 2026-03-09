@@ -15,7 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { formatGHS, calculateTaxes } from "@/lib/ghana";
 import { generateInvoicePDF } from "@/lib/pdf";
-import { Search, Plus, Eye, MessageCircle, Send, Loader2, Download } from "lucide-react";
+import { exportInvoicesCsv } from "@/lib/export";
+import { Search, Plus, Eye, MessageCircle, Send, Loader2, Download, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -118,6 +119,32 @@ export default function Invoices() {
     generateInvoicePDF(invoice, business || { name: "Nexus-GH" });
   };
 
+  // Create Credit Note from Invoice
+  const createCreditNote = useMutation({
+    mutationFn: async (invoice: any) => {
+      const creditNum = `CN-${Date.now().toString(36).toUpperCase()}`;
+      const { error } = await supabase.from("credit_notes").insert({
+        business_id: business!.id,
+        credit_number: creditNum,
+        invoice_id: invoice.id,
+        customer_name: invoice.customer_name,
+        customer_id: invoice.customer_id,
+        date: new Date().toISOString().split("T")[0],
+        reason: `Return/Credit for Invoice ${invoice.invoice_number}`,
+        subtotal: invoice.subtotal,
+        tax_amount: Number(invoice.vat_amount) + Number(invoice.nhil_amount || 0) + Number(invoice.getfl_amount || 0),
+        total: invoice.total,
+        status: "draft",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["credit_notes"] });
+      toast.success("Credit note created — view it in Sales → Credit Notes tab");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -125,9 +152,14 @@ export default function Invoices() {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Invoices</h1>
           <p className="text-muted-foreground text-sm">{invoices.length} invoices · {invoices.filter((i: any) => i.status === "overdue").length} overdue</p>
         </div>
-        <Button onClick={() => setShowCreate(true)} className="gold-gradient text-primary-foreground">
-          <Plus className="h-4 w-4 mr-1" /> New Invoice
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => { if (invoices.length > 0) exportInvoicesCsv(invoices); else toast.error("No invoices"); }}>
+            <Download className="h-4 w-4 mr-1" /> Export
+          </Button>
+          <Button onClick={() => setShowCreate(true)} className="gold-gradient text-primary-foreground">
+            <Plus className="h-4 w-4 mr-1" /> New Invoice
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
@@ -178,9 +210,14 @@ export default function Invoices() {
                           {["draft", "sent", "paid", "overdue", "partial"].map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
                         </SelectContent>
                       </Select>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 hover:bg-accent" onClick={() => downloadInvoice(invoice)}>
-                        <Download className="h-4 w-4" />
-                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 hover:bg-accent" onClick={() => downloadInvoice(invoice)} title="Download PDF">
+                         <Download className="h-4 w-4" />
+                       </Button>
+                       {(invoice.status === "paid" || invoice.status === "sent") && (
+                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-orange-500 hover:bg-orange-500/10" onClick={() => createCreditNote.mutate(invoice)} title="Create Credit Note" disabled={createCreditNote.isPending}>
+                           <RotateCcw className="h-4 w-4" />
+                         </Button>
+                       )}
                     </div>
                   </TableCell>
                 </TableRow>

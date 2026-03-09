@@ -504,6 +504,89 @@ export type Database = {
           },
         ]
       }
+      credit_notes: {
+        Row: {
+          business_id: string
+          created_at: string
+          credit_number: string
+          customer_id: string | null
+          customer_name: string
+          date: string
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          reason: string | null
+          staff_id: string | null
+          status: string
+          subtotal: number
+          tax_amount: number
+          total: number
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          credit_number: string
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          reason?: string | null
+          staff_id?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          total?: number
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          credit_number?: string
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          reason?: string | null
+          staff_id?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_notes_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_notes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_notes_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_notes_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           business_id: string
@@ -544,6 +627,86 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_notes: {
+        Row: {
+          business_id: string
+          carrier: string | null
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          date: string
+          delivery_number: string
+          id: string
+          notes: string | null
+          sales_order_id: string | null
+          shipping_address: string | null
+          staff_id: string | null
+          status: string
+          tracking_number: string | null
+        }
+        Insert: {
+          business_id: string
+          carrier?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          delivery_number: string
+          id?: string
+          notes?: string | null
+          sales_order_id?: string | null
+          shipping_address?: string | null
+          staff_id?: string | null
+          status?: string
+          tracking_number?: string | null
+        }
+        Update: {
+          business_id?: string
+          carrier?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          delivery_number?: string
+          id?: string
+          notes?: string | null
+          sales_order_id?: string | null
+          shipping_address?: string | null
+          staff_id?: string | null
+          status?: string
+          tracking_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_notes_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_notes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_notes_sales_order_id_fkey"
+            columns: ["sales_order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_notes_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
             referencedColumns: ["id"]
           },
         ]
