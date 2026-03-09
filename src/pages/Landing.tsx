@@ -384,20 +384,32 @@ export default function Landing() {
       {/* Footer */}
       <footer className="glass-nav py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/20">
-                <Landmark className="h-4 w-4 text-primary-foreground" />
+          <div className="flex flex-col items-center gap-8">
+            <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between w-full">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/20">
+                  <Landmark className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <span className="font-display text-xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+                  NexusGH
+                </span>
               </div>
-              <span className="font-display text-xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-                NexusGH
-              </span>
+              <div className="flex gap-8 text-sm text-muted-foreground">
+                <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+                <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+                <a href="#testimonials" className="hover:text-foreground transition-colors">Reviews</a>
+                <Link to="/login" className="hover:text-foreground transition-colors">Sign In</Link>
+              </div>
             </div>
-            <div className="flex gap-8 text-sm text-muted-foreground">
-              <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-              <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
-              <a href="#testimonials" className="hover:text-foreground transition-colors">Reviews</a>
-              <Link to="/login" className="hover:text-foreground transition-colors">Sign In</Link>
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-sm text-muted-foreground">
+              <a href="tel:+233544788852" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Phone className="h-4 w-4" />
+                +233 544 788 852
+              </a>
+              <a href="mailto:gengenesix@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Mail className="h-4 w-4" />
+                gengenesix@gmail.com
+              </a>
             </div>
             <p className="text-sm text-muted-foreground">© 2026 NexusGH. By GENESIS</p>
           </div>
