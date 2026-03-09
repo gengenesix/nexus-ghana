@@ -17,15 +17,26 @@ interface StaffSessionContextType {
 
 const StaffSessionContext = createContext<StaffSessionContextType | undefined>(undefined);
 
-// Role-based access control rules
+// Role-based access control rules — SAP-style
 const ROLE_PERMISSIONS: Record<string, string[]> = {
-  Administrator: ["dashboard", "pos", "inventory", "invoices", "customers", "suppliers", "expenses", "reports", "staff", "settings"],
-  Manager: ["dashboard", "pos", "inventory", "invoices", "customers", "suppliers", "expenses", "reports", "staff", "settings"],
-  Supervisor: ["dashboard", "pos", "inventory", "invoices", "customers", "reports"],
+  "System Administrator": ["dashboard", "pos", "inventory", "invoices", "customers", "suppliers", "expenses", "reports", "staff", "settings", "administration", "financials", "crm", "sales", "purchasing", "production", "mrp", "projects", "opportunities", "service", "hr", "banking"],
+  Administrator: ["dashboard", "pos", "inventory", "invoices", "customers", "suppliers", "expenses", "reports", "staff", "settings", "administration", "financials", "crm", "sales", "purchasing", "production", "mrp", "projects", "opportunities", "service", "hr", "banking"],
+  Manager: ["dashboard", "pos", "inventory", "invoices", "customers", "suppliers", "expenses", "reports", "staff", "settings", "crm", "sales", "purchasing", "projects", "banking"],
+  "CFO / Finance Manager": ["dashboard", "financials", "banking", "reports", "expenses", "invoices"],
+  Accountant: ["dashboard", "financials", "banking", "expenses", "invoices", "reports"],
+  "Sales Manager": ["dashboard", "pos", "crm", "sales", "opportunities", "invoices", "customers", "reports"],
+  "Sales Representative": ["pos", "crm", "sales", "opportunities", "customers", "invoices"],
+  Supervisor: ["dashboard", "pos", "inventory", "invoices", "customers", "reports", "crm"],
+  "Purchasing Manager": ["dashboard", "purchasing", "inventory", "mrp", "suppliers"],
+  "Warehouse Manager": ["dashboard", "inventory", "production", "purchasing", "suppliers"],
+  "Production Planner": ["dashboard", "production", "mrp", "inventory"],
+  "HR Manager": ["dashboard", "hr", "reports"],
+  "Project Manager": ["dashboard", "projects", "service", "reports"],
+  "Service Technician": ["service", "inventory"],
+  "Executive / CEO": ["dashboard", "reports", "financials", "crm", "sales", "purchasing", "inventory", "production", "hr", "banking", "projects", "service", "opportunities"],
   Cashier: ["pos", "customers"],
-  "Sales Rep": ["pos", "customers", "invoices"],
-  Warehouse: ["inventory", "suppliers"],
-  Accountant: ["expenses", "invoices", "reports"],
+  "Sales Rep": ["pos", "customers", "invoices", "crm"],
+  Warehouse: ["inventory", "suppliers", "purchasing"],
   Staff: ["pos", "inventory"],
 };
 
@@ -58,7 +69,6 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    // Mark staff as offline
     if (staff) {
       supabase.rpc("staff_logout", { _staff_id: staff.id }).then(() => {});
     }
