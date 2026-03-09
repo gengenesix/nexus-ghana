@@ -1,29 +1,86 @@
 import {
   LayoutDashboard, ShoppingCart, Package, FileText, Users, Truck,
   Receipt, BarChart3, UserCog, Settings, LogOut, Landmark, UserCircle,
+  Shield, Wallet, Handshake, ShoppingBag, Factory, Cpu, FolderKanban,
+  Target, Headphones, Users2, ArrowRightLeft, ChevronDown,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useStaffSession } from "@/contexts/StaffSessionContext";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from "react";
 
-const allNavItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, feature: "dashboard" },
-  { title: "Point of Sale", url: "/pos", icon: ShoppingCart, feature: "pos" },
-  { title: "Inventory", url: "/inventory", icon: Package, feature: "inventory" },
-  { title: "Invoices", url: "/invoices", icon: FileText, feature: "invoices" },
-  { title: "Customers", url: "/customers", icon: Users, feature: "customers" },
-  { title: "Suppliers", url: "/suppliers", icon: Truck, feature: "suppliers" },
-  { title: "Expenses", url: "/expenses", icon: Receipt, feature: "expenses" },
-  { title: "Reports", url: "/reports", icon: BarChart3, feature: "reports" },
-  { title: "Staff", url: "/staff", icon: UserCog, feature: "staff" },
-  { title: "Settings", url: "/settings", icon: Settings, feature: "settings" },
+interface NavGroup {
+  label: string;
+  items: { title: string; url: string; icon: any; feature: string }[];
+}
+
+const navGroups: NavGroup[] = [
+  {
+    label: "Main",
+    items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, feature: "dashboard" },
+      { title: "Point of Sale", url: "/pos", icon: ShoppingCart, feature: "pos" },
+    ],
+  },
+  {
+    label: "Sales & CRM",
+    items: [
+      { title: "CRM", url: "/crm", icon: Handshake, feature: "crm" },
+      { title: "Opportunities", url: "/opportunities", icon: Target, feature: "opportunities" },
+      { title: "Sales Orders", url: "/sales-orders", icon: ShoppingBag, feature: "sales" },
+      { title: "Invoices", url: "/invoices", icon: FileText, feature: "invoices" },
+      { title: "Customers", url: "/customers", icon: Users, feature: "customers" },
+    ],
+  },
+  {
+    label: "Purchasing & Inventory",
+    items: [
+      { title: "Purchasing", url: "/purchasing", icon: Truck, feature: "purchasing" },
+      { title: "Inventory", url: "/inventory", icon: Package, feature: "inventory" },
+      { title: "Warehouses", url: "/warehouses", icon: ArrowRightLeft, feature: "inventory" },
+      { title: "Suppliers", url: "/suppliers", icon: Truck, feature: "suppliers" },
+    ],
+  },
+  {
+    label: "Production & Planning",
+    items: [
+      { title: "Production", url: "/production", icon: Factory, feature: "production" },
+      { title: "MRP", url: "/mrp", icon: Cpu, feature: "mrp" },
+    ],
+  },
+  {
+    label: "Finance & Banking",
+    items: [
+      { title: "Financials", url: "/financials", icon: Wallet, feature: "financials" },
+      { title: "Banking", url: "/banking", icon: Landmark, feature: "banking" },
+      { title: "Expenses", url: "/expenses", icon: Receipt, feature: "expenses" },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { title: "Projects", url: "/projects", icon: FolderKanban, feature: "projects" },
+      { title: "Service", url: "/service", icon: Headphones, feature: "service" },
+      { title: "HR", url: "/hr", icon: Users2, feature: "hr" },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { title: "Reports", url: "/reports", icon: BarChart3, feature: "reports" },
+      { title: "Administration", url: "/administration", icon: Shield, feature: "administration" },
+      { title: "Staff", url: "/staff", icon: UserCog, feature: "staff" },
+      { title: "Settings", url: "/settings", icon: Settings, feature: "settings" },
+    ],
+  },
 ];
 
 export function AppSidebar() {
@@ -33,19 +90,18 @@ export function AppSidebar() {
   const { business } = useBusiness();
   const { staff, logout: staffLogout, canAccess } = useStaffSession();
   const isBusinessOwner = !!user && !!business && business.owner_id === user.id;
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    Main: true, "Sales & CRM": true, "Purchasing & Inventory": true,
+    "Production & Planning": true, "Finance & Banking": true,
+    Operations: true, System: true,
+  });
 
-  const navItems = isBusinessOwner
-    ? allNavItems
-    : allNavItems.filter((item) => canAccess(item.feature));
-
-  const handleLogout = () => {
-    staffLogout();
-    signOut();
+  const toggleGroup = (label: string) => {
+    setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
-  const handleSwitchStaff = () => {
-    staffLogout();
-  };
+  const handleLogout = () => { staffLogout(); signOut(); };
+  const handleSwitchStaff = () => { staffLogout(); };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -74,27 +130,65 @@ export function AppSidebar() {
       )}
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/dashboard"}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      activeClassName="bg-sidebar-accent text-primary font-medium"
-                    >
-                      <item.icon className="h-5 w-5 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {navGroups.map((group) => {
+          const visibleItems = isBusinessOwner
+            ? group.items
+            : group.items.filter((item) => canAccess(item.feature));
+          if (visibleItems.length === 0) return null;
+
+          return (
+            <SidebarGroup key={group.label}>
+              {!collapsed ? (
+                <Collapsible open={openGroups[group.label]} onOpenChange={() => toggleGroup(group.label)}>
+                  <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">
+                    {group.label}
+                    <ChevronDown className={`h-3 w-3 transition-transform ${openGroups[group.label] ? "rotate-0" : "-rotate-90"}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {visibleItems.map((item) => (
+                          <SidebarMenuItem key={item.title}>
+                            <SidebarMenuButton asChild>
+                              <NavLink
+                                to={item.url}
+                                end={item.url === "/dashboard"}
+                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm"
+                                activeClassName="bg-sidebar-accent text-primary font-medium"
+                              >
+                                <item.icon className="h-4 w-4 shrink-0" />
+                                <span>{item.title}</span>
+                              </NavLink>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </CollapsibleContent>
+                </Collapsible>
+              ) : (
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {visibleItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            end={item.url === "/dashboard"}
+                            className="flex items-center justify-center rounded-lg p-2 text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                            activeClassName="bg-sidebar-accent text-primary"
+                          >
+                            <item.icon className="h-4 w-4" />
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              )}
+            </SidebarGroup>
+          );
+        })}
       </SidebarContent>
 
       <SidebarFooter className="p-3 space-y-2">
