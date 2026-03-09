@@ -249,7 +249,7 @@ export default function POS() {
                 <button
                   key={product.id}
                   onClick={() => addToCart(product)}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/5"
+                  className="flex flex-col items-center gap-1.5 sm:gap-2 rounded-xl border border-border bg-card p-3 sm:p-4 transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/5"
                 >
                   <span className="text-3xl">📦</span>
                   <span className="text-sm font-medium text-center leading-tight">{product.name}</span>
