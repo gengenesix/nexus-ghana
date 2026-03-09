@@ -14,7 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { formatGHS, calculateTaxes } from "@/lib/ghana";
-import { Search, Plus, Eye, MessageCircle, Send, Loader2 } from "lucide-react";
+import { generateInvoicePDF } from "@/lib/pdf";
+import { Search, Plus, Eye, MessageCircle, Send, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -113,6 +114,10 @@ export default function Invoices() {
     },
   });
 
+  const downloadInvoice = (invoice: any) => {
+    generateInvoicePDF(invoice, business || { name: "NexusGH" });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -149,7 +154,7 @@ export default function Invoices() {
                 <TableHead className="hidden md:table-cell">Due</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="w-[140px]"></TableHead>
+                <TableHead className="w-[180px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -166,12 +171,17 @@ export default function Invoices() {
                   </TableCell>
                   <TableCell className="text-right font-medium">{formatGHS(Number(invoice.total))}</TableCell>
                   <TableCell>
-                    <Select value={invoice.status} onValueChange={(s) => updateStatus.mutate({ id: invoice.id, status: s })}>
-                      <SelectTrigger className="h-8 text-xs w-[100px]"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {["draft", "sent", "paid", "overdue", "partial"].map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex gap-2">
+                      <Select value={invoice.status} onValueChange={(s) => updateStatus.mutate({ id: invoice.id, status: s })}>
+                        <SelectTrigger className="h-8 text-xs w-[100px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {["draft", "sent", "paid", "overdue", "partial"].map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 hover:bg-accent" onClick={() => downloadInvoice(invoice)}>
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

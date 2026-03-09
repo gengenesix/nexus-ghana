@@ -116,6 +116,11 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid hsl(220 20% 30% / 0.3);
     box-shadow: 0 8px 32px hsl(220 40% 4% / 0.4), inset 0 1px 0 hsl(220 20% 40% / 0.15);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .glass-card:hover {
+    border-color: hsl(220 20% 40% / 0.5);
+    box-shadow: 0 12px 40px hsl(220 40% 4% / 0.5), inset 0 1px 0 hsl(220 20% 50% / 0.2);
   }
   .glass-card-strong {
     background: hsl(220 35% 14% / 0.6);
@@ -132,9 +137,20 @@
   }
   .glass-glow {
     box-shadow: 0 0 40px hsl(37 90% 55% / 0.15), 0 8px 32px hsl(220 40% 4% / 0.4);
+    transition: box-shadow 0.3s ease;
+  }
+  .glass-glow:hover {
+    box-shadow: 0 0 50px hsl(37 90% 55% / 0.25), 0 12px 40px hsl(220 40% 4% / 0.5);
   }
   .font-brand {
     font-family: 'Outfit', 'Space Grotesk', system-ui, sans-serif;
+  }
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px hsl(220 40% 4% / 0.3);
   }
 }
 

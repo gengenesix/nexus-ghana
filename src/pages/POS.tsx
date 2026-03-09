@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatGHS, PAYMENT_METHODS } from "@/lib/ghana";
+import { generateReceiptPDF } from "@/lib/pdf";
 import { Search, Plus, Minus, Trash2, ShoppingCart, CreditCard, Printer, MessageCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -123,6 +124,21 @@ export default function POS() {
     setShowReceipt(false);
   };
 
+  const downloadReceipt = () => {
+    if (cart.length === 0) return;
+    
+    const receiptData = {
+      receipt_number: lastReceipt,
+      items: cart,
+      subtotal,
+      discount_amount: discountAmount,
+      total,
+      payment_method: PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label || paymentMethod,
+    };
+    
+    generateReceiptPDF(receiptData, business || { name: "NexusGH" });
+  };
+
   return (
     <div className="animate-fade-in">
       <h1 className="text-2xl md:text-3xl font-display font-bold mb-4">Point of Sale</h1>
@@ -233,7 +249,7 @@ export default function POS() {
               Paid via {PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label}
             </p>
             <div className="flex gap-2">
-              <Button variant="secondary" size="sm" className="flex-1"><Printer className="h-4 w-4 mr-1" /> Print</Button>
+              <Button variant="secondary" size="sm" className="flex-1 transition-all duration-200 hover:scale-105" onClick={downloadReceipt}><Printer className="h-4 w-4 mr-1" /> PDF</Button>
               <Button variant="secondary" size="sm" className="flex-1" asChild>
                 <a href={`https://wa.me/?text=${encodeURIComponent(`${business?.name || "NexusGH"} Receipt #${lastReceipt}\nTotal: ${formatGHS(total)}`)}`} target="_blank" rel="noreferrer">
                   <MessageCircle className="h-4 w-4 mr-1" /> WhatsApp

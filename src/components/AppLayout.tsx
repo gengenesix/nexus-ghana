@@ -1,9 +1,13 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileNav } from "@/components/MobileNav";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import { PageTransition } from "@/components/PageTransition";
 
 export function AppLayout() {
+  const location = useLocation();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -20,7 +24,11 @@ export function AppLayout() {
           </header>
 
           <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto">
-            <Outlet />
+            <AnimatePresence mode="wait">
+              <PageTransition key={location.pathname}>
+                <Outlet />
+              </PageTransition>
+            </AnimatePresence>
           </main>
         </div>
 
