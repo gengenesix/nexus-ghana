@@ -37,7 +37,7 @@ export default function Login() {
             <Landmark className="h-6 w-6 text-primary-foreground" />
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
           </div>
-          <span className="font-display text-3xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+          <span className="font-curly text-3xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
             NexusGH
           </span>
         </div>

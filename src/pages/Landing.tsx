@@ -390,7 +390,7 @@ export default function Landing() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/20">
                   <Landmark className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="font-display text-xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+                <span className="font-curly text-xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
                   NexusGH
                 </span>
               </div>

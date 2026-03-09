@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingCart, Package, FileText, Users, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Package, FileText, Users, MoreHorizontal, Landmark } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";

@@ -38,7 +38,7 @@ export function AppSidebar() {
           <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
         </div>
         {!collapsed && (
-          <span className="font-display text-xl font-black tracking-tighter bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+          <span className="font-curly text-xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
             NexusGH
           </span>
         )}
