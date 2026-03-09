@@ -5,7 +5,7 @@ import {
   ArrowRight, Check, Landmark, Star, Shield, Globe, Smartphone,
   Sparkles, TrendingUp, Clock,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import heroDashboard from "@/assets/hero-dashboard.png";
 import featurePos from "@/assets/feature-pos.png";
 import featureInvoicing from "@/assets/feature-invoicing.png";
@@ -123,7 +123,6 @@ export default function Landing() {
             <a href="#testimonials" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Reviews</a>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" asChild>
               <Link to="/login">Sign In</Link>
             </Button>
