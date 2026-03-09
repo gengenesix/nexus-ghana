@@ -8,10 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatGHS, PAYMENT_METHODS } from "@/lib/ghana";
-import { generateReceiptPDF } from "@/lib/pdf";
-import { Search, Plus, Minus, Trash2, ShoppingCart, CreditCard, Printer, MessageCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, Plus, Minus, Trash2, ShoppingCart, CreditCard } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ReceiptDialog } from "@/components/pos/ReceiptDialog";
 import { toast } from "sonner";
 
 interface CartItem {
@@ -124,20 +123,7 @@ export default function POS() {
     setShowReceipt(false);
   };
 
-  const downloadReceipt = () => {
-    if (cart.length === 0) return;
-    
-    const receiptData = {
-      receipt_number: lastReceipt,
-      items: cart,
-      subtotal,
-      discount_amount: discountAmount,
-      total,
-      payment_method: PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label || paymentMethod,
-    };
-    
-    generateReceiptPDF(receiptData, business || { name: "Nexus-GH" });
-  };
+
 
   return (
     <div className="animate-fade-in">
@@ -223,43 +209,18 @@ export default function POS() {
         </Card>
       </div>
 
-      <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="font-display text-center">Sale Receipt</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 text-sm">
-            <div className="text-center">
-              <p className="font-bold text-primary text-lg">{business?.name || "Nexus-GH"}</p>
-              <p className="text-muted-foreground text-xs">Receipt #{lastReceipt}</p>
-            </div>
-            <Separator />
-            {cart.map(item => (
-              <div key={item.id} className="flex justify-between">
-                <span>{item.name} x{item.qty}</span>
-                <span>{formatGHS(item.price * item.qty)}</span>
-              </div>
-            ))}
-            <Separator />
-            <div className="flex justify-between font-bold text-lg">
-              <span>Total</span>
-              <span className="text-primary">{formatGHS(total)}</span>
-            </div>
-            <p className="text-center text-xs text-muted-foreground">
-              Paid via {PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label}
-            </p>
-            <div className="flex gap-2">
-              <Button variant="secondary" size="sm" className="flex-1 transition-all duration-200 hover:scale-105" onClick={downloadReceipt}><Printer className="h-4 w-4 mr-1" /> PDF</Button>
-              <Button variant="secondary" size="sm" className="flex-1" asChild>
-                <a href={`https://wa.me/?text=${encodeURIComponent(`${business?.name || "Nexus-GH"} Receipt #${lastReceipt}\nTotal: ${formatGHS(total)}`)}`} target="_blank" rel="noreferrer">
-                  <MessageCircle className="h-4 w-4 mr-1" /> WhatsApp
-                </a>
-              </Button>
-            </div>
-            <Button className="w-full" onClick={newSale}>New Sale</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ReceiptDialog
+        open={showReceipt}
+        onOpenChange={setShowReceipt}
+        cart={cart}
+        total={total}
+        subtotal={subtotal}
+        discountAmount={discountAmount}
+        paymentMethod={paymentMethod}
+        receiptNumber={lastReceipt}
+        business={business}
+        onNewSale={newSale}
+      />
     </div>
   );
 }
