@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck, Mail, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 export function NotificationsCenter() {
   const { business } = useBusiness();
@@ -37,6 +38,17 @@ export function NotificationsCenter() {
       await supabase.from("notifications").update({ is_read: true }).eq("id", id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+
+  const sendDigest = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.functions.invoke("send-notifications", {
+        body: { business_id: business!.id },
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => toast.success("Email digest sent to your business email."),
+    onError: () => toast.error("Failed to send digest. Check RESEND_API_KEY is configured."),
   });
 
   const markAllRead = useMutation({
@@ -72,11 +84,25 @@ export function NotificationsCenter() {
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between border-b px-4 py-3">
           <h4 className="font-semibold text-sm">Notifications</h4>
-          {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => markAllRead.mutate()}>
-              <CheckCheck className="h-3 w-3 mr-1" /> Mark all read
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => sendDigest.mutate()}
+              disabled={sendDigest.isPending}
+              title="Send email digest"
+            >
+              {sendDigest.isPending
+                ? <Loader2 className="h-3 w-3 animate-spin" />
+                : <Mail className="h-3 w-3" />}
             </Button>
-          )}
+            {unreadCount > 0 && (
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => markAllRead.mutate()}>
+                <CheckCheck className="h-3 w-3 mr-1" /> Mark all read
+              </Button>
+            )}
+          </div>
         </div>
         <ScrollArea className="max-h-80">
           {notifications.length === 0 ? (

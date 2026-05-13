@@ -2,12 +2,13 @@ import {
   LayoutDashboard, ShoppingCart, Package, FileText, Users, Truck,
   Receipt, BarChart3, UserCog, Settings, LogOut, Landmark, UserCircle,
   Shield, Wallet, Handshake, ShoppingBag, Factory, Cpu, FolderKanban,
-  Target, Headphones, Users2, ArrowRightLeft, ChevronDown,
+  Headphones, Users2, ArrowRightLeft, ChevronDown, Lock,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useStaffSession } from "@/contexts/StaffSessionContext";
+import { useLicenseTier } from "@/hooks/useLicenseTier";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
@@ -17,9 +18,16 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 
+interface NavItem {
+  title: string;
+  url: string;
+  icon: any;
+  feature: string;
+}
+
 interface NavGroup {
   label: string;
-  items: { title: string; url: string; icon: any; feature: string }[];
+  items: NavItem[];
 }
 
 const navGroups: NavGroup[] = [
@@ -34,7 +42,6 @@ const navGroups: NavGroup[] = [
     label: "Sales & CRM",
     items: [
       { title: "CRM", url: "/crm", icon: Handshake, feature: "crm" },
-      { title: "Opportunities", url: "/opportunities", icon: Target, feature: "opportunities" },
       { title: "Sales Orders", url: "/sales-orders", icon: ShoppingBag, feature: "sales" },
       { title: "Invoices", url: "/invoices", icon: FileText, feature: "invoices" },
       { title: "Customers", url: "/customers", icon: Users, feature: "customers" },
@@ -89,6 +96,7 @@ export function AppSidebar() {
   const { user, signOut } = useAuth();
   const { business } = useBusiness();
   const { staff, logout: staffLogout, canAccess } = useStaffSession();
+  const { canAccess: tierCanAccess } = useLicenseTier();
   const isBusinessOwner = !!user && !!business && business.owner_id === user.id;
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     Main: true, "Sales & CRM": true, "Purchasing & Inventory": true,
@@ -102,6 +110,54 @@ export function AppSidebar() {
 
   const handleLogout = () => { staffLogout(); signOut(); };
   const handleSwitchStaff = () => { staffLogout(); };
+
+  // Derive the module key from the URL (strips leading "/")
+  const moduleKey = (url: string) => url.replace(/^\//, "");
+
+  const renderItem = (item: NavItem) => {
+    const locked = !tierCanAccess(moduleKey(item.url));
+    return (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton asChild>
+          <NavLink
+            to={item.url}
+            end={item.url === "/dashboard"}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm"
+            activeClassName="bg-sidebar-accent text-primary font-medium"
+          >
+            <item.icon className="h-4 w-4 shrink-0" />
+            <span className="flex-1">{item.title}</span>
+            {locked && !collapsed && (
+              <Lock className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+            )}
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  };
+
+  const renderItemCollapsed = (item: NavItem) => {
+    const locked = !tierCanAccess(moduleKey(item.url));
+    return (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton asChild>
+          <NavLink
+            to={item.url}
+            end={item.url === "/dashboard"}
+            className="relative flex items-center justify-center rounded-lg p-2 text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            activeClassName="bg-sidebar-accent text-primary"
+          >
+            <item.icon className="h-4 w-4" />
+            {locked && (
+              <span className="absolute bottom-0.5 right-0.5 block h-2 w-2 rounded-full bg-muted-foreground/40 ring-1 ring-background">
+                <Lock className="h-1.5 w-1.5 text-background" />
+              </span>
+            )}
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -147,21 +203,7 @@ export function AppSidebar() {
                   <CollapsibleContent>
                     <SidebarGroupContent>
                       <SidebarMenu>
-                        {visibleItems.map((item) => (
-                          <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton asChild>
-                              <NavLink
-                                to={item.url}
-                                end={item.url === "/dashboard"}
-                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm"
-                                activeClassName="bg-sidebar-accent text-primary font-medium"
-                              >
-                                <item.icon className="h-4 w-4 shrink-0" />
-                                <span>{item.title}</span>
-                              </NavLink>
-                            </SidebarMenuButton>
-                          </SidebarMenuItem>
-                        ))}
+                        {visibleItems.map(renderItem)}
                       </SidebarMenu>
                     </SidebarGroupContent>
                   </CollapsibleContent>
@@ -169,20 +211,7 @@ export function AppSidebar() {
               ) : (
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {visibleItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                          <NavLink
-                            to={item.url}
-                            end={item.url === "/dashboard"}
-                            className="flex items-center justify-center rounded-lg p-2 text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                            activeClassName="bg-sidebar-accent text-primary"
-                          >
-                            <item.icon className="h-4 w-4" />
-                          </NavLink>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
+                    {visibleItems.map(renderItemCollapsed)}
                   </SidebarMenu>
                 </SidebarGroupContent>
               )}

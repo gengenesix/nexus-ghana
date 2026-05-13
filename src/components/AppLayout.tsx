@@ -8,6 +8,7 @@ import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationsCenter } from "@/components/NotificationsCenter";
 import { ApprovalInbox } from "@/components/ApprovalInbox";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LowStockBanner } from "@/components/LowStockBanner";
 
 export function AppLayout() {
   const location = useLocation();
@@ -36,6 +37,8 @@ export function AppLayout() {
               <NotificationsCenter />
             </div>
           </header>
+
+          <LowStockBanner />
 
           <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto">
             <AnimatePresence mode="wait">

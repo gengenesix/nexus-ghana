@@ -16,8 +16,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { GHANA_REGIONS, formatGHS } from "@/lib/ghana";
 import { exportCustomersCsv } from "@/lib/export";
+import { generateCustomerStatement } from "@/lib/pdf";
 import CsvImportDialog from "@/components/CsvImportDialog";
-import { Search, Plus, Loader2, Trash2, ChevronLeft, ChevronRight, Download, Upload, Edit, Eye, Star } from "lucide-react";
+import { Search, Plus, Loader2, Trash2, ChevronLeft, ChevronRight, Download, Upload, Edit, Eye, Star, FileText } from "lucide-react";
+import { TableSkeleton } from "@/components/TableSkeleton";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 25;
@@ -186,10 +188,11 @@ export default function Customers() {
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
+            {isLoading ? (
+              <TableSkeleton rows={8} cols={5} />
+            ) : (
             <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
-              ) : customers.length === 0 ? (
+              {customers.length === 0 ? (
                 <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No customers found.</TableCell></TableRow>
               ) : customers.map((customer: any) => (
                 <TableRow key={customer.id}>
@@ -209,6 +212,7 @@ export default function Customers() {
                 </TableRow>
               ))}
             </TableBody>
+            )}
           </Table>
         </CardContent>
       </Card>
@@ -317,6 +321,9 @@ export default function Customers() {
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" className="flex-1" onClick={() => { setViewCustomer(null); openEdit(viewCustomer); }}>
                   <Edit className="h-4 w-4 mr-1" /> Edit
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={() => generateCustomerStatement(viewCustomer, customerSales, customerInvoices, business || { name: "NexusGH" })}>
+                  <FileText className="h-4 w-4 mr-1" /> Statement
                 </Button>
               </div>
             </div>

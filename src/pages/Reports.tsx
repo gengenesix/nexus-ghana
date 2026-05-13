@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
@@ -9,58 +9,102 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatGHS } from "@/lib/ghana";
 import { exportSalesCsv, exportInventoryCsv, exportExpensesCsv, exportProfitLossCsv } from "@/lib/export";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area } from "recharts";
-import { Download, TrendingUp, TrendingDown, Award, Calendar, FileSpreadsheet, Users, DollarSign } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area,
+} from "recharts";
+import { Download, TrendingUp, TrendingDown, Award, Users, DollarSign } from "lucide-react";
+import { useChartColors } from "@/hooks/useChartColors";
 import { toast } from "sonner";
 import { format, subMonths } from "date-fns";
 
-const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)", "hsl(280, 65%, 55%)", "hsl(180, 60%, 40%)"];
-const tooltipStyle = { background: "hsl(220, 35%, 12%)", border: "1px solid hsl(220, 20%, 20%)", borderRadius: 8, color: "hsl(210, 40%, 96%)" };
+const COLORS = [
+  "hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)",
+  "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)", "hsl(280, 65%, 55%)", "hsl(180, 60%, 40%)",
+];
+
+function ChartSkeleton() {
+  return <Skeleton className="w-full h-[300px] rounded-xl" />;
+}
+
+function StatSkeleton() {
+  return (
+    <div className="grid sm:grid-cols-4 gap-4">
+      {[...Array(4)].map((_, i) => (
+        <Card key={i}><CardContent className="p-4"><Skeleton className="h-8 w-24 mb-2" /><Skeleton className="h-4 w-16" /></CardContent></Card>
+      ))}
+    </div>
+  );
+}
 
 export default function Reports() {
   const { business } = useBusiness();
+  const { tooltipStyle, gridColor, axisColor } = useChartColors();
   const [dateFrom, setDateFrom] = useState(() => format(subMonths(new Date(), 11), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(() => format(new Date(), "yyyy-MM-dd"));
 
-  const { data: sales = [] } = useQuery({
-    queryKey: ["all-sales", business?.id],
+  // All queries are bounded by dateFrom/dateTo and include them in queryKeys
+  const { data: sales = [], isLoading: salesLoading } = useQuery({
+    queryKey: ["report-sales", business?.id, dateFrom, dateTo],
     queryFn: async () => {
-      const { data, error } = await supabase.from("sales").select("*").eq("business_id", business!.id).order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("sales")
+        .select("id, total, payment_method, staff_id, created_at")
+        .eq("business_id", business!.id)
+        .gte("created_at", dateFrom)
+        .lte("created_at", dateTo + "T23:59:59")
+        .order("created_at", { ascending: false })
+        .limit(5000);
       if (error) throw error;
       return data;
     },
     enabled: !!business,
   });
 
-  const { data: saleItems = [] } = useQuery({
-    queryKey: ["all-sale-items", business?.id],
+  const { data: saleItems = [], isLoading: itemsLoading } = useQuery({
+    queryKey: ["report-sale-items", business?.id, dateFrom, dateTo],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sale_items")
-        .select("product_name, qty, unit_price, sale_id, sales!inner(business_id)")
-        .eq("sales.business_id", business!.id);
+        .select("product_name, qty, unit_price, sale_id, sales!inner(business_id, created_at)")
+        .eq("sales.business_id", business!.id)
+        .gte("sales.created_at", dateFrom)
+        .lte("sales.created_at", dateTo + "T23:59:59")
+        .limit(10000);
       if (error) throw error;
       return data;
     },
     enabled: !!business,
   });
 
-  const { data: expenses = [] } = useQuery({
-    queryKey: ["all-expenses", business?.id],
+  const { data: expenses = [], isLoading: expensesLoading } = useQuery({
+    queryKey: ["report-expenses", business?.id, dateFrom, dateTo],
     queryFn: async () => {
-      const { data, error } = await supabase.from("expenses").select("*").eq("business_id", business!.id).order("date", { ascending: false });
+      const { data, error } = await supabase
+        .from("expenses")
+        .select("*")
+        .eq("business_id", business!.id)
+        .gte("date", dateFrom)
+        .lte("date", dateTo)
+        .order("date", { ascending: false })
+        .limit(2000);
       if (error) throw error;
       return data;
     },
     enabled: !!business,
   });
 
+  // Products are a snapshot — no date filter needed
   const { data: products = [] } = useQuery({
-    queryKey: ["products-report", business?.id],
+    queryKey: ["report-products", business?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("business_id", business!.id);
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, qty, reorder_level, cost_price, selling_price")
+        .eq("business_id", business!.id);
       if (error) throw error;
       return data;
     },
@@ -68,9 +112,14 @@ export default function Reports() {
   });
 
   const { data: accounts = [] } = useQuery({
-    queryKey: ["coa-report", business?.id],
+    queryKey: ["report-coa", business?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("chart_of_accounts").select("*").eq("business_id", business!.id).eq("is_active", true).order("account_code");
+      const { data, error } = await supabase
+        .from("chart_of_accounts")
+        .select("*")
+        .eq("business_id", business!.id)
+        .eq("is_active", true)
+        .order("account_code");
       if (error) throw error;
       return data;
     },
@@ -78,9 +127,15 @@ export default function Reports() {
   });
 
   const { data: invoices = [] } = useQuery({
-    queryKey: ["invoices-report", business?.id],
+    queryKey: ["report-invoices", business?.id, dateFrom, dateTo],
     queryFn: async () => {
-      const { data, error } = await supabase.from("invoices").select("*").eq("business_id", business!.id);
+      const { data, error } = await supabase
+        .from("invoices")
+        .select("id, total, status, due_date, created_at")
+        .eq("business_id", business!.id)
+        .gte("created_at", dateFrom)
+        .lte("created_at", dateTo + "T23:59:59")
+        .limit(2000);
       if (error) throw error;
       return data;
     },
@@ -88,9 +143,12 @@ export default function Reports() {
   });
 
   const { data: staffMembers = [] } = useQuery({
-    queryKey: ["staff-report", business?.id],
+    queryKey: ["report-staff", business?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("staff_members").select("id, name, role").eq("business_id", business!.id);
+      const { data, error } = await supabase
+        .from("staff_members")
+        .select("id, name, role")
+        .eq("business_id", business!.id);
       if (error) throw error;
       return data;
     },
@@ -98,76 +156,117 @@ export default function Reports() {
   });
 
   const { data: payments = [] } = useQuery({
-    queryKey: ["payments-report", business?.id],
+    queryKey: ["report-payments", business?.id, dateFrom, dateTo],
     queryFn: async () => {
-      const { data, error } = await supabase.from("payments").select("*").eq("business_id", business!.id).order("date");
+      const { data, error } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("business_id", business!.id)
+        .gte("date", dateFrom)
+        .lte("date", dateTo)
+        .order("date")
+        .limit(2000);
       if (error) throw error;
       return data;
     },
     enabled: !!business,
   });
 
-  // Monthly P&L data
-  const monthlyMap: Record<string, { revenue: number; expenses: number }> = {};
-  const monthOrder: string[] = [];
-  
-  sales.forEach((s: any) => {
-    const d = new Date(s.created_at);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    if (!monthlyMap[key]) { monthlyMap[key] = { revenue: 0, expenses: 0 }; monthOrder.push(key); }
-    monthlyMap[key].revenue += Number(s.total);
-  });
-  expenses.forEach((e: any) => {
-    const d = new Date(e.date);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    if (!monthlyMap[key]) { monthlyMap[key] = { revenue: 0, expenses: 0 }; monthOrder.push(key); }
-    monthlyMap[key].expenses += Number(e.amount);
-  });
+  const isLoading = salesLoading || expensesLoading;
 
-  const sortedMonths = [...new Set(monthOrder)].sort();
-  const monthlyData = sortedMonths.map(key => {
-    const d = new Date(key + "-01");
-    return {
-      month: d.toLocaleString("en", { month: "short", year: "2-digit" }),
-      revenue: monthlyMap[key].revenue,
-      expenses: monthlyMap[key].expenses,
-      profit: monthlyMap[key].revenue - monthlyMap[key].expenses,
-    };
-  });
+  // ── Derived computations ──────────────────────────────────────────────────
 
-  // Top-selling products
-  const productSalesMap: Record<string, { name: string; qty: number; revenue: number }> = {};
-  saleItems.forEach((item: any) => {
-    const name = item.product_name;
-    if (!productSalesMap[name]) productSalesMap[name] = { name, qty: 0, revenue: 0 };
-    productSalesMap[name].qty += item.qty;
-    productSalesMap[name].revenue += item.qty * Number(item.unit_price);
-  });
-  const topProducts = Object.values(productSalesMap).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
-
-  // Payment method breakdown
-  const paymentMap: Record<string, number> = {};
-  sales.forEach((s: any) => { paymentMap[s.payment_method] = (paymentMap[s.payment_method] || 0) + Number(s.total); });
-  const paymentData = Object.entries(paymentMap).map(([name, value]) => ({ name, value }));
-
-  // Expense category breakdown
-  const expCatMap: Record<string, number> = {};
-  expenses.forEach((e: any) => { expCatMap[e.category] = (expCatMap[e.category] || 0) + Number(e.amount); });
-  const expenseCatData = Object.entries(expCatMap).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-
-  const totalRevenue = sales.reduce((s: number, r: any) => s + Number(r.total), 0);
-  const totalExpensesAmt = expenses.reduce((s: number, r: any) => s + Number(r.amount), 0);
+  const totalRevenue = useMemo(
+    () => sales.reduce((s: number, r: any) => s + Number(r.total), 0),
+    [sales],
+  );
+  const totalExpensesAmt = useMemo(
+    () => expenses.reduce((s: number, r: any) => s + Number(r.amount), 0),
+    [expenses],
+  );
   const netProfit = totalRevenue - totalExpensesAmt;
-  const totalInventoryValue = products.reduce((s: number, p: any) => s + Number(p.selling_price) * p.qty, 0);
-  const totalCostValue = products.reduce((s: number, p: any) => s + Number(p.cost_price) * p.qty, 0);
+
+  const totalInventoryValue = useMemo(
+    () => products.reduce((s: number, p: any) => s + Number(p.selling_price) * p.qty, 0),
+    [products],
+  );
+  const totalCostValue = useMemo(
+    () => products.reduce((s: number, p: any) => s + Number(p.cost_price) * p.qty, 0),
+    [products],
+  );
   const grossMargin = totalRevenue > 0 ? ((totalRevenue - totalCostValue) / totalRevenue * 100) : 0;
 
-  // Financial statements helpers
+  // Monthly P&L
+  const monthlyData = useMemo(() => {
+    const map: Record<string, { revenue: number; expenses: number }> = {};
+    sales.forEach((s: any) => {
+      const key = s.created_at.slice(0, 7);
+      if (!map[key]) map[key] = { revenue: 0, expenses: 0 };
+      map[key].revenue += Number(s.total);
+    });
+    expenses.forEach((e: any) => {
+      const key = (e.date as string).slice(0, 7);
+      if (!map[key]) map[key] = { revenue: 0, expenses: 0 };
+      map[key].expenses += Number(e.amount);
+    });
+    return Object.keys(map).sort().map((key) => {
+      const d = new Date(key + "-01");
+      return {
+        month: d.toLocaleString("en", { month: "short", year: "2-digit" }),
+        revenue: map[key].revenue,
+        expenses: map[key].expenses,
+        profit: map[key].revenue - map[key].expenses,
+      };
+    });
+  }, [sales, expenses]);
+
+  // Top products
+  const topProducts = useMemo(() => {
+    const map: Record<string, { name: string; qty: number; revenue: number }> = {};
+    saleItems.forEach((item: any) => {
+      const name = item.product_name;
+      if (!map[name]) map[name] = { name, qty: 0, revenue: 0 };
+      map[name].qty += item.qty;
+      map[name].revenue += item.qty * Number(item.unit_price);
+    });
+    return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
+  }, [saleItems]);
+
+  // Dead stock & bottom sellers (derived from topProducts + products)
+  const { deadStock, bottomSellers, skuMargins } = useMemo(() => {
+    const soldNames = new Set(topProducts.map(p => p.name));
+    const dead = (products as any[]).filter(p => !soldNames.has(p.name) && p.qty > 0);
+    const bottom = topProducts.length >= 5 ? [...topProducts].sort((a, b) => a.revenue - b.revenue).slice(0, 5) : [];
+    const margins = topProducts.map(tp => {
+      const prod = (products as any[]).find(p => p.name === tp.name);
+      const cost = prod ? Number(prod.cost_price) : 0;
+      const sell = prod ? Number(prod.selling_price) : 0;
+      const pct = sell > 0 ? ((sell - cost) / sell * 100) : 0;
+      return { ...tp, marginPct: pct, cost, sell };
+    }).sort((a, b) => b.marginPct - a.marginPct);
+    return { deadStock: dead, bottomSellers: bottom, skuMargins: margins };
+  }, [topProducts, products]);
+
+  // Payment method breakdown
+  const paymentData = useMemo(() => {
+    const map: Record<string, number> = {};
+    sales.forEach((s: any) => { map[s.payment_method] = (map[s.payment_method] || 0) + Number(s.total); });
+    return Object.entries(map).map(([name, value]) => ({ name, value }));
+  }, [sales]);
+
+  // Expense category breakdown
+  const expenseCatData = useMemo(() => {
+    const map: Record<string, number> = {};
+    expenses.forEach((e: any) => { map[e.category] = (map[e.category] || 0) + Number(e.amount); });
+    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [expenses]);
+
+  // Financial statement helpers
   const groupAccountsByType = (type: string) => accounts.filter((a: any) => a.account_type === type);
   const totalByType = (type: string) => groupAccountsByType(type).reduce((s: number, a: any) => s + Number(a.balance), 0);
 
-  // Trial Balance
-  const trialBalanceData = accounts.map((a: any) => {
+  // Trial balance
+  const trialBalanceData = useMemo(() => accounts.map((a: any) => {
     const bal = Number(a.balance);
     const isDebitNormal = ["asset", "expense", "cost_of_goods"].includes(a.account_type);
     return {
@@ -177,7 +276,8 @@ export default function Reports() {
       debit: isDebitNormal ? Math.max(bal, 0) : Math.max(-bal, 0),
       credit: isDebitNormal ? Math.max(-bal, 0) : Math.max(bal, 0),
     };
-  });
+  }), [accounts]);
+
   const totalTrialDebit = trialBalanceData.reduce((s, r) => s + r.debit, 0);
   const totalTrialCredit = trialBalanceData.reduce((s, r) => s + r.credit, 0);
 
@@ -186,80 +286,89 @@ export default function Reports() {
   const totalLiabilities = totalByType("liability") + totalByType("payable");
   const totalEquity = totalByType("equity");
 
-  // Aging report
-  const today = new Date();
-  const agingBuckets = { current: 0, days30: 0, days60: 0, days90: 0, over90: 0 };
-  invoices.filter((i: any) => ["sent", "overdue", "partial"].includes(i.status)).forEach((inv: any) => {
-    const due = new Date(inv.due_date);
-    const diff = Math.floor((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
-    const amt = Number(inv.total);
-    if (diff <= 0) agingBuckets.current += amt;
-    else if (diff <= 30) agingBuckets.days30 += amt;
-    else if (diff <= 60) agingBuckets.days60 += amt;
-    else if (diff <= 90) agingBuckets.days90 += amt;
-    else agingBuckets.over90 += amt;
-  });
-  const agingData = [
-    { name: "Current", value: agingBuckets.current },
-    { name: "1-30 Days", value: agingBuckets.days30 },
-    { name: "31-60 Days", value: agingBuckets.days60 },
-    { name: "61-90 Days", value: agingBuckets.days90 },
-    { name: "90+ Days", value: agingBuckets.over90 },
-  ];
+  // Aging
+  const agingData = useMemo(() => {
+    const today = new Date();
+    const buckets = { current: 0, days30: 0, days60: 0, days90: 0, over90: 0 };
+    invoices
+      .filter((i: any) => ["sent", "overdue", "partial"].includes(i.status))
+      .forEach((inv: any) => {
+        const diff = Math.floor((today.getTime() - new Date(inv.due_date).getTime()) / 86400000);
+        const amt = Number(inv.total);
+        if (diff <= 0) buckets.current += amt;
+        else if (diff <= 30) buckets.days30 += amt;
+        else if (diff <= 60) buckets.days60 += amt;
+        else if (diff <= 90) buckets.days90 += amt;
+        else buckets.over90 += amt;
+      });
+    return [
+      { name: "Current", value: buckets.current },
+      { name: "1-30 Days", value: buckets.days30 },
+      { name: "31-60 Days", value: buckets.days60 },
+      { name: "61-90 Days", value: buckets.days90 },
+      { name: "90+ Days", value: buckets.over90 },
+    ];
+  }, [invoices]);
 
-  // Staff Performance
-  const staffSalesMap: Record<string, { name: string; role: string; txCount: number; revenue: number; avgOrder: number }> = {};
-  staffMembers.forEach((s: any) => {
-    staffSalesMap[s.id] = { name: s.name, role: s.role, txCount: 0, revenue: 0, avgOrder: 0 };
-  });
-  sales.forEach((s: any) => {
-    if (s.staff_id && staffSalesMap[s.staff_id]) {
-      staffSalesMap[s.staff_id].txCount += 1;
-      staffSalesMap[s.staff_id].revenue += Number(s.total);
-    }
-  });
-  const staffPerformance = Object.values(staffSalesMap)
-    .map(s => ({ ...s, avgOrder: s.txCount > 0 ? s.revenue / s.txCount : 0 }))
-    .sort((a, b) => b.revenue - a.revenue);
-  const topStaffChart = staffPerformance.filter(s => s.revenue > 0).slice(0, 8);
+  // Staff performance
+  const staffPerformance = useMemo(() => {
+    const map: Record<string, { name: string; role: string; txCount: number; revenue: number }> = {};
+    staffMembers.forEach((s: any) => { map[s.id] = { name: s.name, role: s.role, txCount: 0, revenue: 0 }; });
+    sales.forEach((s: any) => {
+      if (s.staff_id && map[s.staff_id]) {
+        map[s.staff_id].txCount += 1;
+        map[s.staff_id].revenue += Number(s.total);
+      }
+    });
+    return Object.values(map)
+      .map((s) => ({ ...s, avgOrder: s.txCount > 0 ? s.revenue / s.txCount : 0 }))
+      .sort((a, b) => b.revenue - a.revenue);
+  }, [staffMembers, sales]);
 
-  // Cash Flow
-  const cashFlowMonthly: Record<string, { inflow: number; outflow: number }> = {};
-  payments.forEach((p: any) => {
-    const d = new Date(p.date);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    if (!cashFlowMonthly[key]) cashFlowMonthly[key] = { inflow: 0, outflow: 0 };
-    if (p.type === "incoming") cashFlowMonthly[key].inflow += Number(p.amount);
-    else cashFlowMonthly[key].outflow += Number(p.amount);
-  });
-  const cashFlowData = Object.keys(cashFlowMonthly).sort().map(key => {
-    const d = new Date(key + "-01");
-    return {
-      month: d.toLocaleString("en", { month: "short", year: "2-digit" }),
-      inflow: cashFlowMonthly[key].inflow,
-      outflow: cashFlowMonthly[key].outflow,
-      net: cashFlowMonthly[key].inflow - cashFlowMonthly[key].outflow,
-    };
-  });
-  const totalInflow = payments.filter((p: any) => p.type === "incoming").reduce((s: number, p: any) => s + Number(p.amount), 0);
-  const totalOutflow = payments.filter((p: any) => p.type === "outgoing").reduce((s: number, p: any) => s + Number(p.amount), 0);
+  // Cash flow
+  const { cashFlowData, totalInflow, totalOutflow } = useMemo(() => {
+    const monthly: Record<string, { inflow: number; outflow: number }> = {};
+    payments.forEach((p: any) => {
+      const key = (p.date as string).slice(0, 7);
+      if (!monthly[key]) monthly[key] = { inflow: 0, outflow: 0 };
+      if (p.type === "incoming") monthly[key].inflow += Number(p.amount);
+      else monthly[key].outflow += Number(p.amount);
+    });
+    const data = Object.keys(monthly).sort().map((key) => ({
+      month: new Date(key + "-01").toLocaleString("en", { month: "short", year: "2-digit" }),
+      inflow: monthly[key].inflow,
+      outflow: monthly[key].outflow,
+      net: monthly[key].inflow - monthly[key].outflow,
+    }));
+    const inflow = payments.filter((p: any) => p.type === "incoming").reduce((s: number, p: any) => s + Number(p.amount), 0);
+    const outflow = payments.filter((p: any) => p.type === "outgoing").reduce((s: number, p: any) => s + Number(p.amount), 0);
+    return { cashFlowData: data, totalInflow: inflow, totalOutflow: outflow };
+  }, [payments]);
 
-  const handleExportSales = () => { exportSalesCsv(sales); toast.success("Sales exported!"); };
-  const handleExportInventory = () => { exportInventoryCsv(products); toast.success("Inventory exported!"); };
-  const handleExportExpenses = () => { exportExpensesCsv(expenses); toast.success("Expenses exported!"); };
-  const handleExportPL = () => { exportProfitLossCsv(monthlyData); toast.success("P&L report exported!"); };
+  // ── Date filter row (shared across all tabs) ──────────────────────────────
+  const DateFilter = () => (
+    <div className="flex flex-wrap items-end gap-3">
+      <div className="space-y-1">
+        <Label className="text-xs">From</Label>
+        <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-[150px]" />
+      </div>
+      <div className="space-y-1">
+        <Label className="text-xs">To</Label>
+        <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-[150px]" />
+      </div>
+      {isLoading && <p className="text-xs text-muted-foreground animate-pulse pb-1">Loading…</p>}
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold">Reports & Analytics</h1>
-          <p className="text-muted-foreground text-sm">Financial statements, insights and business intelligence</p>
-        </div>
+      <div>
+        <h1 className="text-2xl md:text-3xl font-display font-bold">Reports & Analytics</h1>
+        <p className="text-muted-foreground text-sm">Financial statements, insights and business intelligence</p>
       </div>
 
       <Tabs defaultValue="pnl">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="pnl">P&L</TabsTrigger>
           <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>
           <TabsTrigger value="trial-balance">Trial Balance</TabsTrigger>
@@ -272,36 +381,36 @@ export default function Reports() {
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
         </TabsList>
 
-        {/* Profit & Loss */}
+        {/* ── Profit & Loss ── */}
         <TabsContent value="pnl" className="space-y-4">
-          <div className="flex flex-wrap items-end gap-3 justify-between">
-            <div className="flex gap-3 items-end">
-              <div className="space-y-1">
-                <Label className="text-xs">From</Label>
-                <Input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-[150px]" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">To</Label>
-                <Input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="w-[150px]" />
-              </div>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <DateFilter />
+            <Button variant="outline" size="sm" onClick={() => { exportProfitLossCsv(monthlyData); toast.success("P&L exported!"); }}>
+              <Download className="h-4 w-4 mr-1" /> Export CSV
+            </Button>
+          </div>
+          {isLoading ? <StatSkeleton /> : (
+            <div className="grid sm:grid-cols-4 gap-4">
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Revenue</p><p className="text-2xl font-display font-bold text-primary">{formatGHS(totalRevenue)}</p></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Expenses</p><p className="text-2xl font-display font-bold text-destructive">{formatGHS(totalExpensesAmt)}</p></CardContent></Card>
+              <Card><CardContent className="p-4 text-center">
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                  {netProfit >= 0 ? <TrendingUp className="h-4 w-4 text-green-500" /> : <TrendingDown className="h-4 w-4 text-destructive" />} Net Profit
+                </p>
+                <p className={`text-2xl font-display font-bold ${netProfit >= 0 ? "text-green-500" : "text-destructive"}`}>{formatGHS(netProfit)}</p>
+              </CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Gross Margin</p><p className="text-2xl font-display font-bold">{grossMargin.toFixed(1)}%</p></CardContent></Card>
             </div>
-            <Button variant="outline" size="sm" onClick={handleExportPL}><Download className="h-4 w-4 mr-1" /> Export CSV</Button>
-          </div>
-          <div className="grid sm:grid-cols-4 gap-4">
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Revenue</p><p className="text-2xl font-display font-bold text-primary">{formatGHS(totalRevenue)}</p></CardContent></Card>
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Expenses</p><p className="text-2xl font-display font-bold text-destructive">{formatGHS(totalExpensesAmt)}</p></CardContent></Card>
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground flex items-center justify-center gap-1">{netProfit >= 0 ? <TrendingUp className="h-4 w-4 text-green-500" /> : <TrendingDown className="h-4 w-4 text-destructive" />} Net Profit</p><p className={`text-2xl font-display font-bold ${netProfit >= 0 ? "text-green-500" : "text-destructive"}`}>{formatGHS(netProfit)}</p></CardContent></Card>
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Gross Margin</p><p className="text-2xl font-display font-bold">{grossMargin.toFixed(1)}%</p></CardContent></Card>
-          </div>
-          {monthlyData.length > 0 && (
+          )}
+          {isLoading ? <ChartSkeleton /> : monthlyData.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="font-display text-base">Monthly Trends</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={320}>
                   <LineChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
-                    <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" fontSize={12} />
-                    <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                    <XAxis dataKey="month" stroke={axisColor} fontSize={12} />
+                    <YAxis stroke={axisColor} fontSize={12} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
                     <Legend />
                     <Line type="monotone" dataKey="revenue" stroke="hsl(37, 90%, 55%)" strokeWidth={2} dot={{ r: 4 }} name="Revenue" />
@@ -314,69 +423,39 @@ export default function Reports() {
           )}
         </TabsContent>
 
-        {/* Balance Sheet */}
+        {/* ── Balance Sheet ── */}
         <TabsContent value="balance-sheet" className="space-y-4">
           <Card>
             <CardHeader><CardTitle className="font-display">Balance Sheet</CardTitle></CardHeader>
             <CardContent className="space-y-6">
               {accounts.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Set up your Chart of Accounts in Financials module first.</p>
+                <p className="text-center text-muted-foreground py-8">Set up your Chart of Accounts in Financials first.</p>
               ) : (
                 <>
-                  <div>
-                    <h3 className="font-semibold text-sm mb-2 text-primary">ASSETS</h3>
-                    <Table>
-                      <TableBody>
-                        {[...groupAccountsByType("asset"), ...groupAccountsByType("bank"), ...groupAccountsByType("receivable")].map((a: any) => (
-                          <TableRow key={a.id}>
-                            <TableCell className="text-xs text-muted-foreground w-20">{a.account_code}</TableCell>
-                            <TableCell className="text-sm">{a.name}</TableCell>
-                            <TableCell className="text-right font-medium">{formatGHS(Number(a.balance))}</TableCell>
+                  {[
+                    { label: "ASSETS", color: "text-primary", rows: [...groupAccountsByType("asset"), ...groupAccountsByType("bank"), ...groupAccountsByType("receivable")], total: totalAssets, totalLabel: "Total Assets", totalColor: "text-primary" },
+                    { label: "LIABILITIES", color: "text-destructive", rows: [...groupAccountsByType("liability"), ...groupAccountsByType("payable")], total: totalLiabilities, totalLabel: "Total Liabilities", totalColor: "text-destructive" },
+                    { label: "EQUITY", color: "", rows: groupAccountsByType("equity"), total: totalEquity, totalLabel: "Total Equity", totalColor: "" },
+                  ].map((section) => (
+                    <div key={section.label}>
+                      <h3 className={`font-semibold text-sm mb-2 ${section.color}`}>{section.label}</h3>
+                      <Table>
+                        <TableBody>
+                          {section.rows.map((a: any) => (
+                            <TableRow key={a.id}>
+                              <TableCell className="text-xs text-muted-foreground w-20">{a.account_code}</TableCell>
+                              <TableCell className="text-sm">{a.name}</TableCell>
+                              <TableCell className="text-right font-medium">{formatGHS(Number(a.balance))}</TableCell>
+                            </TableRow>
+                          ))}
+                          <TableRow className="font-bold border-t-2">
+                            <TableCell colSpan={2}>{section.totalLabel}</TableCell>
+                            <TableCell className={`text-right ${section.totalColor}`}>{formatGHS(section.total)}</TableCell>
                           </TableRow>
-                        ))}
-                        <TableRow className="font-bold border-t-2">
-                          <TableCell colSpan={2}>Total Assets</TableCell>
-                          <TableCell className="text-right text-primary">{formatGHS(totalAssets)}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm mb-2 text-destructive">LIABILITIES</h3>
-                    <Table>
-                      <TableBody>
-                        {[...groupAccountsByType("liability"), ...groupAccountsByType("payable")].map((a: any) => (
-                          <TableRow key={a.id}>
-                            <TableCell className="text-xs text-muted-foreground w-20">{a.account_code}</TableCell>
-                            <TableCell className="text-sm">{a.name}</TableCell>
-                            <TableCell className="text-right font-medium">{formatGHS(Number(a.balance))}</TableCell>
-                          </TableRow>
-                        ))}
-                        <TableRow className="font-bold border-t-2">
-                          <TableCell colSpan={2}>Total Liabilities</TableCell>
-                          <TableCell className="text-right text-destructive">{formatGHS(totalLiabilities)}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm mb-2">EQUITY</h3>
-                    <Table>
-                      <TableBody>
-                        {groupAccountsByType("equity").map((a: any) => (
-                          <TableRow key={a.id}>
-                            <TableCell className="text-xs text-muted-foreground w-20">{a.account_code}</TableCell>
-                            <TableCell className="text-sm">{a.name}</TableCell>
-                            <TableCell className="text-right font-medium">{formatGHS(Number(a.balance))}</TableCell>
-                          </TableRow>
-                        ))}
-                        <TableRow className="font-bold border-t-2">
-                          <TableCell colSpan={2}>Total Equity</TableCell>
-                          <TableCell className="text-right">{formatGHS(totalEquity)}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ))}
                   <Card className="bg-secondary/30">
                     <CardContent className="p-4 flex justify-between items-center">
                       <span className="font-bold">Liabilities + Equity</span>
@@ -389,7 +468,7 @@ export default function Reports() {
           </Card>
         </TabsContent>
 
-        {/* Trial Balance */}
+        {/* ── Trial Balance ── */}
         <TabsContent value="trial-balance" className="space-y-4">
           <Card>
             <CardHeader><CardTitle className="font-display">Trial Balance</CardTitle></CardHeader>
@@ -435,8 +514,9 @@ export default function Reports() {
           </Card>
         </TabsContent>
 
-        {/* Cash Flow Statement */}
+        {/* ── Cash Flow ── */}
         <TabsContent value="cash-flow" className="space-y-4">
+          <DateFilter />
           <div className="grid sm:grid-cols-3 gap-4">
             <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Inflows</p><p className="text-2xl font-display font-bold text-green-500">{formatGHS(totalInflow)}</p></CardContent></Card>
             <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Outflows</p><p className="text-2xl font-display font-bold text-destructive">{formatGHS(totalOutflow)}</p></CardContent></Card>
@@ -458,9 +538,9 @@ export default function Reports() {
                         <stop offset="95%" stopColor="hsl(0, 72%, 51%)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
-                    <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" fontSize={12} />
-                    <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                    <XAxis dataKey="month" stroke={axisColor} fontSize={12} />
+                    <YAxis stroke={axisColor} fontSize={12} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
                     <Legend />
                     <Area type="monotone" dataKey="inflow" stroke="hsl(142, 76%, 36%)" fill="url(#inflowGrad)" strokeWidth={2} name="Inflows" />
@@ -471,12 +551,13 @@ export default function Reports() {
               </CardContent>
             </Card>
           ) : (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">No payment data recorded yet. Record payments in the Banking module.</CardContent></Card>
+            <Card><CardContent className="py-12 text-center text-muted-foreground">No payment data in this period.</CardContent></Card>
           )}
         </TabsContent>
 
-        {/* Aging Report */}
+        {/* ── Aging ── */}
         <TabsContent value="aging" className="space-y-4">
+          <DateFilter />
           <div className="grid sm:grid-cols-5 gap-3">
             {agingData.map((b, i) => (
               <Card key={b.name}>
@@ -492,9 +573,9 @@ export default function Reports() {
             <CardContent>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={agingData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
-                  <XAxis dataKey="name" stroke="hsl(215, 15%, 55%)" fontSize={12} />
-                  <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                  <XAxis dataKey="name" stroke={axisColor} fontSize={12} />
+                  <YAxis stroke={axisColor} fontSize={12} />
                   <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
                   <Bar dataKey="value" radius={[6, 6, 0, 0]} name="Outstanding">
                     {agingData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
@@ -505,22 +586,25 @@ export default function Reports() {
           </Card>
         </TabsContent>
 
-        {/* Staff Performance */}
+        {/* ── Staff Performance ── */}
         <TabsContent value="staff-perf" className="space-y-4">
+          <DateFilter />
           <div className="grid sm:grid-cols-3 gap-4">
             <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Staff Members</p><p className="text-2xl font-display font-bold">{staffMembers.length}</p></CardContent></Card>
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Avg Revenue / Staff</p><p className="text-2xl font-display font-bold text-primary">{formatGHS(staffPerformance.length > 0 ? totalRevenue / staffPerformance.filter(s => s.revenue > 0).length || 0 : 0)}</p></CardContent></Card>
+            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Avg Revenue / Staff</p>
+              <p className="text-2xl font-display font-bold text-primary">{formatGHS(staffPerformance.filter((s) => s.revenue > 0).length > 0 ? totalRevenue / staffPerformance.filter((s) => s.revenue > 0).length : 0)}</p>
+            </CardContent></Card>
             <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Top Performer</p><p className="text-lg font-display font-bold text-primary">{staffPerformance[0]?.name || "—"}</p></CardContent></Card>
           </div>
-          {topStaffChart.length > 0 && (
+          {staffPerformance.filter((s) => s.revenue > 0).length > 0 && (
             <Card>
               <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> Revenue by Staff Member</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={topStaffChart} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
-                    <XAxis type="number" stroke="hsl(215, 15%, 55%)" fontSize={11} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
-                    <YAxis type="category" dataKey="name" width={120} stroke="hsl(215, 15%, 55%)" fontSize={11} />
+                  <BarChart data={staffPerformance.filter((s) => s.revenue > 0).slice(0, 8)} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                    <XAxis type="number" stroke={axisColor} fontSize={11} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
+                    <YAxis type="category" dataKey="name" width={120} stroke={axisColor} fontSize={11} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
                     <Bar dataKey="revenue" fill="hsl(37, 90%, 55%)" radius={[0, 6, 6, 0]} name="Revenue" />
                   </BarChart>
@@ -564,25 +648,30 @@ export default function Reports() {
           </Card>
         </TabsContent>
 
-        {/* Sales */}
+        {/* ── Sales ── */}
         <TabsContent value="sales" className="space-y-4">
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={handleExportSales}><Download className="h-4 w-4 mr-1" /> Export CSV</Button>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <DateFilter />
+            <Button variant="outline" size="sm" onClick={() => { exportSalesCsv(sales); toast.success("Sales exported!"); }}>
+              <Download className="h-4 w-4 mr-1" /> Export CSV
+            </Button>
           </div>
-          <div className="grid sm:grid-cols-3 gap-4">
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Revenue</p><p className="text-2xl font-display font-bold text-primary">{formatGHS(totalRevenue)}</p></CardContent></Card>
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Avg. Order Value</p><p className="text-2xl font-display font-bold">{formatGHS(sales.length > 0 ? totalRevenue / sales.length : 0)}</p></CardContent></Card>
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Transactions</p><p className="text-2xl font-display font-bold">{sales.length}</p></CardContent></Card>
-          </div>
-          {monthlyData.length > 0 && (
+          {isLoading ? <StatSkeleton /> : (
+            <div className="grid sm:grid-cols-3 gap-4">
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Revenue</p><p className="text-2xl font-display font-bold text-primary">{formatGHS(totalRevenue)}</p></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Avg. Order Value</p><p className="text-2xl font-display font-bold">{formatGHS(sales.length > 0 ? totalRevenue / sales.length : 0)}</p></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Transactions</p><p className="text-2xl font-display font-bold">{sales.length}</p></CardContent></Card>
+            </div>
+          )}
+          {isLoading ? <ChartSkeleton /> : monthlyData.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="font-display text-base">Sales vs Expenses</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
-                    <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" />
-                    <YAxis stroke="hsl(215, 15%, 55%)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                    <XAxis dataKey="month" stroke={axisColor} />
+                    <YAxis stroke={axisColor} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
                     <Bar dataKey="revenue" fill="hsl(37, 90%, 55%)" radius={[6, 6, 0, 0]} name="Sales" />
                     <Bar dataKey="expenses" fill="hsl(0, 72%, 51%)" radius={[6, 6, 0, 0]} name="Expenses" />
@@ -608,55 +697,140 @@ export default function Reports() {
           )}
         </TabsContent>
 
-        {/* Top Products */}
+        {/* ── Top Products ── */}
         <TabsContent value="top-products" className="space-y-4">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><Award className="h-5 w-5 text-primary" /> Top Selling Products</CardTitle></CardHeader>
-              <CardContent>
-                {topProducts.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No sales data yet</p>
-                ) : (
-                  <div className="space-y-3">
-                    {topProducts.map((p, i) => (
-                      <div key={p.name} className="flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-2">
-                        <div className="flex items-center gap-3">
-                          <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${i < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{i + 1}</span>
-                          <div>
-                            <p className="text-sm font-medium">{p.name}</p>
-                            <p className="text-xs text-muted-foreground">{p.qty} units sold</p>
+          <DateFilter />
+          {itemsLoading ? <ChartSkeleton /> : (
+            <>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><Award className="h-5 w-5 text-primary" /> Top Selling Products</CardTitle></CardHeader>
+                  <CardContent>
+                    {topProducts.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">No sales in this period</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {topProducts.map((p, i) => (
+                          <div key={p.name} className="flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-2">
+                            <div className="flex items-center gap-3">
+                              <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${i < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{i + 1}</span>
+                              <div>
+                                <p className="text-sm font-medium">{p.name}</p>
+                                <p className="text-xs text-muted-foreground">{p.qty} units sold</p>
+                              </div>
+                            </div>
+                            <span className="text-sm font-bold text-primary">{formatGHS(p.revenue)}</span>
                           </div>
-                        </div>
-                        <span className="text-sm font-bold text-primary">{formatGHS(p.revenue)}</span>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )}
+                  </CardContent>
+                </Card>
+                {topProducts.length > 0 && (
+                  <Card>
+                    <CardHeader><CardTitle className="font-display text-base">Revenue by Product</CardTitle></CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={topProducts.slice(0, 7)} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                          <XAxis type="number" stroke={axisColor} fontSize={11} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
+                          <YAxis type="category" dataKey="name" width={100} stroke={axisColor} fontSize={11} />
+                          <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                          <Bar dataKey="revenue" fill="hsl(37, 90%, 55%)" radius={[0, 6, 6, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
                 )}
-              </CardContent>
-            </Card>
-            {topProducts.length > 0 && (
-              <Card>
-                <CardHeader><CardTitle className="font-display text-base">Revenue by Product</CardTitle></CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={topProducts.slice(0, 7)} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
-                      <XAxis type="number" stroke="hsl(215, 15%, 55%)" fontSize={11} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
-                      <YAxis type="category" dataKey="name" width={100} stroke="hsl(215, 15%, 55%)" fontSize={11} />
-                      <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
-                      <Bar dataKey="revenue" fill="hsl(37, 90%, 55%)" radius={[0, 6, 6, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+              </div>
+
+              {/* Margin per SKU */}
+              {skuMargins.length > 0 && (
+                <Card>
+                  <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><TrendingUp className="h-5 w-5 text-green-500" /> Margin Analysis (Sold SKUs)</CardTitle></CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product</TableHead>
+                          <TableHead className="text-right">Cost</TableHead>
+                          <TableHead className="text-right">Sell Price</TableHead>
+                          <TableHead className="text-right">Margin %</TableHead>
+                          <TableHead className="text-right">Revenue</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {skuMargins.slice(0, 10).map((p) => (
+                          <TableRow key={p.name}>
+                            <TableCell className="font-medium text-sm">{p.name}</TableCell>
+                            <TableCell className="text-right text-muted-foreground">{formatGHS(p.cost)}</TableCell>
+                            <TableCell className="text-right">{formatGHS(p.sell)}</TableCell>
+                            <TableCell className="text-right">
+                              <Badge variant="outline" className={`${p.marginPct >= 30 ? "text-green-500 border-green-500/40" : p.marginPct >= 15 ? "text-amber-500 border-amber-500/40" : "text-destructive border-destructive/40"}`}>
+                                {p.marginPct.toFixed(1)}%
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right font-bold text-primary">{formatGHS(p.revenue)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                {/* Bottom Sellers */}
+                {bottomSellers.length > 0 && (
+                  <Card>
+                    <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><TrendingDown className="h-5 w-5 text-orange-500" /> Slowest Movers</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {bottomSellers.map((p) => (
+                          <div key={p.name} className="flex items-center justify-between rounded-lg bg-orange-500/5 border border-orange-500/10 px-3 py-2">
+                            <div>
+                              <p className="text-sm font-medium">{p.name}</p>
+                              <p className="text-xs text-muted-foreground">{p.qty} units sold</p>
+                            </div>
+                            <span className="text-sm font-bold text-orange-500">{formatGHS(p.revenue)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Dead Stock */}
+                {deadStock.length > 0 && (
+                  <Card>
+                    <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><TrendingDown className="h-5 w-5 text-destructive" /> Dead Stock (no sales)</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 max-h-[280px] overflow-y-auto">
+                        {deadStock.map((p: any) => (
+                          <div key={p.id} className="flex items-center justify-between rounded-lg bg-destructive/5 border border-destructive/10 px-3 py-2">
+                            <div>
+                              <p className="text-sm font-medium">{p.name}</p>
+                              <p className="text-xs text-muted-foreground">{p.qty} units in stock</p>
+                            </div>
+                            <span className="text-sm font-bold text-destructive">{formatGHS(Number(p.selling_price) * p.qty)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">{deadStock.length} product{deadStock.length !== 1 ? "s" : ""} with no sales in selected period</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </>
+          )}
         </TabsContent>
 
-        {/* Inventory */}
+        {/* ── Inventory ── */}
         <TabsContent value="inventory" className="space-y-4">
           <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={handleExportInventory}><Download className="h-4 w-4 mr-1" /> Export CSV</Button>
+            <Button variant="outline" size="sm" onClick={() => { exportInventoryCsv(products); toast.success("Inventory exported!"); }}>
+              <Download className="h-4 w-4 mr-1" /> Export CSV
+            </Button>
           </div>
           <div className="grid sm:grid-cols-4 gap-4">
             <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Products</p><p className="text-2xl font-display font-bold">{products.length}</p></CardContent></Card>
@@ -666,16 +840,21 @@ export default function Reports() {
           </div>
         </TabsContent>
 
-        {/* Expenses */}
+        {/* ── Expenses ── */}
         <TabsContent value="expenses" className="space-y-4">
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={handleExportExpenses}><Download className="h-4 w-4 mr-1" /> Export CSV</Button>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <DateFilter />
+            <Button variant="outline" size="sm" onClick={() => { exportExpensesCsv(expenses); toast.success("Expenses exported!"); }}>
+              <Download className="h-4 w-4 mr-1" /> Export CSV
+            </Button>
           </div>
-          <div className="grid sm:grid-cols-3 gap-4">
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Expenses</p><p className="text-2xl font-display font-bold text-destructive">{formatGHS(totalExpensesAmt)}</p></CardContent></Card>
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Net Profit</p><p className={`text-2xl font-display font-bold ${netProfit >= 0 ? "text-green-500" : "text-destructive"}`}>{formatGHS(netProfit)}</p></CardContent></Card>
-            <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Expense Categories</p><p className="text-2xl font-display font-bold">{expenseCatData.length}</p></CardContent></Card>
-          </div>
+          {expensesLoading ? <StatSkeleton /> : (
+            <div className="grid sm:grid-cols-3 gap-4">
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Expenses</p><p className="text-2xl font-display font-bold text-destructive">{formatGHS(totalExpensesAmt)}</p></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Net Profit</p><p className={`text-2xl font-display font-bold ${netProfit >= 0 ? "text-green-500" : "text-destructive"}`}>{formatGHS(netProfit)}</p></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Expense Categories</p><p className="text-2xl font-display font-bold">{expenseCatData.length}</p></CardContent></Card>
+            </div>
+          )}
           {expenseCatData.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="font-display text-base">Expenses by Category</CardTitle></CardHeader>

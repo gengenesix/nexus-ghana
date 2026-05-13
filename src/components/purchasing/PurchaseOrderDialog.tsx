@@ -38,7 +38,7 @@ export default function PurchaseOrderDialog({ open, onOpenChange }: PurchaseOrde
     setSaving(true);
     try {
       const poNum = `PO-${Date.now().toString(36).toUpperCase()}`;
-      const { error } = await supabase.from("purchase_orders").insert({
+      const { data: po, error } = await supabase.from("purchase_orders").insert({
         business_id: business!.id,
         po_number: poNum,
         supplier_name: form.supplier_name.trim(),
@@ -48,8 +48,17 @@ export default function PurchaseOrderDialog({ open, onOpenChange }: PurchaseOrde
         subtotal,
         total: subtotal,
         status: "draft",
-      });
+      }).select().single();
       if (error) throw error;
+
+      const itemRows = validLines.map(l => ({
+        po_id: po.id,
+        description: l.description,
+        qty: parseFloat(l.qty) || 1,
+        unit_price: parseFloat(l.unit_price) || 0,
+      }));
+      await supabase.from("purchase_order_items").insert(itemRows);
+
       toast.success("Purchase order created");
       queryClient.invalidateQueries({ queryKey: ["purchase_orders"] });
       onOpenChange(false);

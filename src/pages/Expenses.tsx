@@ -13,15 +13,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatGHS, EXPENSE_CATEGORIES } from "@/lib/ghana";
-import { Plus, Search, Loader2, Trash2, Download, Calendar, Edit2, TrendingUp, TrendingDown, DollarSign, AlertTriangle } from "lucide-react";
+import { Plus, Search, Loader2, Trash2, Download, Calendar, Edit2, TrendingUp, TrendingDown, DollarSign, AlertTriangle, Paperclip, ExternalLink } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, Legend } from "recharts";
 import { toast } from "sonner";
 import { exportExpensesCsv } from "@/lib/export";
+import { useChartColors } from "@/hooks/useChartColors";
 import { format, subMonths, startOfMonth, endOfMonth, differenceInDays } from "date-fns";
 
 
 const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)", "hsl(280, 60%, 50%)", "hsl(20, 80%, 50%)", "hsl(170, 60%, 40%)", "hsl(330, 70%, 50%)"];
-const tooltipStyle = { background: "hsl(220, 35%, 12%)", border: "1px solid hsl(220, 20%, 20%)", borderRadius: 8, color: "hsl(210, 40%, 96%)" };
 
 const QUICK_RANGES = [
   { label: "This Month", from: () => format(startOfMonth(new Date()), "yyyy-MM-dd"), to: () => format(new Date(), "yyyy-MM-dd") },
@@ -45,6 +45,8 @@ export default function Expenses() {
   const [formCategory, setFormCategory] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formPaidBy, setFormPaidBy] = useState("Cash");
+  const [formReceiptFile, setFormReceiptFile] = useState<File | null>(null);
+  const [uploadingReceipt, setUploadingReceipt] = useState(false);
 
   const { data: expenses = [], isLoading } = useQuery({
     queryKey: ["expenses", business?.id],
@@ -129,17 +131,34 @@ export default function Expenses() {
     setFormCategory(expense.category);
     setFormDescription(expense.description || "");
     setFormPaidBy(expense.paid_by || "Cash");
+    setFormReceiptFile(null);
     setShowAdd(true);
   };
 
   const resetForm = () => {
     setFormDate(new Date().toISOString().split("T")[0]);
     setFormAmount(""); setFormCategory(""); setFormDescription(""); setFormPaidBy("Cash");
+    setFormReceiptFile(null);
     setEditingExpense(null);
   };
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      let receipt_url: string | null = editingExpense?.receipt_url ?? null;
+
+      if (formReceiptFile) {
+        setUploadingReceipt(true);
+        const ext = formReceiptFile.name.split(".").pop();
+        const path = `${business!.id}/${Date.now()}.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("expense-receipts")
+          .upload(path, formReceiptFile, { upsert: true });
+        setUploadingReceipt(false);
+        if (uploadErr) throw uploadErr;
+        const { data: urlData } = supabase.storage.from("expense-receipts").getPublicUrl(path);
+        receipt_url = urlData.publicUrl;
+      }
+
       const payload = {
         business_id: business!.id,
         date: formDate,
@@ -147,6 +166,7 @@ export default function Expenses() {
         category: formCategory,
         description: formDescription,
         paid_by: formPaidBy,
+        receipt_url,
       };
       if (editingExpense) {
         const { error } = await supabase.from("expenses").update(payload).eq("id", editingExpense.id);
@@ -509,8 +529,28 @@ export default function Expenses() {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => saveMutation.mutate()} disabled={!formCategory || !formAmount || saveMutation.isPending}>
-              {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : editingExpense ? "Update Expense" : "Log Expense"}
+            <div className="space-y-2">
+              <Label>Receipt Photo (optional)</Label>
+              <div className="flex items-center gap-2">
+                <label className="flex-1 cursor-pointer flex items-center gap-2 rounded-md border border-input px-3 py-2 text-sm text-muted-foreground hover:border-primary transition-colors">
+                  <Paperclip className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{formReceiptFile ? formReceiptFile.name : "Choose image..."}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={e => setFormReceiptFile(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+                {editingExpense?.receipt_url && !formReceiptFile && (
+                  <a href={editingExpense.receipt_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => saveMutation.mutate()} disabled={!formCategory || !formAmount || saveMutation.isPending || uploadingReceipt}>
+              {saveMutation.isPending || uploadingReceipt ? <Loader2 className="h-4 w-4 animate-spin" /> : editingExpense ? "Update Expense" : "Log Expense"}
             </Button>
           </div>
         </DialogContent>

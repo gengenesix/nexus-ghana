@@ -13,12 +13,23 @@ import AccountDialog from "@/components/financials/AccountDialog";
 import JournalEntryDialog from "@/components/financials/JournalEntryDialog";
 import SeedChartOfAccounts from "@/components/financials/SeedChartOfAccounts";
 import ExchangeRatesTab from "@/components/financials/ExchangeRatesTab";
+import FinancialReportDialog from "@/components/financials/FinancialReportDialog";
+import GeneralLedger from "@/components/financials/GeneralLedger";
+
+type ReportType = "pl" | "balance" | "trial" | "cashflow";
+const REPORT_CONFIG: { key: ReportType; label: string; desc: string }[] = [
+  { key: "pl", label: "Profit & Loss", desc: "Revenue vs expenses for the period" },
+  { key: "balance", label: "Balance Sheet", desc: "Assets, liabilities, and equity" },
+  { key: "trial", label: "Trial Balance", desc: "All account balances, debits and credits" },
+  { key: "cashflow", label: "Cash Flow Statement", desc: "Cash inflows and outflows" },
+];
 
 export default function Financials() {
   const { business } = useBusiness();
   const [activeTab, setActiveTab] = useState("chart");
   const [accountDialog, setAccountDialog] = useState<{ open: boolean; account?: any }>({ open: false });
   const [jeOpen, setJeOpen] = useState(false);
+  const [reportDialog, setReportDialog] = useState<{ open: boolean; type: ReportType | null }>({ open: false, type: null });
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ["chart_of_accounts", business?.id],
@@ -137,25 +148,21 @@ export default function Financials() {
         </TabsContent>
 
         <TabsContent value="ledger">
-          <Card><CardContent className="pt-6">
-            <div className="text-center py-12 text-muted-foreground">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <h3 className="font-semibold text-lg">General Ledger</h3>
-              <p className="text-sm">View all postings per account with drill-down. Create accounts and journal entries first.</p>
-            </div>
-          </CardContent></Card>
+          <GeneralLedger />
         </TabsContent>
 
         <TabsContent value="reports">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {["Profit & Loss", "Balance Sheet", "Trial Balance", "Cash Flow Statement"].map((report) => (
-              <Card key={report} className="cursor-pointer hover:border-primary/50 transition-colors">
+            {REPORT_CONFIG.map((report) => (
+              <Card key={report.key} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setReportDialog({ open: true, type: report.key })}>
                 <CardHeader>
-                  <CardTitle className="text-base">{report}</CardTitle>
-                  <CardDescription>Generate {report.toLowerCase()} report</CardDescription>
+                  <CardTitle className="text-base">{report.label}</CardTitle>
+                  <CardDescription>{report.desc}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="outline" size="sm"><FileText className="h-4 w-4 mr-1" />Generate</Button>
+                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setReportDialog({ open: true, type: report.key }); }}>
+                    <FileText className="h-4 w-4 mr-1" />Generate
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -169,6 +176,13 @@ export default function Financials() {
 
       <AccountDialog open={accountDialog.open} onOpenChange={(o) => setAccountDialog({ open: o })} account={accountDialog.account} />
       <JournalEntryDialog open={jeOpen} onOpenChange={setJeOpen} />
+      <FinancialReportDialog
+        open={reportDialog.open}
+        onOpenChange={(v) => setReportDialog({ open: v, type: reportDialog.type })}
+        reportType={reportDialog.type}
+        accounts={accounts}
+        businessName={business?.name}
+      />
     </div>
   );
 }

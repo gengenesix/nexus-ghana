@@ -23,9 +23,11 @@ interface ReceiptDialogProps {
   receiptNumber: string;
   business: any;
   onNewSale: () => void;
+  customerPhone?: string | null;
+  customerName?: string | null;
 }
 
-export function ReceiptDialog({ open, onOpenChange, cart, total, subtotal, discountAmount, paymentMethod, receiptNumber, business, onNewSale }: ReceiptDialogProps) {
+export function ReceiptDialog({ open, onOpenChange, cart, total, subtotal, discountAmount, paymentMethod, receiptNumber, business, onNewSale, customerPhone, customerName }: ReceiptDialogProps) {
   const paymentLabel = PAYMENT_METHODS.find(m => m.value === paymentMethod)?.label || paymentMethod;
 
   const downloadReceipt = () => {
@@ -84,8 +86,14 @@ export function ReceiptDialog({ open, onOpenChange, cart, total, subtotal, disco
 
   const shareWhatsApp = () => {
     const itemsList = cart.map(item => `• ${item.name} x${item.qty} = ${formatGHS(item.price * item.qty)}`).join("\n");
-    const message = `🧾 *${business?.name || "Nexus-GH"}*\nReceipt #${receiptNumber}\n${new Date().toLocaleString()}\n\n${itemsList}\n\n${discountAmount > 0 ? `Discount: -${formatGHS(discountAmount)}\n` : ""}*Total: ${formatGHS(total)}*\nPaid via: ${paymentLabel}\n\nThank you! 🙏`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
+    const greeting = customerName ? `Hello ${customerName.split(" ")[0]},\n\n` : "";
+    const message = `${greeting}🧾 *${business?.name || "NexusGH"}*\nReceipt #${receiptNumber}\n${new Date().toLocaleString()}\n\n${itemsList}\n\n${discountAmount > 0 ? `Discount: -${formatGHS(discountAmount)}\n` : ""}*Total: ${formatGHS(total)}*\nPaid via: ${paymentLabel}\n\n${business?.receipt_footer || "Thank you for your patronage! 🙏"}`;
+    // If customer has a phone, send directly to them; otherwise open share picker
+    const phone = customerPhone?.replace(/\D/g, "").replace(/^0/, "233");
+    const url = phone
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
   };
 
   return (

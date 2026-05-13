@@ -1,42 +1,48 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { StaffSessionProvider } from "@/contexts/StaffSessionContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BusinessGuard } from "@/components/BusinessGuard";
 import { StaffPinGuard } from "@/components/StaffPinGuard";
 import { AppLayout } from "@/components/AppLayout";
-import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Onboarding from "./pages/Onboarding";
-import Dashboard from "./pages/Dashboard";
-import POS from "./pages/POS";
-import Inventory from "./pages/Inventory";
-import Invoices from "./pages/Invoices";
-import Customers from "./pages/Customers";
-import Suppliers from "./pages/Suppliers";
-import Expenses from "./pages/Expenses";
-import Reports from "./pages/Reports";
-import Staff from "./pages/Staff";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { RoleGuard } from "@/components/RoleGuard";
+import { TierGate } from "@/components/TierGate";
+
+// Lazy-loaded pages — each becomes its own chunk
+const Landing = lazy(() => import("./pages/Landing"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const POS = lazy(() => import("./pages/POS"));
+const Inventory = lazy(() => import("./pages/Inventory"));
+const Invoices = lazy(() => import("./pages/Invoices"));
+const Customers = lazy(() => import("./pages/Customers"));
+const Suppliers = lazy(() => import("./pages/Suppliers"));
+const Expenses = lazy(() => import("./pages/Expenses"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Staff = lazy(() => import("./pages/Staff"));
+const Settings = lazy(() => import("./pages/Settings"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 // ERP Modules
-import Administration from "./pages/modules/Administration";
-import Financials from "./pages/modules/Financials";
-import CRM from "./pages/modules/CRM";
-import SalesOrders from "./pages/modules/SalesOrders";
-import Purchasing from "./pages/modules/Purchasing";
-import Production from "./pages/modules/Production";
-import MRP from "./pages/modules/MRP";
-import Projects from "./pages/modules/Projects";
-import ServiceModule from "./pages/modules/ServiceModule";
-import HumanResources from "./pages/modules/HumanResources";
-import Banking from "./pages/modules/Banking";
-import Warehouses from "./pages/modules/Warehouses";
+const Administration = lazy(() => import("./pages/modules/Administration"));
+const Financials = lazy(() => import("./pages/modules/Financials"));
+const CRM = lazy(() => import("./pages/modules/CRM"));
+const SalesOrders = lazy(() => import("./pages/modules/SalesOrders"));
+const Purchasing = lazy(() => import("./pages/modules/Purchasing"));
+const Production = lazy(() => import("./pages/modules/Production"));
+const MRP = lazy(() => import("./pages/modules/MRP"));
+const Projects = lazy(() => import("./pages/modules/Projects"));
+const ServiceModule = lazy(() => import("./pages/modules/ServiceModule"));
+const HumanResources = lazy(() => import("./pages/modules/HumanResources"));
+const Banking = lazy(() => import("./pages/modules/Banking"));
+const Warehouses = lazy(() => import("./pages/modules/Warehouses"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +55,14 @@ const queryClient = new QueryClient({
   },
 });
 
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+    </div>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -57,39 +71,51 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <StaffSessionProvider>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-              <Route element={<ProtectedRoute><BusinessGuard><StaffPinGuard><AppLayout /></StaffPinGuard></BusinessGuard></ProtectedRoute>}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/pos" element={<POS />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/invoices" element={<Invoices />} />
-                <Route path="/customers" element={<Customers />} />
-                <Route path="/suppliers" element={<Suppliers />} />
-                <Route path="/expenses" element={<Expenses />} />
-                <Route path="/reports" element={<Reports />} />
-                <Route path="/staff" element={<Staff />} />
-                <Route path="/settings" element={<Settings />} />
-                {/* ERP Module Routes */}
-                <Route path="/administration" element={<Administration />} />
-                <Route path="/financials" element={<Financials />} />
-                <Route path="/crm" element={<CRM />} />
-                <Route path="/sales-orders" element={<SalesOrders />} />
-                <Route path="/purchasing" element={<Purchasing />} />
-                <Route path="/production" element={<Production />} />
-                <Route path="/mrp" element={<MRP />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/service" element={<ServiceModule />} />
-                <Route path="/hr" element={<HumanResources />} />
-                <Route path="/banking" element={<Banking />} />
-                <Route path="/warehouses" element={<Warehouses />} />
-                <Route path="/opportunities" element={<CRM />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+                <Route element={<ProtectedRoute><BusinessGuard><StaffPinGuard><AppLayout /></StaffPinGuard></BusinessGuard></ProtectedRoute>}>
+                  {/* Core — available on all tiers */}
+                  <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
+                  <Route path="/pos" element={<ErrorBoundary><POS /></ErrorBoundary>} />
+                  <Route path="/inventory" element={<ErrorBoundary><Inventory /></ErrorBoundary>} />
+                  <Route path="/invoices" element={<ErrorBoundary><Invoices /></ErrorBoundary>} />
+                  <Route path="/customers" element={<ErrorBoundary><Customers /></ErrorBoundary>} />
+                  <Route path="/suppliers" element={<ErrorBoundary><Suppliers /></ErrorBoundary>} />
+                  <Route path="/expenses" element={<ErrorBoundary><Expenses /></ErrorBoundary>} />
+                  <Route path="/reports" element={<ErrorBoundary><RoleGuard feature="reports"><Reports /></RoleGuard></ErrorBoundary>} />
+                  <Route path="/staff" element={<ErrorBoundary><RoleGuard feature="staff"><Staff /></RoleGuard></ErrorBoundary>} />
+                  <Route path="/settings" element={<ErrorBoundary><RoleGuard feature="settings"><Settings /></RoleGuard></ErrorBoundary>} />
+
+                  {/* Finance tier */}
+                  <Route path="/financials" element={<ErrorBoundary><TierGate module="financials"><RoleGuard feature="financials"><Financials /></RoleGuard></TierGate></ErrorBoundary>} />
+                  <Route path="/banking" element={<ErrorBoundary><TierGate module="banking"><RoleGuard feature="banking"><Banking /></RoleGuard></TierGate></ErrorBoundary>} />
+
+                  {/* Sales & CRM tier */}
+                  <Route path="/crm" element={<ErrorBoundary><TierGate module="crm"><CRM /></TierGate></ErrorBoundary>} />
+                  <Route path="/sales-orders" element={<ErrorBoundary><TierGate module="sales-orders"><SalesOrders /></TierGate></ErrorBoundary>} />
+                  <Route path="/projects" element={<ErrorBoundary><TierGate module="projects"><Projects /></TierGate></ErrorBoundary>} />
+                  <Route path="/service" element={<ErrorBoundary><TierGate module="service"><ServiceModule /></TierGate></ErrorBoundary>} />
+
+                  {/* Logistics tier */}
+                  <Route path="/purchasing" element={<ErrorBoundary><TierGate module="purchasing"><Purchasing /></TierGate></ErrorBoundary>} />
+                  <Route path="/warehouses" element={<ErrorBoundary><TierGate module="warehouses"><Warehouses /></TierGate></ErrorBoundary>} />
+                  <Route path="/production" element={<ErrorBoundary><TierGate module="production"><Production /></TierGate></ErrorBoundary>} />
+                  <Route path="/mrp" element={<ErrorBoundary><TierGate module="mrp"><MRP /></TierGate></ErrorBoundary>} />
+
+                  {/* Professional-only */}
+                  <Route path="/hr" element={<ErrorBoundary><TierGate module="hr"><RoleGuard feature="hr"><HumanResources /></RoleGuard></TierGate></ErrorBoundary>} />
+                  <Route path="/administration" element={<ErrorBoundary><TierGate module="administration"><RoleGuard feature="administration"><Administration /></RoleGuard></TierGate></ErrorBoundary>} />
+
+                  {/* /opportunities was a duplicate of /crm — redirect */}
+                  <Route path="/opportunities" element={<Navigate to="/crm" replace />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </StaffSessionProvider>
         </AuthProvider>
       </BrowserRouter>

@@ -4,17 +4,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useBusiness } from "@/hooks/useBusiness";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Truck, Package, FileCheck, Plus } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ShoppingCart, Truck, Package, FileCheck, Plus, PackageCheck, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import PurchaseOrderDialog from "@/components/purchasing/PurchaseOrderDialog";
 
 export default function Purchasing() {
   const { business } = useBusiness();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("orders");
   const [poOpen, setPoOpen] = useState(false);
+  const [receivingPo, setReceivingPo] = useState<any>(null);
 
   const { data: purchaseOrders = [] } = useQuery({
     queryKey: ["purchase_orders", business?.id],
@@ -24,6 +28,33 @@ export default function Purchasing() {
       return data;
     },
     enabled: !!business?.id,
+  });
+
+  const { data: poItems = [] } = useQuery({
+    queryKey: ["po-items", receivingPo?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("purchase_order_items").select("*").eq("po_id", receivingPo!.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!receivingPo,
+  });
+
+  const receiveMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("receive_purchase_order", {
+        p_po_id: receivingPo!.id,
+        p_business_id: business!.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["purchase_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      setReceivingPo(null);
+      toast.success("Purchase order received — stock updated!");
+    },
+    onError: (err: any) => toast.error(err.message),
   });
 
   return (
@@ -53,7 +84,7 @@ export default function Purchasing() {
           <Card><CardContent className="pt-4">
             {purchaseOrders.length > 0 ? (
               <Table>
-                <TableHeader><TableRow><TableHead>PO #</TableHead><TableHead>Supplier</TableHead><TableHead>Date</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                <TableHeader><TableRow><TableHead>PO #</TableHead><TableHead>Supplier</TableHead><TableHead>Date</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead><TableHead className="w-[120px]"></TableHead></TableRow></TableHeader>
                 <TableBody>{purchaseOrders.map((po: any) => (
                   <TableRow key={po.id}>
                     <TableCell className="font-mono">{po.po_number}</TableCell>
@@ -61,6 +92,13 @@ export default function Purchasing() {
                     <TableCell>{format(new Date(po.date), "MMM d, yyyy")}</TableCell>
                     <TableCell className="text-right font-mono">GHS {Number(po.total).toLocaleString()}</TableCell>
                     <TableCell><Badge variant="outline" className="capitalize">{po.status}</Badge></TableCell>
+                    <TableCell>
+                      {po.status !== "received" && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs text-green-600 hover:bg-green-600/10" onClick={() => setReceivingPo(po)}>
+                          <PackageCheck className="h-3.5 w-3.5 mr-1" /> Receive
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}</TableBody>
               </Table>
@@ -76,6 +114,49 @@ export default function Purchasing() {
       </Tabs>
 
       <PurchaseOrderDialog open={poOpen} onOpenChange={setPoOpen} />
+
+      {/* Receive PO Dialog */}
+      <Dialog open={!!receivingPo} onOpenChange={(v) => { if (!v) setReceivingPo(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Receive Purchase Order</DialogTitle>
+          </DialogHeader>
+          {receivingPo && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-secondary/50 p-3 text-sm space-y-1">
+                <p className="font-semibold">{receivingPo.po_number}</p>
+                <p className="text-muted-foreground">{receivingPo.supplier_name} · {format(new Date(receivingPo.date), "MMM d, yyyy")}</p>
+              </div>
+
+              {poItems.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Items to receive</p>
+                  <div className="divide-y divide-border rounded-lg border overflow-hidden">
+                    {poItems.map((item: any) => (
+                      <div key={item.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                        <span className="flex-1">{item.description}</span>
+                        <span className="text-muted-foreground">×{item.qty}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Items linked to products will have their stock incremented automatically.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">This PO has no saved line items. Confirming receipt will mark it as received.</p>
+              )}
+
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setReceivingPo(null)}>Cancel</Button>
+                <Button className="flex-1 gold-gradient text-primary-foreground" onClick={() => receiveMutation.mutate()} disabled={receiveMutation.isPending}>
+                  {receiveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><PackageCheck className="h-4 w-4 mr-1" /> Confirm Receipt</>}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

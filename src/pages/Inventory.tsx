@@ -18,9 +18,24 @@ import { exportInventoryCsv } from "@/lib/export";
 import CsvImportDialog from "@/components/CsvImportDialog";
 import SerialBatchTab from "@/components/inventory/SerialBatchTab";
 import { Search, Plus, Edit, Trash2, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Download, Upload, PackagePlus, PackageMinus } from "lucide-react";
+import { TableSkeleton } from "@/components/TableSkeleton";
 import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 const PAGE_SIZE = 25;
+
+const productSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  sku: z.string().default(""),
+  barcode: z.string().default(""),
+  cost_price: z.coerce.number().min(0, "Must be 0 or more"),
+  selling_price: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
+  qty: z.coerce.number().int().min(0, "Must be 0 or more"),
+  reorder_level: z.coerce.number().int().min(0, "Must be 0 or more"),
+});
+type ProductForm = z.infer<typeof productSchema>;
 
 export default function Inventory() {
   const { business } = useBusiness();
@@ -39,12 +54,10 @@ export default function Inventory() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
 
-  const [formName, setFormName] = useState("");
-  const [formSku, setFormSku] = useState("");
-  const [formCostPrice, setFormCostPrice] = useState("");
-  const [formSellingPrice, setFormSellingPrice] = useState("");
-  const [formQty, setFormQty] = useState("");
-  const [formReorderLevel, setFormReorderLevel] = useState("10");
+  const productForm = useForm<ProductForm>({
+    resolver: zodResolver(productSchema),
+    defaultValues: { name: "", sku: "", barcode: "", cost_price: 0, selling_price: 0, qty: 0, reorder_level: 10 },
+  });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", business?.id],
@@ -96,13 +109,15 @@ export default function Inventory() {
   const lowStockCount = products.filter((p: any) => p.qty <= p.reorder_level).length;
 
   const resetForm = () => {
-    setFormName(""); setFormSku(""); setFormCostPrice(""); setFormSellingPrice(""); setFormQty(""); setFormReorderLevel("10");
+    productForm.reset({ name: "", sku: "", cost_price: 0, selling_price: 0, qty: 0, reorder_level: 10 });
     setEditingProduct(null);
   };
 
   const openEdit = (p: any) => {
-    setFormName(p.name); setFormSku(p.sku || ""); setFormCostPrice(String(p.cost_price));
-    setFormSellingPrice(String(p.selling_price)); setFormQty(String(p.qty)); setFormReorderLevel(String(p.reorder_level));
+    productForm.reset({
+      name: p.name, sku: p.sku || "", barcode: p.barcode || "", cost_price: Number(p.cost_price),
+      selling_price: Number(p.selling_price), qty: Number(p.qty), reorder_level: Number(p.reorder_level),
+    });
     setEditingProduct(p);
     setShowAdd(true);
   };
@@ -115,15 +130,16 @@ export default function Inventory() {
   };
 
   const addMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (values: ProductForm) => {
       const payload = {
         business_id: business!.id,
-        name: formName.trim(),
-        sku: formSku.trim(),
-        cost_price: Number(formCostPrice) || 0,
-        selling_price: Number(formSellingPrice) || 0,
-        qty: Number(formQty) || 0,
-        reorder_level: Number(formReorderLevel) || 10,
+        name: values.name,
+        sku: values.sku,
+        barcode: values.barcode || null,
+        cost_price: values.cost_price,
+        selling_price: values.selling_price,
+        qty: values.qty,
+        reorder_level: values.reorder_level,
       };
       if (editingProduct) {
         const { error } = await supabase.from("products").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", editingProduct.id);
@@ -250,10 +266,11 @@ export default function Inventory() {
                 <TableHead className="w-[130px]"></TableHead>
               </TableRow>
             </TableHeader>
+            {isLoading ? (
+              <TableSkeleton rows={8} cols={7} />
+            ) : (
             <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin mx-auto" /></TableCell></TableRow>
-              ) : products.length === 0 ? (
+              {products.length === 0 ? (
                 <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No products found.</TableCell></TableRow>
               ) : products.map((product: any) => {
                 const margin = Number(product.selling_price) > 0
@@ -285,6 +302,7 @@ export default function Inventory() {
                 );
               })}
             </TableBody>
+            )}
           </Table>
         </CardContent>
       </Card>
@@ -307,18 +325,49 @@ export default function Inventory() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Product Name</Label><Input placeholder="e.g. Milo 400g" value={formName} onChange={e => setFormName(e.target.value)} /></div>
-              <div className="space-y-2"><Label>SKU</Label><Input placeholder="e.g. MIL-001" value={formSku} onChange={e => setFormSku(e.target.value)} /></div>
+              <div className="space-y-1">
+                <Label>Product Name *</Label>
+                <Input placeholder="e.g. Milo 400g" {...productForm.register("name")} />
+                {productForm.formState.errors.name && <p className="text-xs text-destructive">{productForm.formState.errors.name.message}</p>}
+              </div>
+              <div className="space-y-1">
+                <Label>SKU</Label>
+                <Input placeholder="e.g. MIL-001" {...productForm.register("sku")} />
+              </div>
+              <div className="space-y-1">
+                <Label>Barcode</Label>
+                <Input placeholder="e.g. 6001234567890" {...productForm.register("barcode")} />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Cost Price (GHS)</Label><Input type="number" placeholder="0.00" value={formCostPrice} onChange={e => setFormCostPrice(e.target.value)} /></div>
-              <div className="space-y-2"><Label>Selling Price (GHS)</Label><Input type="number" placeholder="0.00" value={formSellingPrice} onChange={e => setFormSellingPrice(e.target.value)} /></div>
+              <div className="space-y-1">
+                <Label>Cost Price (GHS)</Label>
+                <Input type="number" step="0.01" placeholder="0.00" {...productForm.register("cost_price")} />
+                {productForm.formState.errors.cost_price && <p className="text-xs text-destructive">{productForm.formState.errors.cost_price.message}</p>}
+              </div>
+              <div className="space-y-1">
+                <Label>Selling Price (GHS) *</Label>
+                <Input type="number" step="0.01" placeholder="0.00" {...productForm.register("selling_price")} />
+                {productForm.formState.errors.selling_price && <p className="text-xs text-destructive">{productForm.formState.errors.selling_price.message}</p>}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Quantity</Label><Input type="number" placeholder="0" value={formQty} onChange={e => setFormQty(e.target.value)} /></div>
-              <div className="space-y-2"><Label>Reorder Level</Label><Input type="number" placeholder="10" value={formReorderLevel} onChange={e => setFormReorderLevel(e.target.value)} /></div>
+              <div className="space-y-1">
+                <Label>Quantity</Label>
+                <Input type="number" placeholder="0" {...productForm.register("qty")} />
+                {productForm.formState.errors.qty && <p className="text-xs text-destructive">{productForm.formState.errors.qty.message}</p>}
+              </div>
+              <div className="space-y-1">
+                <Label>Reorder Level</Label>
+                <Input type="number" placeholder="10" {...productForm.register("reorder_level")} />
+                {productForm.formState.errors.reorder_level && <p className="text-xs text-destructive">{productForm.formState.errors.reorder_level.message}</p>}
+              </div>
             </div>
-            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => addMutation.mutate()} disabled={!formName.trim() || addMutation.isPending}>
+            <Button
+              className="w-full gold-gradient text-primary-foreground"
+              onClick={productForm.handleSubmit((values) => addMutation.mutate(values))}
+              disabled={addMutation.isPending}
+            >
               {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : editingProduct ? "Update Product" : "Add Product"}
             </Button>
           </div>

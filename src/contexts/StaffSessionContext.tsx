@@ -10,7 +10,7 @@ export interface StaffSession {
 interface StaffSessionContextType {
   staff: StaffSession | null;
   isStaffLoggedIn: boolean;
-  loginWithPin: (businessId: string, pin: string) => Promise<StaffSession | null>;
+  loginWithPin: (businessId: string, pin: string, staffId?: string) => Promise<StaffSession | null>;
   logout: () => void;
   canAccess: (feature: string) => boolean;
 }
@@ -46,10 +46,11 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const loginWithPin = useCallback(async (businessId: string, pin: string): Promise<StaffSession | null> => {
+  const loginWithPin = useCallback(async (businessId: string, pin: string, staffId?: string): Promise<StaffSession | null> => {
     const { data, error } = await supabase.rpc("verify_staff_pin", {
       _business_id: businessId,
       _pin: pin,
+      _staff_id: staffId ?? null,
     });
 
     if (error || !data || data.length === 0) {

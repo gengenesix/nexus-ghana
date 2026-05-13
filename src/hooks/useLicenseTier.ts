@@ -1,0 +1,82 @@
+import { useBusiness } from "./useBusiness";
+
+export type LicenseTier =
+  | "starter"
+  | "professional"
+  | "limited_financial"
+  | "limited_logistics"
+  | "limited_sales_crm";
+
+// Modules available per tier. "professional" gets everything.
+const TIER_MODULES: Record<LicenseTier, string[]> = {
+  starter: [
+    "dashboard", "pos", "inventory", "invoices",
+    "customers", "suppliers", "expenses", "reports",
+    "staff", "settings",
+  ],
+  limited_financial: [
+    "dashboard", "pos", "inventory", "invoices",
+    "customers", "suppliers", "expenses", "reports",
+    "staff", "settings",
+    "financials", "banking",
+  ],
+  limited_logistics: [
+    "dashboard", "pos", "inventory", "invoices",
+    "customers", "suppliers", "expenses", "reports",
+    "staff", "settings",
+    "purchasing", "warehouses", "production", "mrp",
+  ],
+  limited_sales_crm: [
+    "dashboard", "pos", "inventory", "invoices",
+    "customers", "suppliers", "expenses", "reports",
+    "staff", "settings",
+    "crm", "sales-orders", "projects", "service",
+  ],
+  professional: [
+    "dashboard", "pos", "inventory", "invoices",
+    "customers", "suppliers", "expenses", "reports",
+    "staff", "settings",
+    "financials", "banking",
+    "crm", "sales-orders", "projects", "service",
+    "purchasing", "warehouses", "production", "mrp",
+    "hr", "administration",
+  ],
+};
+
+// Human-readable tier labels for upgrade prompts
+export const TIER_LABELS: Record<LicenseTier, string> = {
+  starter: "Starter",
+  limited_financial: "Finance",
+  limited_logistics: "Logistics",
+  limited_sales_crm: "Sales & CRM",
+  professional: "Professional",
+};
+
+// Which tier unlocks a given module (used for upgrade messaging)
+export const MODULE_REQUIRED_TIER: Record<string, LicenseTier> = {
+  financials: "limited_financial",
+  banking: "limited_financial",
+  crm: "limited_sales_crm",
+  "sales-orders": "limited_sales_crm",
+  projects: "limited_sales_crm",
+  service: "limited_sales_crm",
+  purchasing: "limited_logistics",
+  warehouses: "limited_logistics",
+  production: "limited_logistics",
+  mrp: "limited_logistics",
+  hr: "professional",
+  administration: "professional",
+};
+
+export function useLicenseTier() {
+  const { business } = useBusiness();
+  const tier = (business as any)?.license_tier as LicenseTier | undefined;
+
+  // Default to "professional" if no tier set (legacy / unconfigured businesses)
+  const effectiveTier: LicenseTier = tier ?? "professional";
+  const allowedModules = TIER_MODULES[effectiveTier] ?? TIER_MODULES.professional;
+
+  const canAccess = (module: string): boolean => allowedModules.includes(module);
+
+  return { tier: effectiveTier, canAccess, allowedModules };
+}

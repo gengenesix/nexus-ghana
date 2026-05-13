@@ -17,10 +17,35 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatGHS, calculateTaxes } from "@/lib/ghana";
 import { generateInvoicePDF } from "@/lib/pdf";
 import { exportInvoicesCsv } from "@/lib/export";
-import { Search, Plus, Eye, Send, Loader2, Download, RotateCcw, FileText, Clock, DollarSign, AlertTriangle, CreditCard } from "lucide-react";
+import { Search, Plus, Eye, Send, Loader2, Download, RotateCcw, FileText, Clock, DollarSign, AlertTriangle, CreditCard, Trash2, MessageSquare } from "lucide-react";
+import { TableSkeleton } from "@/components/TableSkeleton";
 import { toast } from "sonner";
 import { differenceInDays, format } from "date-fns";
 import RecurringInvoicesTab from "@/components/invoices/RecurringInvoicesTab";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const today = new Date().toISOString().split("T")[0];
+
+const lineItemSchema = z.object({
+  product_id: z.string().nullable().default(null),
+  description: z.string().min(1, "Description required"),
+  qty: z.coerce.number().min(1, "Min 1"),
+  unit_price: z.coerce.number().min(0, "Must be ≥ 0"),
+});
+
+const invoiceSchema = z.object({
+  customer_id: z.string().default(""),
+  date: z.string().min(1, "Invoice date is required"),
+  due_date: z.string().default(""),
+  notes: z.string().default(""),
+  apply_vat: z.boolean().default(true),
+  apply_nhil: z.boolean().default(true),
+  apply_getfl: z.boolean().default(true),
+  line_items: z.array(lineItemSchema).min(1, "Add at least one line item"),
+});
+type InvoiceForm = z.infer<typeof invoiceSchema>;
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -43,12 +68,28 @@ export default function Invoices() {
   const [paymentMethod, setPaymentMethod] = useState("cash");
 
   // Create form
-  const [formCustomerId, setFormCustomerId] = useState("");
-  const [formDate, setFormDate] = useState(new Date().toISOString().split("T")[0]);
-  const [formDueDate, setFormDueDate] = useState("");
-  const [formNotes, setFormNotes] = useState("");
-  const [formSubtotal, setFormSubtotal] = useState("0");
-  const [taxes, setTaxes] = useState({ vat: true, nhil: true, getfl: true });
+  const invoiceForm = useForm<InvoiceForm>({
+    resolver: zodResolver(invoiceSchema),
+    defaultValues: {
+      customer_id: "",
+      date: today,
+      due_date: "",
+      notes: "",
+      apply_vat: true,
+      apply_nhil: true,
+      apply_getfl: true,
+      line_items: [{ product_id: null, description: "", qty: 1, unit_price: 0 }],
+    },
+  });
+  const { fields: lineFields, append: appendLine, remove: removeLine } = useFieldArray({
+    control: invoiceForm.control,
+    name: "line_items",
+  });
+  const watchedLines = invoiceForm.watch("line_items");
+  const watchedSubtotal = watchedLines.reduce((s, item) => s + (Number(item.qty) || 0) * (Number(item.unit_price) || 0), 0);
+  const watchedVat = invoiceForm.watch("apply_vat");
+  const watchedNhil = invoiceForm.watch("apply_nhil");
+  const watchedGetfl = invoiceForm.watch("apply_getfl");
 
   const { data: invoices = [], isLoading } = useQuery({
     queryKey: ["invoices", business?.id],
@@ -68,6 +109,20 @@ export default function Invoices() {
       return data;
     },
     enabled: !!business,
+  });
+
+  const { data: invoiceLineItems = [] } = useQuery({
+    queryKey: ["invoice-items", selectedInvoice?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("invoice_items")
+        .select("id, description, qty, unit_price")
+        .eq("invoice_id", selectedInvoice!.id)
+        .order("id");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedInvoice,
   });
 
   const { data: payments = [] } = useQuery({
@@ -108,8 +163,8 @@ export default function Invoices() {
     return { totalInvoiced, totalPaid, totalUnpaid, totalOverdue, overdueCount: overdue.length, paidCount: paid.length, aging };
   }, [invoices]);
 
-  const subtotalNum = Number(formSubtotal) || 0;
-  const taxCalc = calculateTaxes(subtotalNum, taxes);
+  const subtotalNum = watchedSubtotal;
+  const taxCalc = calculateTaxes(subtotalNum, { vat: watchedVat, nhil: watchedNhil, getfl: watchedGetfl });
 
   // Invoice payments
   const invoicePayments = useMemo(() => {
@@ -121,34 +176,47 @@ export default function Invoices() {
   const balanceDue = selectedInvoice ? Number(selectedInvoice.total) - totalPaidForInvoice : 0;
 
   const createMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (values: InvoiceForm) => {
       const { data: invNum, error: rpcErr } = await supabase.rpc("generate_invoice_number");
       if (rpcErr) throw rpcErr;
-      const customer = customers.find((c: any) => c.id === formCustomerId);
-      const { error } = await supabase.from("invoices").insert({
+      const customer = customers.find((c: any) => c.id === values.customer_id);
+      const sub = values.line_items.reduce((s, item) => s + Number(item.qty) * Number(item.unit_price), 0);
+      const tc = calculateTaxes(sub, { vat: values.apply_vat, nhil: values.apply_nhil, getfl: values.apply_getfl });
+      const { data: invoice, error } = await supabase.from("invoices").insert({
         business_id: business!.id,
         invoice_number: invNum,
-        customer_id: formCustomerId || null,
+        customer_id: values.customer_id || null,
         customer_name: customer?.name || "Walk-in Customer",
         status: "draft",
-        date: formDate,
-        due_date: formDueDate || new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
-        subtotal: subtotalNum,
-        vat_amount: taxes.vat ? taxCalc.vatAmount : 0,
-        nhil_amount: taxes.nhil ? taxCalc.nhilAmount : 0,
-        getfl_amount: taxes.getfl ? taxCalc.getflAmount : 0,
-        total: taxCalc.total,
-        notes: formNotes,
-        apply_vat: taxes.vat,
-        apply_nhil: taxes.nhil,
-        apply_getfl: taxes.getfl,
-      });
+        date: values.date,
+        due_date: values.due_date || new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
+        subtotal: sub,
+        vat_amount: values.apply_vat ? tc.vatAmount : 0,
+        nhil_amount: values.apply_nhil ? tc.nhilAmount : 0,
+        getfl_amount: values.apply_getfl ? tc.getflAmount : 0,
+        total: tc.total,
+        notes: values.notes,
+        apply_vat: values.apply_vat,
+        apply_nhil: values.apply_nhil,
+        apply_getfl: values.apply_getfl,
+      }).select().single();
       if (error) throw error;
+
+      // Insert line items
+      const items = values.line_items.map(item => ({
+        invoice_id: invoice.id,
+        product_id: item.product_id || null,
+        description: item.description,
+        qty: Number(item.qty),
+        unit_price: Number(item.unit_price),
+      }));
+      const { error: itemsErr } = await supabase.from("invoice_items").insert(items);
+      if (itemsErr) throw itemsErr;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       setShowCreate(false);
-      setFormCustomerId(""); setFormNotes(""); setFormSubtotal("0");
+      invoiceForm.reset();
       toast.success("Invoice created!");
     },
     onError: (err: any) => toast.error(err.message),
@@ -339,9 +407,12 @@ export default function Invoices() {
                 <TableHead className="w-[200px]"></TableHead>
               </TableRow>
             </TableHeader>
+            {isLoading ? (
+              <TableSkeleton rows={7} cols={7} />
+            ) : (
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{isLoading ? "Loading..." : "No invoices yet."}</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No invoices yet.</TableCell></TableRow>
               ) : filtered.map((invoice: any) => {
                 const isOverdue = invoice.status !== "paid" && invoice.due_date < new Date().toISOString().split("T")[0];
                 return (
@@ -375,6 +446,7 @@ export default function Invoices() {
                 );
               })}
             </TableBody>
+            )}
           </Table>
         </CardContent>
       </Card>
@@ -415,6 +487,26 @@ export default function Invoices() {
                     <p className="font-medium">{format(new Date(selectedInvoice.created_at), "dd MMM yyyy")}</p>
                   </div>
                 </div>
+
+                {invoiceLineItems.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-sm font-semibold mb-2">Line Items</p>
+                      <div className="space-y-1.5">
+                        {invoiceLineItems.map((item: any) => (
+                          <div key={item.id} className="flex items-center justify-between text-sm">
+                            <div className="flex-1 min-w-0">
+                              <p className="truncate">{item.description}</p>
+                              <p className="text-xs text-muted-foreground">{item.qty} × {formatGHS(Number(item.unit_price))}</p>
+                            </div>
+                            <span className="ml-2 font-medium">{formatGHS(Number(item.qty) * Number(item.unit_price))}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <Separator />
 
@@ -542,40 +634,155 @@ export default function Invoices() {
             <DialogTitle className="font-display">Create Invoice</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"><Label>Customer</Label>
-              <Select value={formCustomerId} onValueChange={setFormCustomerId}>
-                <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
-                <SelectContent>
-                  {customers.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label>Customer</Label>
+                <Controller
+                  control={invoiceForm.control}
+                  name="customer_id"
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
+                      <SelectContent>
+                        {customers.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Invoice Date *</Label>
+                <Input type="date" {...invoiceForm.register("date")} />
+                {invoiceForm.formState.errors.date && <p className="text-xs text-destructive">{invoiceForm.formState.errors.date.message}</p>}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Invoice Date</Label><Input type="date" value={formDate} onChange={e => setFormDate(e.target.value)} /></div>
-              <div className="space-y-2"><Label>Due Date</Label><Input type="date" value={formDueDate} onChange={e => setFormDueDate(e.target.value)} /></div>
+              <div className="space-y-1">
+                <Label>Due Date</Label>
+                <Input type="date" {...invoiceForm.register("due_date")} />
+              </div>
+              <div className="space-y-1">
+                <Label>Notes</Label>
+                <Input placeholder="Optional notes..." {...invoiceForm.register("notes")} />
+              </div>
             </div>
-            <div className="space-y-2"><Label>Subtotal (GHS)</Label><Input type="number" placeholder="0.00" value={formSubtotal} onChange={e => setFormSubtotal(e.target.value)} /></div>
-            <div className="space-y-2"><Label>Notes</Label><Textarea placeholder="Any additional notes..." value={formNotes} onChange={e => setFormNotes(e.target.value)} /></div>
 
             <Separator />
-            <p className="text-sm font-medium">Ghana Taxes</p>
+
+            {/* Line Items */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between"><Label>VAT (15%)</Label><Switch checked={taxes.vat} onCheckedChange={v => setTaxes(t => ({ ...t, vat: v }))} /></div>
-              <div className="flex items-center justify-between"><Label>NHIL (2.5%)</Label><Switch checked={taxes.nhil} onCheckedChange={v => setTaxes(t => ({ ...t, nhil: v }))} /></div>
-              <div className="flex items-center justify-between"><Label>GETFL (1%)</Label><Switch checked={taxes.getfl} onCheckedChange={v => setTaxes(t => ({ ...t, getfl: v }))} /></div>
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">Line Items *</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => appendLine({ product_id: null, description: "", qty: 1, unit_price: 0 })}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Add Item
+                </Button>
+              </div>
+              {invoiceForm.formState.errors.line_items && !Array.isArray(invoiceForm.formState.errors.line_items) && (
+                <p className="text-xs text-destructive">{invoiceForm.formState.errors.line_items.message}</p>
+              )}
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="p-2 text-left text-xs font-medium">Description</th>
+                      <th className="p-2 text-right text-xs font-medium w-16">Qty</th>
+                      <th className="p-2 text-right text-xs font-medium w-24">Price</th>
+                      <th className="p-2 text-right text-xs font-medium w-24">Total</th>
+                      <th className="w-8"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lineFields.map((field, index) => {
+                      const qty = Number(watchedLines[index]?.qty) || 0;
+                      const price = Number(watchedLines[index]?.unit_price) || 0;
+                      return (
+                        <tr key={field.id} className="border-t">
+                          <td className="p-1">
+                            <Input
+                              className="h-7 text-xs"
+                              placeholder="Item description"
+                              {...invoiceForm.register(`line_items.${index}.description`)}
+                            />
+                          </td>
+                          <td className="p-1">
+                            <Input
+                              className="h-7 text-xs text-right"
+                              type="number"
+                              min={1}
+                              {...invoiceForm.register(`line_items.${index}.qty`)}
+                            />
+                          </td>
+                          <td className="p-1">
+                            <Input
+                              className="h-7 text-xs text-right"
+                              type="number"
+                              step="0.01"
+                              min={0}
+                              placeholder="0.00"
+                              {...invoiceForm.register(`line_items.${index}.unit_price`)}
+                            />
+                          </td>
+                          <td className="p-1 text-right font-mono text-xs pr-2 text-primary">
+                            {formatGHS(qty * price)}
+                          </td>
+                          <td className="p-1">
+                            {lineFields.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => removeLine(index)}
+                              >
+                                <Trash2 className="h-3 w-3 text-destructive" />
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <Separator />
-            <div className="text-sm space-y-1">
-              <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatGHS(subtotalNum)}</span></div>
-              {taxes.vat && <div className="flex justify-between"><span className="text-muted-foreground">VAT (15%)</span><span>{formatGHS(taxCalc.vatAmount)}</span></div>}
-              {taxes.nhil && <div className="flex justify-between"><span className="text-muted-foreground">NHIL (2.5%)</span><span>{formatGHS(taxCalc.nhilAmount)}</span></div>}
-              {taxes.getfl && <div className="flex justify-between"><span className="text-muted-foreground">GETFL (1%)</span><span>{formatGHS(taxCalc.getflAmount)}</span></div>}
-              <Separator />
-              <div className="flex justify-between font-bold text-lg"><span>Total</span><span className="text-primary">{formatGHS(taxCalc.total)}</span></div>
+
+            {/* Tax toggles */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="flex items-center justify-between rounded-lg border p-2">
+                <Label className="text-xs">VAT 15%</Label>
+                <Controller control={invoiceForm.control} name="apply_vat" render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+              </div>
+              <div className="flex items-center justify-between rounded-lg border p-2">
+                <Label className="text-xs">NHIL 2.5%</Label>
+                <Controller control={invoiceForm.control} name="apply_nhil" render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+              </div>
+              <div className="flex items-center justify-between rounded-lg border p-2">
+                <Label className="text-xs">GETFL 1%</Label>
+                <Controller control={invoiceForm.control} name="apply_getfl" render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+              </div>
             </div>
 
-            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
+            <div className="rounded-lg bg-secondary/50 p-3 text-sm space-y-1">
+              <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatGHS(subtotalNum)}</span></div>
+              {watchedVat && <div className="flex justify-between"><span className="text-muted-foreground">VAT (15%)</span><span>{formatGHS(taxCalc.vatAmount)}</span></div>}
+              {watchedNhil && <div className="flex justify-between"><span className="text-muted-foreground">NHIL (2.5%)</span><span>{formatGHS(taxCalc.nhilAmount)}</span></div>}
+              {watchedGetfl && <div className="flex justify-between"><span className="text-muted-foreground">GETFL (1%)</span><span>{formatGHS(taxCalc.getflAmount)}</span></div>}
+              <Separator />
+              <div className="flex justify-between font-bold text-base"><span>Total</span><span className="text-primary">{formatGHS(taxCalc.total)}</span></div>
+            </div>
+
+            <Button
+              className="w-full gold-gradient text-primary-foreground"
+              onClick={invoiceForm.handleSubmit((values) => createMutation.mutate(values))}
+              disabled={createMutation.isPending}
+            >
               {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Send className="h-4 w-4 mr-2" /> Create Invoice</>}
             </Button>
           </div>

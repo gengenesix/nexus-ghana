@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Factory, Layers, ClipboardList, Calendar, Plus } from "lucide-react";
 import { format } from "date-fns";
 import ProductionOrderDialog from "@/components/production/ProductionOrderDialog";
+import { ProductionScheduler } from "@/components/production/ProductionScheduler";
 
 export default function Production() {
   const { business } = useBusiness();
@@ -98,7 +99,10 @@ export default function Production() {
         </TabsContent>
 
         <TabsContent value="scheduling">
-          <Card><CardContent className="text-center py-12 text-muted-foreground"><Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" /><h3 className="font-semibold text-lg">Production Scheduling</h3><p className="text-sm">Plan production runs against capacity. Create production orders first.</p></CardContent></Card>
+          <ProductionScheduler
+            orders={prodOrders}
+            onOrderClick={() => setProdOrderOpen(true)}
+          />
         </TabsContent>
       </Tabs>
 
