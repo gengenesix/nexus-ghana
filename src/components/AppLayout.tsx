@@ -1,4 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { NexisBadge, NexisWordmark } from "@/components/NexisLogo";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileNav } from "@/components/MobileNav";
 import { Outlet, useLocation } from "react-router-dom";
@@ -25,15 +26,8 @@ export function AppLayout() {
             <div className="flex items-center gap-4">
               <SidebarTrigger className="mr-2 hidden md:flex" />
               <div className="flex items-center gap-2 md:hidden">
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px]"
-                  style={{ backgroundColor: "var(--forest)", color: "var(--lime)" }}
-                >
-                  NX
-                </div>
-                <span className="font-extrabold text-base" style={{ color: "var(--forest)", letterSpacing: "-0.03em" }}>
-                  Nexus-GH
-                </span>
+                <NexisBadge size={28} />
+                <NexisWordmark style={{ color: "var(--forest)", fontSize: 16 }} />
               </div>
               <GlobalSearch />
             </div>

@@ -42,7 +42,7 @@ interface ReceiptData {
 export const generateInvoicePDF = (invoice: InvoiceData, business: BusinessData) => {
   const doc = new jsPDF();
   
-  // Colors (NexusGH gold theme)
+  // Colors (Nexis gold theme)
   const primaryGold = [255, 193, 7]; // Gold
   const darkGray = [51, 51, 51];
   const lightGray = [128, 128, 128];
@@ -55,7 +55,7 @@ export const generateInvoicePDF = (invoice: InvoiceData, business: BusinessData)
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(24);
   doc.setFont('helvetica', 'bold');
-  doc.text(business.name || 'NexusGH', 20, 25);
+  doc.text(business.name || 'Nexis', 20, 25);
   
   // Invoice title
   doc.setTextColor(51, 51, 51);
@@ -146,7 +146,7 @@ export const generateInvoicePDF = (invoice: InvoiceData, business: BusinessData)
   const pageHeight = doc.internal.pageSize.height;
   doc.setFontSize(10);
   doc.setTextColor(128, 128, 128);
-  doc.text('Powered by NexusGH Business Management System', 20, pageHeight - 20);
+  doc.text('Powered by Nexis Business Management System', 20, pageHeight - 20);
   
   // Save the PDF
   doc.save(`Invoice-${invoice.invoice_number}.pdf`);
@@ -168,7 +168,7 @@ export const generateReceiptPDF = (receipt: ReceiptData, business: BusinessData)
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text(business.name || 'NexusGH', 20, 22);
+  doc.text(business.name || 'Nexis', 20, 22);
   
   // Receipt title
   doc.setTextColor(51, 51, 51);
@@ -239,7 +239,7 @@ export const generateReceiptPDF = (receipt: ReceiptData, business: BusinessData)
   doc.setFontSize(10);
   doc.setTextColor(128, 128, 128);
   doc.text('Thank you for your business!', 20, pageHeight - 30);
-  doc.text('Powered by NexusGH Business Management System', 20, pageHeight - 20);
+  doc.text('Powered by Nexis Business Management System', 20, pageHeight - 20);
   
   // Save the PDF
   doc.save(`Receipt-${receipt.receipt_number}.pdf`);
@@ -260,7 +260,7 @@ export const generateCustomerStatement = (
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(20);
   doc.setFont("helvetica", "bold");
-  doc.text(business.name || "NexusGH", 14, 22);
+  doc.text(business.name || "Nexis", 14, 22);
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.text("ACCOUNT STATEMENT", 150, 22);
@@ -346,7 +346,7 @@ export const generateCustomerStatement = (
   doc.setTextColor(128, 128, 128);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Powered by NexusGH Business Management System", 14, pageH - 12);
+  doc.text("Powered by Nexis Business Management System", 14, pageH - 12);
 
   doc.save(`Statement-${customer.name.replace(/\s+/g, "_")}.pdf`);
 };

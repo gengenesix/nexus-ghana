@@ -224,7 +224,7 @@ export default function Settings() {
             <CardContent>
               <div className="flex items-center justify-between p-4 rounded-lg gold-gradient text-primary-foreground">
                 <div>
-                  <p className="font-bold text-lg">Nexus-GH Pro</p>
+                  <p className="font-bold text-lg">Nexis Pro</p>
                   <p className="text-sm opacity-90">Unlimited features · Priority support</p>
                 </div>
                 <Badge className="bg-primary-foreground/20 text-primary-foreground">Active</Badge>

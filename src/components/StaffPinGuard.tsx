@@ -99,7 +99,7 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
           </div>
           <div>
             <CardTitle className="font-display text-2xl">Staff Access</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">{business?.name || "Nexus-GH"}</p>
+            <p className="text-sm text-muted-foreground mt-1">{business?.name || "Nexis"}</p>
           </div>
         </CardHeader>
 

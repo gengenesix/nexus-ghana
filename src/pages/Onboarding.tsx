@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GHANA_REGIONS } from "@/lib/ghana";
-import { Loader2, Building2, MapPin, Phone, Mail, Lock } from "lucide-react";
+import { Loader2, Building2, MapPin, Lock } from "lucide-react";
+import { NexisBadge, NexisWordmark } from "@/components/NexisLogo";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -64,7 +65,7 @@ export default function Onboarding() {
         status: "active",
       });
       if (error) throw error;
-      toast.success("Business created! Welcome to Nexus-GH 🎉");
+      toast.success("Business created! Welcome to Nexis 🎉");
       navigate("/dashboard");
     } catch (err: any) {
       toast.error(err.message || "Failed to create business");
@@ -90,15 +91,8 @@ export default function Onboarding() {
         <div className="relative z-10 flex flex-col h-full px-12 py-10">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs"
-              style={{ backgroundColor: "var(--lime)", color: "var(--forest)" }}
-            >
-              NX
-            </div>
-            <span className="text-white text-lg font-extrabold" style={{ letterSpacing: "-0.03em" }}>
-              Nexus-GH
-            </span>
+            <NexisBadge size={36} />
+            <NexisWordmark onDark style={{ color: "white", fontSize: 18 }} />
           </div>
 
           {/* Hero copy */}
@@ -151,15 +145,8 @@ export default function Onboarding() {
         <div className="w-full max-w-[480px] animate-fade-in">
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs"
-              style={{ backgroundColor: "var(--forest)", color: "var(--lime)" }}
-            >
-              NX
-            </div>
-            <span className="font-extrabold text-lg" style={{ color: "var(--forest)", letterSpacing: "-0.03em" }}>
-              Nexus-GH
-            </span>
+            <NexisBadge size={32} />
+            <NexisWordmark style={{ color: "var(--forest)", fontSize: 18 }} />
           </div>
 
           <h2
@@ -323,7 +310,7 @@ export default function Onboarding() {
           </form>
 
           <p className="text-center text-xs mt-6" style={{ color: "var(--muted-foreground)" }}>
-            © 2026 Nexus-GH · By GENESIS
+            © 2026 Nexis · By GENESIS
           </p>
         </div>
       </div>

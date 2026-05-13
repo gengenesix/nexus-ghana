@@ -34,7 +34,7 @@ export function ReceiptDialog({ open, onOpenChange, cart, total, subtotal, disco
     if (cart.length === 0) return;
     generateReceiptPDF(
       { receipt_number: receiptNumber, items: cart, subtotal, discount_amount: discountAmount, total, payment_method: paymentLabel },
-      business || { name: "Nexus-GH" }
+      business || { name: "Nexis" }
     );
   };
 
@@ -58,7 +58,7 @@ export function ReceiptDialog({ open, onOpenChange, cart, total, subtotal, disco
         .total { font-size: 16px; font-weight: bold; }
         @media print { body { margin: 0; } }
       </style></head><body>
-        <h2>${business?.name || "Nexus-GH"}</h2>
+        <h2>${business?.name || "Nexis"}</h2>
         ${business?.address ? `<p class="center">${business.address}</p>` : ""}
         ${business?.phone ? `<p class="center">Tel: ${business.phone}</p>` : ""}
         <hr/>
@@ -87,7 +87,7 @@ export function ReceiptDialog({ open, onOpenChange, cart, total, subtotal, disco
   const shareWhatsApp = () => {
     const itemsList = cart.map(item => `• ${item.name} x${item.qty} = ${formatGHS(item.price * item.qty)}`).join("\n");
     const greeting = customerName ? `Hello ${customerName.split(" ")[0]},\n\n` : "";
-    const message = `${greeting}🧾 *${business?.name || "NexusGH"}*\nReceipt #${receiptNumber}\n${new Date().toLocaleString()}\n\n${itemsList}\n\n${discountAmount > 0 ? `Discount: -${formatGHS(discountAmount)}\n` : ""}*Total: ${formatGHS(total)}*\nPaid via: ${paymentLabel}\n\n${business?.receipt_footer || "Thank you for your patronage! 🙏"}`;
+    const message = `${greeting}🧾 *${business?.name || "Nexis"}*\nReceipt #${receiptNumber}\n${new Date().toLocaleString()}\n\n${itemsList}\n\n${discountAmount > 0 ? `Discount: -${formatGHS(discountAmount)}\n` : ""}*Total: ${formatGHS(total)}*\nPaid via: ${paymentLabel}\n\n${business?.receipt_footer || "Thank you for your patronage! 🙏"}`;
     // If customer has a phone, send directly to them; otherwise open share picker
     const phone = customerPhone?.replace(/\D/g, "").replace(/^0/, "233");
     const url = phone
@@ -104,7 +104,7 @@ export function ReceiptDialog({ open, onOpenChange, cart, total, subtotal, disco
         </DialogHeader>
         <div className="space-y-3 text-sm">
           <div className="text-center">
-            <p className="font-bold text-primary text-lg">{business?.name || "Nexus-GH"}</p>
+            <p className="font-bold text-primary text-lg">{business?.name || "Nexis"}</p>
             <p className="text-muted-foreground text-xs">Receipt #{receiptNumber}</p>
             <p className="text-muted-foreground text-xs">{new Date().toLocaleString()}</p>
           </div>

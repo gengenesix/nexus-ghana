@@ -270,7 +270,7 @@ export default function Invoices() {
   });
 
   const downloadInvoice = (invoice: any) => {
-    generateInvoicePDF(invoice, business || { name: "Nexus-GH" });
+    generateInvoicePDF(invoice, business || { name: "Nexis" });
   };
 
   const createCreditNote = useMutation({

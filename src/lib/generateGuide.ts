@@ -28,7 +28,7 @@ export function downloadUserGuide() {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(28);
   doc.setFont("helvetica", "bold");
-  doc.text("Nexus-GH", margin, 22);
+  doc.text("Nexis", margin, 22);
   doc.setFontSize(13);
   doc.setFont("helvetica", "normal");
   doc.text("User Guide & Documentation", margin, 32);
@@ -37,14 +37,14 @@ export function downloadUserGuide() {
   y = 60;
 
   // About
-  addText("1. About Nexus-GH", 18, "bold", [40, 40, 40]);
+  addText("1. About Nexis", 18, "bold", [40, 40, 40]);
   addText(
-    "Nexus-GH is an all-in-one business management platform built specifically for Ghanaian entrepreneurs and SMEs. It combines Point of Sale (POS), inventory management, invoicing, customer relationship management, expense tracking, staff management, supplier management, and business analytics into one seamless application.",
+    "Nexis is an all-in-one business management platform built specifically for Ghanaian entrepreneurs and SMEs. It combines Point of Sale (POS), inventory management, invoicing, customer relationship management, expense tracking, staff management, supplier management, and business analytics into one seamless application.",
     11
   );
   addGap();
   addText(
-    "Nexus-GH supports Ghana-specific features including Mobile Money (MoMo) payments for MTN, Telecel, and AirtelTigo, automatic Ghana tax calculations (VAT 15%, NHIL 2.5%, GETFL 1%), and region-based customer management covering all 16 regions of Ghana.",
+    "Nexis supports Ghana-specific features including Mobile Money (MoMo) payments for MTN, Telecel, and AirtelTigo, automatic Ghana tax calculations (VAT 15%, NHIL 2.5%, GETFL 1%), and region-based customer management covering all 16 regions of Ghana.",
     11
   );
   addGap(10);
@@ -72,7 +72,7 @@ export function downloadUserGuide() {
   // How to use
   addText("3. Getting Started", 18, "bold", [40, 40, 40]);
   const steps = [
-    ["Step 1: Create an Account", "Visit the Nexus-GH website and click 'Get Started'. Fill in your full name, email address, and create a password. Verify your email to activate your account."],
+    ["Step 1: Create an Account", "Visit the Nexis website and click 'Get Started'. Fill in your full name, email address, and create a password. Verify your email to activate your account."],
     ["Step 2: Set Up Your Business", "After logging in, you'll be guided through onboarding. Enter your business name, select your region in Ghana, and provide your business phone number and address."],
     ["Step 3: Add Your Products", "Navigate to Inventory and add your products with names, prices, quantities, SKU codes, and categories. You can also upload product images."],
     ["Step 4: Add Customers", "Go to Customers to add your regular customers with their contact information and region for better relationship management."],
@@ -105,13 +105,13 @@ export function downloadUserGuide() {
 
   // Developer
   addText("6. Developed By", 18, "bold", [40, 40, 40]);
-  addText("Nexus-GH is developed by GENESIS, a technology company focused on building digital solutions for African businesses.", 11);
+  addText("Nexis is developed by GENESIS, a technology company focused on building digital solutions for African businesses.", 11);
   addGap(4);
   addText("Contact Information:", 12, "bold");
   addText("Phone: +233 544 788 852", 10);
   addText("Email: gengenesix@gmail.com", 10);
   addGap(4);
-  addText("© 2026 Nexus-GH. All rights reserved. By GENESIS.", 10, "normal", [120, 120, 120]);
+  addText("© 2026 Nexis. All rights reserved. By GENESIS.", 10, "normal", [120, 120, 120]);
 
-  doc.save("Nexus-GH_User_Guide.pdf");
+  doc.save("Nexis_User_Guide.pdf");
 }

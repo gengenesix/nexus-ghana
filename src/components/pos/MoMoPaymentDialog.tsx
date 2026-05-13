@@ -57,7 +57,7 @@ export function MoMoPaymentDialog({ open, onOpenChange, paymentMethod, amount, c
           merchant_account_number: merchantId,
           customer_msisdn: cleaned,
           amount,
-          description: `Nexus-GH Sale #${clientReference}`,
+          description: `Nexis Sale #${clientReference}`,
           client_reference: clientReference,
         },
       });

@@ -1,9 +1,10 @@
 import {
   LayoutDashboard, ShoppingCart, Package, FileText, Users, Truck,
-  Receipt, BarChart3, UserCog, Settings, LogOut, Landmark, UserCircle,
+  Receipt, BarChart3, UserCog, Settings, LogOut, UserCircle,
   Shield, Wallet, Handshake, ShoppingBag, Factory, Cpu, FolderKanban,
-  Headphones, Users2, ArrowRightLeft, ChevronDown, Lock,
+  Headphones, Users2, ArrowRightLeft, ChevronDown, Lock, Landmark,
 } from "lucide-react";
+import { NexisBadge, NexisWordmark } from "@/components/NexisLogo";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/hooks/useBusiness";
@@ -164,19 +165,9 @@ export function AppSidebar() {
         className="flex items-center gap-3 px-4 py-5 shrink-0"
         style={{ borderBottom: "1px solid hsl(var(--border))" }}
       >
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-xl font-black text-xs shrink-0"
-          style={{ backgroundColor: "var(--forest)", color: "var(--lime)", letterSpacing: "-0.02em" }}
-        >
-          NX
-        </div>
+        <NexisBadge size={36} />
         {!collapsed && (
-          <span
-            className="text-lg font-extrabold tracking-tight"
-            style={{ color: "var(--forest)", letterSpacing: "-0.03em" }}
-          >
-            Nexus-GH
-          </span>
+          <NexisWordmark style={{ color: "var(--forest)", fontSize: 18 }} />
         )}
       </div>
 

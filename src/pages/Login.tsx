@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { NexisBadge, NexisWordmark } from "@/components/NexisLogo";
 
 export default function Login() {
   const [email, setEmail]       = useState("");
@@ -45,15 +46,8 @@ export default function Login() {
         <div className="relative z-10 flex flex-col h-full px-12 py-10">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs"
-              style={{ backgroundColor: "var(--lime)", color: "var(--forest)" }}
-            >
-              NX
-            </div>
-            <span className="text-white text-lg font-extrabold tracking-tight" style={{ letterSpacing: "-0.03em" }}>
-              Nexus-GH
-            </span>
+            <NexisBadge size={36} />
+            <NexisWordmark onDark style={{ color: "white", fontSize: 18 }} />
           </div>
 
           {/* Hero copy */}
@@ -93,17 +87,22 @@ export default function Login() {
         style={{ backgroundColor: "var(--cream)" }}
       >
         <div className="w-full max-w-[400px] animate-fade-in">
+          {/* Back to home */}
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold mb-6 hover:opacity-70 transition-opacity"
+            style={{ color: "var(--muted-foreground)", textDecoration: "none" }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+            Back to home
+          </Link>
+
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs"
-              style={{ backgroundColor: "var(--forest)", color: "var(--lime)" }}
-            >
-              NX
-            </div>
-            <span className="font-extrabold text-lg tracking-tight" style={{ color: "var(--forest)", letterSpacing: "-0.03em" }}>
-              Nexus-GH
-            </span>
+            <NexisBadge size={32} />
+            <NexisWordmark style={{ color: "var(--forest)", fontSize: 18 }} />
           </div>
 
           <h2
@@ -113,7 +112,7 @@ export default function Login() {
             Welcome back
           </h2>
           <p className="text-sm mb-8" style={{ color: "var(--muted-foreground)" }}>
-            Sign in to your Nexus-GH account
+            Sign in to your Nexis account
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -197,7 +196,7 @@ export default function Login() {
           </form>
 
           <p className="text-center text-xs mt-8" style={{ color: "var(--muted-foreground)" }}>
-            © 2026 Nexus-GH · By GENESIS
+            © 2026 Nexis · By GENESIS
           </p>
         </div>
       </div>

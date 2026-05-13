@@ -322,7 +322,7 @@ export default function Customers() {
                 <Button variant="outline" className="flex-1" onClick={() => { setViewCustomer(null); openEdit(viewCustomer); }}>
                   <Edit className="h-4 w-4 mr-1" /> Edit
                 </Button>
-                <Button variant="outline" className="flex-1" onClick={() => generateCustomerStatement(viewCustomer, customerSales, customerInvoices, business || { name: "NexusGH" })}>
+                <Button variant="outline" className="flex-1" onClick={() => generateCustomerStatement(viewCustomer, customerSales, customerInvoices, business || { name: "Nexis" })}>
                   <FileText className="h-4 w-4 mr-1" /> Statement
                 </Button>
               </div>
