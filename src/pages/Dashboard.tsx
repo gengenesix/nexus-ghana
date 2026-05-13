@@ -16,12 +16,13 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useMemo } from "react";
+import { motion } from "framer-motion";
 import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 import { useChartColors } from "@/hooks/useChartColors";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)"];
+const COLORS = ["hsl(140,28%,16%)", "hsl(86,68%,52%)", "hsl(142,60%,38%)", "hsl(210,70%,48%)", "hsl(0,72%,51%)"];
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -186,8 +187,13 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      <motion.div
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div>
           <h1 className="text-2xl md:text-3xl font-display font-bold">
             {greeting}{staff ? `, ${staff.name.split(" ")[0]}` : ""} 👋
@@ -205,24 +211,34 @@ export default function Dashboard() {
             <Receipt className="h-4 w-4 mr-1" /> Log Expense
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Primary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Today's Sales"
-          value={formatGHS(stats?.todayTotal ?? 0)}
-          icon={ShoppingCart}
-          trend={growthPct !== 0 ? `${growthPct > 0 ? "+" : ""}${growthPct.toFixed(0)}% vs yesterday` : `${stats?.todayCount ?? 0} transactions`}
-          trendUp={growthPct >= 0}
-        />
-        <StatCard title="Unpaid Invoices" value={String(stats?.unpaidCount ?? 0)} icon={FileText} trend={`${formatGHS(stats?.unpaidTotal ?? 0)} outstanding`} />
-        <StatCard title="Low Stock Items" value={String(stats?.lowStock?.length ?? 0)} icon={AlertTriangle} trend={stats?.outOfStock ? `${stats.outOfStock} out of stock` : "All stocked"} />
-        <StatCard title="Total Customers" value={String(stats?.customerCount ?? 0)} icon={Users} trend="All time" trendUp={(stats?.customerCount ?? 0) > 0} />
+        {[
+          { title: "Today's Sales", value: formatGHS(stats?.todayTotal ?? 0), icon: ShoppingCart, trend: growthPct !== 0 ? `${growthPct > 0 ? "+" : ""}${growthPct.toFixed(0)}% vs yesterday` : `${stats?.todayCount ?? 0} transactions`, trendUp: growthPct >= 0 },
+          { title: "Unpaid Invoices", value: String(stats?.unpaidCount ?? 0), icon: FileText, trend: `${formatGHS(stats?.unpaidTotal ?? 0)} outstanding` },
+          { title: "Low Stock Items", value: String(stats?.lowStock?.length ?? 0), icon: AlertTriangle, trend: stats?.outOfStock ? `${stats.outOfStock} out of stock` : "All stocked" },
+          { title: "Total Customers", value: String(stats?.customerCount ?? 0), icon: Users, trend: "All time", trendUp: (stats?.customerCount ?? 0) > 0 },
+        ].map((card, i) => (
+          <motion.div
+            key={card.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 + i * 0.07 }}
+          >
+            <StatCard {...card} />
+          </motion.div>
+        ))}
       </div>
 
       {/* Financial snapshot row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.42 }}
+      >
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -271,10 +287,15 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Secondary KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.55 }}
+      >
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/crm")}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Briefcase className="h-5 w-5 text-primary" /></div>
@@ -311,10 +332,15 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Charts Row */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <motion.div
+        className="grid lg:grid-cols-3 gap-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.65 }}
+      >
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="font-display">Weekly Sales</CardTitle>
@@ -325,15 +351,15 @@ export default function Dashboard() {
               <AreaChart data={weeklySales}>
                 <defs>
                   <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(37, 90%, 55%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(37, 90%, 55%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(140,28%,16%)" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="hsl(140,28%,16%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                 <XAxis dataKey="day" stroke={axisColor} fontSize={12} />
                 <YAxis stroke={axisColor} fontSize={12} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [formatGHS(value), "Sales"]} />
-                <Area type="monotone" dataKey="sales" stroke="hsl(37, 90%, 55%)" strokeWidth={2} fill="url(#salesGradient)" />
+                <Area type="monotone" dataKey="sales" stroke="hsl(140,28%,16%)" strokeWidth={2} fill="url(#salesGradient)" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -366,10 +392,15 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Activity & Pipeline Row */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <motion.div
+        className="grid lg:grid-cols-3 gap-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.75 }}
+      >
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="font-display">Recent Transactions</CardTitle>
@@ -477,7 +508,7 @@ export default function Dashboard() {
             </Card>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Pipeline Summary */}
       {pipelineData.length > 0 && (

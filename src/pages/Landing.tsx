@@ -1,48 +1,46 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import {
   ShoppingCart, Package, FileText, BarChart3, Users, Receipt,
-  ArrowRight, Check, Landmark, Star, Shield, Globe, Smartphone,
-  Sparkles, TrendingUp, Clock, Phone, Mail, Download,
+  ArrowRight, Check, Shield, Globe, Smartphone,
+  TrendingUp, Phone, Mail, Download, Star,
 } from "lucide-react";
-
 
 import heroDashboard from "@/assets/hero-dashboard.png";
 import featurePos from "@/assets/feature-pos.png";
 import featureInvoicing from "@/assets/feature-invoicing.png";
 import featureInventory from "@/assets/feature-inventory.png";
 
-const features = [
+const allFeatures = [
+  { icon: ShoppingCart, label: "Point of Sale", desc: "Fast sales & MoMo payments" },
+  { icon: Package, label: "Inventory", desc: "Real-time stock tracking" },
+  { icon: FileText, label: "Invoicing", desc: "Tax-compliant Ghana bills" },
+  { icon: Users, label: "Customers", desc: "CRM & loyalty points" },
+  { icon: Receipt, label: "Expenses", desc: "Track & categorise spending" },
+  { icon: BarChart3, label: "Reports", desc: "Business insights & exports" },
+  { icon: Shield, label: "Staff", desc: "Roles, PINs & permissions" },
+  { icon: Smartphone, label: "MoMo Pay", desc: "MTN, Vodafone & AirtelTigo" },
+  { icon: Globe, label: "Ghana Tax", desc: "Auto VAT, NHIL & GETFL" },
+];
+
+const showcases = [
   {
     icon: ShoppingCart,
-    title: "Point of Sale",
-    desc: "Fast, touch-friendly POS with MoMo QR payments, barcode scanning, and instant receipt printing.",
+    title: "Point of Sale — built for speed",
+    desc: "Touch-optimised POS with barcode scanning, MoMo QR codes, split payments, and instant thermal receipt printing. Works fully offline.",
     image: featurePos,
   },
   {
     icon: FileText,
-    title: "Smart Invoicing",
-    desc: "Auto-numbered invoices with Ghana tax (VAT, NHIL, GETFL) computed automatically. PDF export ready.",
+    title: "Invoicing with Ghana tax",
+    desc: "Auto-numbered invoices (NXG-YYYY-NNN) with VAT, NHIL, and GETFL computed automatically. Export to PDF and email in one click.",
     image: featureInvoicing,
   },
   {
     icon: Package,
-    title: "Inventory Tracking",
-    desc: "Real-time stock levels, low-stock alerts, categories, and automatic deduction on every sale.",
+    title: "Inventory that never sleeps",
+    desc: "Real-time stock levels, reorder alerts, categories, and automatic deduction on every sale. Supports barcodes and warehouse transfers.",
     image: featureInventory,
   },
-];
-
-const allFeatures = [
-  { icon: ShoppingCart, label: "Point of Sale", desc: "Quick sales & MoMo" },
-  { icon: Package, label: "Inventory", desc: "Stock tracking" },
-  { icon: FileText, label: "Invoicing", desc: "Tax-compliant bills" },
-  { icon: Users, label: "Customers", desc: "CRM & loyalty" },
-  { icon: Receipt, label: "Expenses", desc: "Track spending" },
-  { icon: BarChart3, label: "Reports", desc: "Business insights" },
-  { icon: Shield, label: "Staff", desc: "Roles & PINs" },
-  { icon: Smartphone, label: "MoMo Pay", desc: "Mobile money" },
-  { icon: Globe, label: "Ghana Tax", desc: "VAT, NHIL, GETFL" },
 ];
 
 const plans = [
@@ -50,7 +48,7 @@ const plans = [
     name: "Starter",
     price: "Free",
     period: "",
-    desc: "Perfect for solo traders just getting started.",
+    desc: "Solo traders just getting started.",
     features: ["1 User", "50 Products", "POS & Sales", "Basic Reports", "Email Support"],
     cta: "Get Started Free",
     popular: false,
@@ -59,8 +57,8 @@ const plans = [
     name: "Business",
     price: "GH₵ 99",
     period: "/month",
-    desc: "For growing businesses that need full control.",
-    features: ["5 Staff Members", "Unlimited Products", "Invoicing + Tax", "Full Reports & Analytics", "MoMo Integration", "Priority Support"],
+    desc: "Growing businesses that need full control.",
+    features: ["5 Staff Members", "Unlimited Products", "Invoicing + Tax", "Full Analytics", "MoMo Integration", "Priority Support"],
     cta: "Start Free Trial",
     popular: true,
   },
@@ -69,7 +67,7 @@ const plans = [
     price: "GH₵ 249",
     period: "/month",
     desc: "Multi-branch businesses with advanced needs.",
-    features: ["Unlimited Staff", "Multi-Branch Support", "API Access", "Custom Branding", "Dedicated Account Manager", "SLA Guarantee"],
+    features: ["Unlimited Staff", "Multi-Branch", "API Access", "Custom Branding", "Dedicated Manager", "SLA Guarantee"],
     cta: "Contact Sales",
     popular: false,
   },
@@ -79,154 +77,231 @@ const testimonials = [
   {
     name: "Ama Serwaa",
     role: "Owner, Serwaa's Cosmetics — Kumasi",
-    text: "Nexus-GH changed how I run my shop. I can track every cedi and my MoMo payments are sorted automatically.",
+    text: "Nexus-GH changed how I run my shop. Every cedi is tracked and my MoMo payments are sorted automatically.",
     rating: 5,
+    initials: "AS",
   },
   {
     name: "Kwame Mensah",
     role: "Manager, FreshMart Supermarket — Accra",
     text: "The invoicing with automatic Ghana tax calculation saves me hours every week. No more manual VAT math!",
     rating: 5,
+    initials: "KM",
   },
   {
     name: "Abena Osei",
     role: "Founder, TechHub GH — Takoradi",
     text: "Finally a business tool built for Ghana. The POS is lightning fast and my staff learned it in minutes.",
     rating: 5,
+    initials: "AO",
   },
 ];
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* Animated background orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[20%] h-[600px] w-[600px] rounded-full bg-primary/5 blur-[150px] animate-pulse" />
-        <div className="absolute top-[40%] right-[-5%] h-[500px] w-[500px] rounded-full bg-primary/4 blur-[130px]" />
-        <div className="absolute bottom-[-10%] left-[-5%] h-[400px] w-[400px] rounded-full bg-info/3 blur-[120px]" />
-      </div>
-
-      {/* Nav — Glassmorphism */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-nav">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/25">
-              <Landmark className="h-5 w-5 text-primary-foreground" />
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
+    <div
+      className="min-h-screen overflow-x-hidden"
+      style={{ backgroundColor: "var(--cream)", color: "var(--forest)", fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+    >
+      {/* ── Navbar ─────────────────────────────────── */}
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center"
+        style={{ backgroundColor: "var(--forest)", borderBottom: "none" }}
+      >
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 lg:px-8">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs"
+              style={{ backgroundColor: "var(--lime)", color: "var(--forest)" }}
+            >
+              NX
             </div>
-            <span className="font-curly text-2xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
+            <span
+              className="text-white font-extrabold text-lg"
+              style={{ letterSpacing: "-0.03em" }}
+            >
               Nexus-GH
             </span>
           </Link>
-          <div className="hidden items-center gap-8 md:flex">
-            <a href="#features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Features</a>
-            <a href="#pricing" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
-            <a href="#testimonials" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Reviews</a>
+
+          {/* Desktop nav links */}
+          <div className="hidden md:flex items-center gap-8">
+            {["Features", "Pricing", "Reviews"].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-sm font-medium transition-opacity hover:opacity-100"
+                style={{ color: "rgba(255,255,255,0.65)", textDecoration: "none" }}
+              >
+                {item}
+              </a>
+            ))}
           </div>
+
+          {/* CTA buttons */}
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" asChild>
-              <Link to="/login">Sign In</Link>
-            </Button>
-            <Button size="sm" className="gold-gradient text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow" asChild>
-              <Link to="/register">Get Started</Link>
-            </Button>
+            <Link
+              to="/login"
+              className="hidden sm:block text-sm font-semibold transition-opacity hover:opacity-70"
+              style={{ color: "rgba(255,255,255,0.75)", textDecoration: "none" }}
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/register"
+              className="px-5 py-2 rounded-full text-sm font-bold transition-all hover:opacity-90"
+              style={{ backgroundColor: "var(--lime)", color: "var(--forest)", textDecoration: "none" }}
+            >
+              Get Started
+            </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative pt-32 pb-20 sm:pt-44 sm:pb-32">
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="mx-auto mb-8 inline-flex items-center gap-2 rounded-full glass-card px-5 py-2 text-sm font-medium text-primary">
-              <Landmark className="h-4 w-4" />
-              Built for Ghana's Next Generation of Entrepreneurs
-            </div>
-            <h1 className="mx-auto max-w-5xl font-brand text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-8xl leading-[0.95]">
-              Run Your Business
-              <br />
-              <span className="gold-text">Smarter,</span> Not Harder
-            </h1>
-            <p className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl leading-relaxed">
-              All-in-one POS, inventory, invoicing, and analytics platform designed specifically for Ghanaian businesses. Accept MoMo, manage stock, and grow.
-            </p>
-            <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="gold-gradient h-14 px-10 text-base font-bold text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-[1.02]" asChild>
-                <Link to="/register">
+      {/* ── Hero ───────────────────────────────────── */}
+      <section className="pt-28 pb-16 sm:pt-36 sm:pb-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
+            {/* Left — copy */}
+            <div className="animate-fade-in">
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase mb-8"
+                style={{ backgroundColor: "white", color: "var(--forest)", letterSpacing: "0.08em", border: "1px solid hsl(var(--border))" }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--lime)" }}
+                />
+                Built for Ghana SMBs
+              </div>
+              <h1
+                className="font-extrabold leading-[1.0] mb-6"
+                style={{ fontSize: "clamp(2.5rem, 5.5vw, 4rem)", letterSpacing: "-0.04em", color: "var(--forest)" }}
+              >
+                Run Your Ghana<br />
+                Business{" "}
+                <span style={{ color: "hsl(142,60%,38%)" }}>Smarter.</span>
+              </h1>
+              <p
+                className="text-lg leading-relaxed mb-10 max-w-[480px]"
+                style={{ color: "hsl(140,15%,40%)" }}
+              >
+                All-in-one POS, inventory, invoicing, MoMo payments, and analytics — designed specifically for Ghanaian businesses.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  to="/register"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
+                  style={{ backgroundColor: "var(--forest)", color: "white", textDecoration: "none" }}
+                >
                   Start Free — No Credit Card
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
-              </Button>
-              <Button variant="outline" size="lg" className="h-14 px-10 text-base glass-card border-0 hover:bg-muted/50" asChild>
-                <a href="#features">See How It Works</a>
-              </Button>
+                <a
+                  href="#features"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-base transition-all hover:opacity-80"
+                  style={{ backgroundColor: "white", color: "var(--forest)", border: "1px solid hsl(var(--border))", textDecoration: "none" }}
+                >
+                  See How It Works
+                </a>
+              </div>
+
+              {/* Trust pills */}
+              <div className="mt-8 flex flex-wrap gap-3">
+                {[
+                  { icon: Check, label: "Free forever plan" },
+                  { icon: TrendingUp, label: "500+ businesses" },
+                  { icon: Globe, label: "All 16 regions" },
+                ].map(({ icon: Icon, label }) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full"
+                    style={{ backgroundColor: "white", color: "hsl(140,20%,35%)", border: "1px solid hsl(var(--border))" }}
+                  >
+                    <Icon className="h-3.5 w-3.5" style={{ color: "hsl(142,60%,38%)" }} />
+                    {label}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            {/* Trust indicators */}
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-              <span className="flex items-center gap-2"><Check className="h-4 w-4 text-success" /> Free forever plan</span>
-              <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-info" /> Setup in 2 minutes</span>
-              <span className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /> 500+ businesses</span>
-            </div>
-          </div>
-
-          {/* Hero Image — Glass frame */}
-          <div className="relative mt-20">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-b from-primary/20 via-primary/5 to-transparent blur-sm" />
-            <div className="relative rounded-2xl glass-card-strong p-2 sm:p-3 glass-glow">
-              <img
-                src={heroDashboard}
-                alt="Nexus-GH Dashboard showing sales analytics and business metrics"
-                className="w-full rounded-xl"
-                loading="eager"
-              />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none" />
+            {/* Right — hero image */}
+            <div className="mt-14 lg:mt-0 animate-fade-in" style={{ animationDelay: "0.15s" }}>
+              <div
+                className="rounded-2xl overflow-hidden"
+                style={{ boxShadow: "0 24px 80px rgba(26,58,34,0.18)", border: "1px solid hsl(var(--border))" }}
+              >
+                <img
+                  src={heroDashboard}
+                  alt="Nexus-GH Dashboard"
+                  className="w-full block"
+                  loading="eager"
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats — Glass cards */}
-      <section className="relative py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      {/* ── Stats band ─────────────────────────────── */}
+      <section style={{ backgroundColor: "var(--forest)" }} className="py-14">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { value: "50+", label: "Businesses", icon: Users },
-              { value: "₵200k+", label: "Sales Processed", icon: TrendingUp },
-              { value: "16", label: "Regions Covered", icon: Globe },
-              { value: "99.9%", label: "Uptime", icon: Shield },
-            ].map((stat) => (
-              <div key={stat.label} className="glass-card rounded-2xl p-6 text-center transition-all hover:scale-[1.02]">
-                <stat.icon className="mx-auto mb-3 h-6 w-6 text-primary/70" />
-                <div className="font-brand text-3xl font-bold gold-text">{stat.value}</div>
-                <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
+              { value: "50+", label: "Businesses" },
+              { value: "₵200k+", label: "Sales processed" },
+              { value: "16", label: "Regions covered" },
+              { value: "99.9%", label: "Uptime" },
+            ].map((s) => (
+              <div key={s.label} className="text-center">
+                <p
+                  className="text-3xl font-extrabold font-mono mb-1"
+                  style={{ color: "var(--lime)", letterSpacing: "-0.025em" }}
+                >
+                  {s.value}
+                </p>
+                <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Feature Grid — Glass cards */}
-      <section className="py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="font-brand text-3xl font-bold sm:text-4xl">Everything Your Business Needs</h2>
-            <p className="mt-4 text-lg text-muted-foreground">One platform, nine powerful modules</p>
+      {/* ── Feature grid ───────────────────────────── */}
+      <section id="features" className="py-20 sm:py-28">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-14">
+            <p
+              className="text-xs font-bold uppercase mb-3"
+              style={{ color: "hsl(140,20%,50%)", letterSpacing: "0.1em" }}
+            >
+              Everything you need
+            </p>
+            <h2
+              className="font-extrabold leading-tight"
+              style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.75rem)", letterSpacing: "-0.035em", color: "var(--forest)" }}
+            >
+              One platform, nine modules.
+            </h2>
           </div>
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {allFeatures.map((f) => (
               <div
                 key={f.label}
-                className="group glass-card rounded-2xl p-5 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10 cursor-default"
+                className="rounded-2xl p-5 flex items-start gap-4 transition-all hover:-translate-y-0.5"
+                style={{ backgroundColor: "white", border: "1px solid hsl(var(--border))", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}
               >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all group-hover:gold-gradient group-hover:text-primary-foreground group-hover:shadow-lg group-hover:shadow-primary/20">
-                    <f.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="font-display font-semibold block">{f.label}</span>
-                    <span className="text-sm text-muted-foreground">{f.desc}</span>
-                  </div>
+                <div
+                  className="rounded-xl p-2.5 flex-shrink-0"
+                  style={{ backgroundColor: "var(--cream)" }}
+                >
+                  <f.icon className="h-5 w-5" style={{ color: "var(--forest)" }} />
+                </div>
+                <div>
+                  <p className="font-bold text-sm mb-0.5" style={{ color: "var(--forest)" }}>{f.label}</p>
+                  <p className="text-sm" style={{ color: "hsl(140,10%,50%)" }}>{f.desc}</p>
                 </div>
               </div>
             ))}
@@ -234,32 +309,47 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Feature Showcases */}
-      <section id="features" className="py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-32">
-          {features.map((feature, i) => (
+      {/* ── Feature showcases ──────────────────────── */}
+      <section className="py-20 sm:py-28" style={{ backgroundColor: "white" }}>
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 space-y-28">
+          {showcases.map((s, i) => (
             <div
-              key={feature.title}
-              className={`flex flex-col items-center gap-12 lg:gap-16 lg:flex-row ${i % 2 === 1 ? "lg:flex-row-reverse" : ""}`}
+              key={s.title}
+              className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 ${i % 2 === 1 ? "lg:flex-row-reverse" : ""}`}
             >
               <div className="flex-1 space-y-5">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl glass-card text-primary">
-                  <feature.icon className="h-7 w-7" />
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                  style={{ backgroundColor: "var(--cream)" }}
+                >
+                  <s.icon className="h-6 w-6" style={{ color: "var(--forest)" }} />
                 </div>
-                <h3 className="font-brand text-3xl font-bold sm:text-4xl">{feature.title}</h3>
-                <p className="text-lg text-muted-foreground leading-relaxed">{feature.desc}</p>
-                <Button variant="link" className="px-0 text-primary font-semibold" asChild>
-                  <Link to="/register">
-                    Try it free <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
+                <h3
+                  className="font-extrabold leading-tight"
+                  style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)", letterSpacing: "-0.03em", color: "var(--forest)" }}
+                >
+                  {s.title}
+                </h3>
+                <p className="text-base leading-relaxed" style={{ color: "hsl(140,10%,44%)" }}>
+                  {s.desc}
+                </p>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-1.5 text-sm font-bold transition-opacity hover:opacity-70"
+                  style={{ color: "hsl(142,60%,38%)", textDecoration: "none" }}
+                >
+                  Try it free <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
-              <div className="flex-1">
-                <div className="glass-card-strong rounded-2xl p-2 sm:p-3 glass-glow transition-transform hover:scale-[1.01]">
+              <div className="flex-1 w-full">
+                <div
+                  className="rounded-2xl overflow-hidden"
+                  style={{ boxShadow: "0 16px 60px rgba(26,58,34,0.12)", border: "1px solid hsl(var(--border))" }}
+                >
                   <img
-                    src={feature.image}
-                    alt={`${feature.title} feature screenshot`}
-                    className="w-full rounded-xl"
+                    src={s.image}
+                    alt={`${s.title} screenshot`}
+                    className="w-full block"
                     loading="lazy"
                   />
                 </div>
@@ -269,86 +359,130 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Pricing — Glass cards */}
+      {/* ── Pricing ────────────────────────────────── */}
       <section id="pricing" className="py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="font-brand text-3xl font-bold sm:text-4xl">Simple, Transparent Pricing</h2>
-            <p className="mt-4 text-lg text-muted-foreground">Start free, upgrade as you grow. No hidden fees.</p>
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2
+              className="font-extrabold mb-3"
+              style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)", letterSpacing: "-0.035em", color: "var(--forest)" }}
+            >
+              Simple, transparent pricing
+            </h2>
+            <p className="text-base" style={{ color: "hsl(140,10%,44%)" }}>Start free, upgrade as you grow. No hidden fees.</p>
           </div>
-          <div className="mt-14 grid gap-6 md:grid-cols-3">
+
+          <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative rounded-2xl transition-all ${
-                  plan.popular
-                    ? "glass-card-strong scale-[1.03] shadow-xl shadow-primary/20 ring-1 ring-primary/40"
-                    : "glass-card hover:scale-[1.02]"
-                }`}
+                className="relative rounded-2xl p-8 flex flex-col"
+                style={{
+                  backgroundColor: plan.popular ? "var(--forest)" : "white",
+                  border: plan.popular ? "none" : "1px solid hsl(var(--border))",
+                  boxShadow: plan.popular ? "0 16px 60px rgba(26,58,34,0.2)" : "0 1px 4px rgba(0,0,0,0.04)",
+                }}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 gold-gradient px-5 py-1.5 text-xs font-bold text-primary-foreground rounded-full shadow-lg">
+                  <div
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 px-5 py-1 rounded-full text-xs font-bold"
+                    style={{ backgroundColor: "var(--lime)", color: "var(--forest)" }}
+                  >
                     MOST POPULAR
                   </div>
                 )}
-                <div className="p-8">
-                  <h3 className="font-brand text-xl font-bold">{plan.name}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{plan.desc}</p>
-                  <div className="mt-6 flex items-baseline gap-1">
-                    <span className="font-brand text-4xl font-extrabold">{plan.price}</span>
-                    {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
-                  </div>
-                  <Button
-                    className={`mt-8 w-full font-semibold h-12 ${
-                      plan.popular
-                        ? "gold-gradient text-primary-foreground shadow-lg shadow-primary/25"
-                        : "glass-card border-0 hover:bg-muted/50"
-                    }`}
-                    variant={plan.popular ? "default" : "outline"}
-                    asChild
+                <h3
+                  className="font-extrabold text-lg mb-1"
+                  style={{ color: plan.popular ? "white" : "var(--forest)" }}
+                >
+                  {plan.name}
+                </h3>
+                <p
+                  className="text-sm mb-6"
+                  style={{ color: plan.popular ? "rgba(255,255,255,0.6)" : "hsl(140,10%,50%)" }}
+                >
+                  {plan.desc}
+                </p>
+                <div className="flex items-baseline gap-1 mb-8">
+                  <span
+                    className="text-4xl font-extrabold font-mono"
+                    style={{ color: plan.popular ? "var(--lime)" : "var(--forest)", letterSpacing: "-0.04em" }}
                   >
-                    <Link to="/register">{plan.cta}</Link>
-                  </Button>
-                  <ul className="mt-8 space-y-3">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-3 text-sm">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15">
-                          <Check className="h-3 w-3 text-primary" />
-                        </div>
-                        <span className="text-muted-foreground">{f}</span>
-                      </li>
-                    ))}
-                  </ul>
+                    {plan.price}
+                  </span>
+                  {plan.period && (
+                    <span className="text-sm" style={{ color: plan.popular ? "rgba(255,255,255,0.5)" : "hsl(140,10%,50%)" }}>
+                      {plan.period}
+                    </span>
+                  )}
                 </div>
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm">
+                      <div
+                        className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: plan.popular ? "rgba(255,255,255,0.15)" : "var(--cream)" }}
+                      >
+                        <Check className="h-3 w-3" style={{ color: plan.popular ? "var(--lime)" : "hsl(142,60%,38%)" }} />
+                      </div>
+                      <span style={{ color: plan.popular ? "rgba(255,255,255,0.8)" : "hsl(140,10%,44%)" }}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  to="/register"
+                  className="block text-center py-3.5 rounded-full font-bold text-sm transition-all hover:opacity-90"
+                  style={{
+                    backgroundColor: plan.popular ? "var(--lime)" : "var(--forest)",
+                    color: plan.popular ? "var(--forest)" : "white",
+                    textDecoration: "none",
+                  }}
+                >
+                  {plan.cta}
+                </Link>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials — Glass cards */}
-      <section id="testimonials" className="py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="font-brand text-3xl font-bold sm:text-4xl">Loved by Ghana Businesses</h2>
-            <p className="mt-4 text-lg text-muted-foreground">See what our customers are saying</p>
+      {/* ── Testimonials ───────────────────────────── */}
+      <section id="reviews" className="py-20 sm:py-28" style={{ backgroundColor: "white" }}>
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2
+              className="font-extrabold mb-3"
+              style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)", letterSpacing: "-0.035em", color: "var(--forest)" }}
+            >
+              Loved by Ghana businesses
+            </h2>
+            <p className="text-base" style={{ color: "hsl(140,10%,44%)" }}>Real stories from real entrepreneurs.</p>
           </div>
-          <div className="mt-14 grid gap-6 md:grid-cols-3">
+          <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t) => (
-              <div key={t.name} className="glass-card rounded-2xl p-7 transition-all hover:scale-[1.02]">
+              <div
+                key={t.name}
+                className="rounded-2xl p-7"
+                style={{ backgroundColor: "var(--cream)", border: "1px solid hsl(var(--border))" }}
+              >
                 <div className="flex gap-1 mb-5">
                   {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                    <Star key={i} className="h-4 w-4 fill-current" style={{ color: "hsl(38,92%,50%)" }} />
                   ))}
                 </div>
-                <p className="text-muted-foreground leading-relaxed">"{t.text}"</p>
-                <div className="mt-6 flex items-center gap-3 border-t border-border/30 pt-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full gold-gradient text-sm font-bold text-primary-foreground">
-                    {t.name.split(" ").map(n => n[0]).join("")}
+                <p className="text-sm leading-relaxed mb-6" style={{ color: "hsl(140,10%,40%)" }}>
+                  "{t.text}"
+                </p>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    style={{ backgroundColor: "var(--forest)", color: "var(--lime)" }}
+                  >
+                    {t.initials}
                   </div>
                   <div>
-                    <div className="font-semibold text-sm">{t.name}</div>
-                    <div className="text-xs text-muted-foreground">{t.role}</div>
+                    <p className="text-sm font-semibold" style={{ color: "var(--forest)" }}>{t.name}</p>
+                    <p className="text-xs" style={{ color: "hsl(140,10%,50%)" }}>{t.role}</p>
                   </div>
                 </div>
               </div>
@@ -357,72 +491,84 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA — Glass card */}
-      <section className="py-20 sm:py-28">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="relative glass-card-strong rounded-3xl p-12 text-center sm:p-20 overflow-hidden">
-            <div className="pointer-events-none absolute -top-20 -right-20 h-60 w-60 rounded-full bg-primary/15 blur-[80px]" />
-            <div className="pointer-events-none absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-primary/10 blur-[80px]" />
-            <div className="relative">
-              <h2 className="font-brand text-3xl font-bold sm:text-5xl leading-tight">
-                Ready to <span className="gold-text">Transform</span>
-                <br />Your Business?
-              </h2>
-              <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto">
-                Join hundreds of Ghanaian entrepreneurs already using Nexus-GH to grow their business.
-              </p>
-              <Button size="lg" className="mt-10 h-14 px-12 text-base font-bold gold-gradient text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-[1.02]" asChild>
-                <Link to="/register">
-                  Get Started for Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
-          </div>
+      {/* ── CTA band ───────────────────────────────── */}
+      <section style={{ backgroundColor: "var(--forest)" }} className="py-20">
+        <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
+          <h2
+            className="font-extrabold text-white leading-tight mb-4"
+            style={{ fontSize: "clamp(2rem, 4vw, 3rem)", letterSpacing: "-0.04em" }}
+          >
+            Ready to transform<br />your business?
+          </h2>
+          <p className="text-base mb-10" style={{ color: "rgba(255,255,255,0.6)" }}>
+            Join hundreds of Ghanaian entrepreneurs already on Nexus-GH.
+          </p>
+          <Link
+            to="/register"
+            className="inline-flex items-center gap-2 px-10 py-4 rounded-full font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
+            style={{ backgroundColor: "var(--lime)", color: "var(--forest)", textDecoration: "none" }}
+          >
+            Get Started for Free
+            <ArrowRight className="h-5 w-5" />
+          </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="glass-nav py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center gap-8">
-            <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between w-full">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/20">
-                  <Landmark className="h-4 w-4 text-primary-foreground" />
-                </div>
-                <span className="font-curly text-xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-                  Nexus-GH
-                </span>
-              </div>
-              <div className="flex gap-8 text-sm text-muted-foreground">
-                <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-                <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
-                <a href="#testimonials" className="hover:text-foreground transition-colors">Reviews</a>
-                <Link to="/login" className="hover:text-foreground transition-colors">Sign In</Link>
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-sm text-muted-foreground">
-              <a href="tel:+233544788852" className="flex items-center gap-2 hover:text-primary transition-colors">
-                <Phone className="h-4 w-4" />
-                +233 544 788 852
-              </a>
-              <a href="mailto:gengenesix@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
-                <Mail className="h-4 w-4" />
-                gengenesix@gmail.com
-              </a>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-              <a
-                href="/NexusGH_User_Guide.pdf"
-                download="NexusGH_User_Guide.pdf"
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+      {/* ── Footer ─────────────────────────────────── */}
+      <footer style={{ backgroundColor: "var(--forest)", borderTop: "1px solid rgba(255,255,255,0.08)" }} className="py-12">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+            {/* Logo */}
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs"
+                style={{ backgroundColor: "var(--lime)", color: "var(--forest)" }}
               >
-                <Download className="h-4 w-4" />
-                Download User Guide
-              </a>
-              <p className="text-sm text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
+                NX
+              </div>
+              <span className="text-white font-extrabold text-lg" style={{ letterSpacing: "-0.03em" }}>
+                Nexus-GH
+              </span>
             </div>
+
+            {/* Nav links */}
+            <div className="flex flex-wrap gap-6 text-sm">
+              {["Features", "Pricing", "Reviews"].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}
+                  className="hover:opacity-100 transition-opacity"
+                >
+                  {item}
+                </a>
+              ))}
+              <Link to="/login" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }} className="hover:opacity-100 transition-opacity">
+                Sign In
+              </Link>
+            </div>
+
+            {/* Contact */}
+            <div className="flex flex-col sm:flex-row gap-4 text-sm">
+              <a href="tel:+233544788852" className="flex items-center gap-1.5 hover:opacity-80 transition-opacity" style={{ color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
+                <Phone className="h-4 w-4" /> +233 544 788 852
+              </a>
+              <a href="mailto:gengenesix@gmail.com" className="flex items-center gap-1.5 hover:opacity-80 transition-opacity" style={{ color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
+                <Mail className="h-4 w-4" /> gengenesix@gmail.com
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>© 2026 Nexus-GH · By GENESIS</p>
+            <a
+              href="/NexusGH_User_Guide.pdf"
+              download
+              className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80"
+              style={{ color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
+            >
+              <Download className="h-3.5 w-3.5" /> Download User Guide
+            </a>
           </div>
         </div>
       </footer>

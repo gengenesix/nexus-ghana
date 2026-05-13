@@ -1,33 +1,30 @@
-import { useState, useEffect } from "react";
-
 /**
- * Returns Recharts-compatible color tokens that react to the current
- * dark/light theme (ThemeToggle adds/removes the "light" class on <html>).
+ * Recharts-compatible color tokens using the CampusAid
+ * forest/lime/cream design system (always light theme).
  */
 export function useChartColors() {
-  const [isLight, setIsLight] = useState(() =>
-    document.documentElement.classList.contains("light")
-  );
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(document.documentElement.classList.contains("light"));
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  }, []);
-
   return {
     tooltipStyle: {
-      background:   isLight ? "hsl(0, 0%, 100%)"       : "hsl(220, 35%, 12%)",
-      border:       isLight ? "1px solid hsl(220, 13%, 87%)" : "1px solid hsl(220, 20%, 20%)",
-      borderRadius: 8,
-      color:        isLight ? "hsl(222, 47%, 11%)"      : "hsl(210, 40%, 96%)",
+      background:   "white",
+      border:       "1px solid hsl(45, 15%, 87%)",
+      borderRadius: 12,
+      color:        "hsl(140, 28%, 16%)",
+      fontSize:     13,
+      fontFamily:   "'Plus Jakarta Sans', system-ui, sans-serif",
     } as React.CSSProperties,
-    gridColor:  isLight ? "hsl(220, 13%, 87%)" : "hsl(220, 20%, 20%)",
-    axisColor:  isLight ? "hsl(220, 8%, 46%)"  : "hsl(215, 15%, 55%)",
+    gridColor:  "hsl(45, 15%, 87%)",
+    axisColor:  "hsl(140, 10%, 44%)",
   };
 }
+
+/* Shared chart color palette — forest, lime, greens, blues, red, amber */
+export const CHART_COLORS = [
+  "hsl(140, 28%, 16%)",   // forest
+  "hsl(86, 68%, 52%)",    // lime (darker for charts)
+  "hsl(142, 60%, 38%)",   // mid green
+  "hsl(210, 70%, 48%)",   // blue
+  "hsl(0, 72%, 51%)",     // red
+  "hsl(38, 92%, 50%)",    // amber
+  "hsl(280, 50%, 50%)",   // purple
+  "hsl(170, 55%, 40%)",   // teal
+];

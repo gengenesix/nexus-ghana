@@ -38,8 +38,8 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
   Staff: "POS and inventory access only",
 };
 
-const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)", "hsl(280, 65%, 55%)"];
-const tooltipStyle = { background: "hsl(220, 35%, 12%)", border: "1px solid hsl(220, 20%, 20%)", borderRadius: 8, color: "hsl(210, 40%, 96%)" };
+const COLORS = ["hsl(140,28%,16%)", "hsl(86,68%,52%)", "hsl(142,60%,38%)", "hsl(210,70%,48%)", "hsl(0,72%,51%)", "hsl(280,50%,50%)"];
+const tooltipStyle = { background: "white", border: "1px solid hsl(45,15%,87%)", borderRadius: 8, color: "hsl(140,28%,16%)" };
 
 export default function Staff() {
   const { business } = useBusiness();
@@ -411,7 +411,7 @@ export default function Staff() {
                 <CardContent>
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={roleDistribution}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(45,15%,87%)" />
                       <XAxis dataKey="name" stroke="hsl(215, 15%, 55%)" fontSize={10} angle={-30} textAnchor="end" height={60} />
                       <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} allowDecimals={false} />
                       <Tooltip contentStyle={tooltipStyle} />

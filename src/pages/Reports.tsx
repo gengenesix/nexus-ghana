@@ -22,8 +22,8 @@ import { toast } from "sonner";
 import { format, subMonths } from "date-fns";
 
 const COLORS = [
-  "hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)",
-  "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)", "hsl(280, 65%, 55%)", "hsl(180, 60%, 40%)",
+  "hsl(140,28%,16%)", "hsl(86,68%,52%)", "hsl(142,60%,38%)",
+  "hsl(210,70%,48%)", "hsl(0,72%,51%)", "hsl(280,50%,50%)", "hsl(170,55%,40%)",
 ];
 
 function ChartSkeleton() {
@@ -413,7 +413,7 @@ export default function Reports() {
                     <YAxis stroke={axisColor} fontSize={12} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
                     <Legend />
-                    <Line type="monotone" dataKey="revenue" stroke="hsl(37, 90%, 55%)" strokeWidth={2} dot={{ r: 4 }} name="Revenue" />
+                    <Line type="monotone" dataKey="revenue" stroke="hsl(140,28%,16%)" strokeWidth={2} dot={{ r: 4 }} name="Revenue" />
                     <Line type="monotone" dataKey="expenses" stroke="hsl(0, 72%, 51%)" strokeWidth={2} dot={{ r: 4 }} name="Expenses" />
                     <Line type="monotone" dataKey="profit" stroke="hsl(142, 76%, 36%)" strokeWidth={2} dot={{ r: 4 }} name="Profit" />
                   </LineChart>
@@ -545,7 +545,7 @@ export default function Reports() {
                     <Legend />
                     <Area type="monotone" dataKey="inflow" stroke="hsl(142, 76%, 36%)" fill="url(#inflowGrad)" strokeWidth={2} name="Inflows" />
                     <Area type="monotone" dataKey="outflow" stroke="hsl(0, 72%, 51%)" fill="url(#outflowGrad)" strokeWidth={2} name="Outflows" />
-                    <Line type="monotone" dataKey="net" stroke="hsl(37, 90%, 55%)" strokeWidth={2} dot={{ r: 4 }} name="Net" />
+                    <Line type="monotone" dataKey="net" stroke="hsl(140,28%,16%)" strokeWidth={2} dot={{ r: 4 }} name="Net" />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -606,7 +606,7 @@ export default function Reports() {
                     <XAxis type="number" stroke={axisColor} fontSize={11} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
                     <YAxis type="category" dataKey="name" width={120} stroke={axisColor} fontSize={11} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
-                    <Bar dataKey="revenue" fill="hsl(37, 90%, 55%)" radius={[0, 6, 6, 0]} name="Revenue" />
+                    <Bar dataKey="revenue" fill="hsl(140,28%,16%)" radius={[0, 6, 6, 0]} name="Revenue" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -673,7 +673,7 @@ export default function Reports() {
                     <XAxis dataKey="month" stroke={axisColor} />
                     <YAxis stroke={axisColor} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
-                    <Bar dataKey="revenue" fill="hsl(37, 90%, 55%)" radius={[6, 6, 0, 0]} name="Sales" />
+                    <Bar dataKey="revenue" fill="hsl(140,28%,16%)" radius={[6, 6, 0, 0]} name="Sales" />
                     <Bar dataKey="expenses" fill="hsl(0, 72%, 51%)" radius={[6, 6, 0, 0]} name="Expenses" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -736,7 +736,7 @@ export default function Reports() {
                           <XAxis type="number" stroke={axisColor} fontSize={11} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
                           <YAxis type="category" dataKey="name" width={100} stroke={axisColor} fontSize={11} />
                           <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
-                          <Bar dataKey="revenue" fill="hsl(37, 90%, 55%)" radius={[0, 6, 6, 0]} />
+                          <Bar dataKey="revenue" fill="hsl(140,28%,16%)" radius={[0, 6, 6, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </CardContent>

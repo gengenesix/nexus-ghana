@@ -21,7 +21,7 @@ import { useChartColors } from "@/hooks/useChartColors";
 import { format, subMonths, startOfMonth, endOfMonth, differenceInDays } from "date-fns";
 
 
-const COLORS = ["hsl(37, 90%, 55%)", "hsl(210, 92%, 45%)", "hsl(142, 76%, 36%)", "hsl(215, 15%, 55%)", "hsl(0, 72%, 51%)", "hsl(280, 60%, 50%)", "hsl(20, 80%, 50%)", "hsl(170, 60%, 40%)", "hsl(330, 70%, 50%)"];
+const COLORS = ["hsl(140,28%,16%)", "hsl(86,68%,52%)", "hsl(142,60%,38%)", "hsl(210,70%,48%)", "hsl(0,72%,51%)", "hsl(280,50%,50%)", "hsl(38,92%,50%)", "hsl(170,55%,40%)", "hsl(330,70%,50%)"];
 
 const QUICK_RANGES = [
   { label: "This Month", from: () => format(startOfMonth(new Date()), "yyyy-MM-dd"), to: () => format(new Date(), "yyyy-MM-dd") },
@@ -288,7 +288,7 @@ export default function Expenses() {
                 <CardContent>
                   <ResponsiveContainer width="100%" height={220}>
                     <LineChart data={monthlyTrend}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(45,15%,87%)" />
                       <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" fontSize={12} />
                       <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
                       <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [formatGHS(v), "Expenses"]} />
@@ -432,7 +432,7 @@ export default function Expenses() {
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={monthlyTrend}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(45,15%,87%)" />
                     <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" fontSize={12} />
                     <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [formatGHS(v), "Expenses"]} />
