@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Landmark, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [showPw, setShowPw]     = useState(false);
+  const [loading, setLoading]   = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -30,45 +27,179 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
-      <div className="w-full max-w-md animate-fade-in">
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-xl gold-gradient shadow-lg shadow-primary/25 shrink-0">
-            <Landmark className="h-6 w-6 text-primary-foreground" />
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20" />
+    <div className="min-h-screen flex">
+      {/* ── Left panel — forest brand (desktop) ── */}
+      <div
+        className="hidden lg:flex lg:w-[520px] xl:w-[580px] flex-shrink-0 flex-col relative overflow-hidden"
+        style={{ backgroundColor: "var(--forest)" }}
+      >
+        {/* dot texture */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+            opacity: 0.04,
+          }}
+        />
+        <div className="relative z-10 flex flex-col h-full px-12 py-10">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs"
+              style={{ backgroundColor: "var(--lime)", color: "var(--forest)" }}
+            >
+              NX
+            </div>
+            <span className="text-white text-lg font-extrabold tracking-tight" style={{ letterSpacing: "-0.03em" }}>
+              Nexus-GH
+            </span>
           </div>
-          <span className="font-curly text-3xl bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
-            Nexus-GH
-          </span>
-        </div>
 
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="font-display text-2xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to manage your business</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="you@business.com" value={email} onChange={e => setEmail(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
-              </div>
-              <Button type="submit" className="w-full gold-gradient text-primary-foreground font-semibold" disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"}
-              </Button>
-            </form>
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline font-medium">Sign up</Link>
+          {/* Hero copy */}
+          <div className="flex-1 flex flex-col justify-center">
+            <h1
+              className="text-white font-extrabold leading-tight mb-4"
+              style={{ fontSize: "clamp(1.875rem, 3vw, 2.5rem)", letterSpacing: "-0.03em" }}
+            >
+              Your Business.<br />Fully in Control.
+            </h1>
+            <p className="text-white/60 text-base leading-relaxed max-w-[360px]">
+              POS, inventory, invoicing, MoMo payments, HR, and full financial management — built for Ghana SMBs.
             </p>
-          </CardContent>
-        </Card>
+          </div>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">© 2026 Nexus-GH. By GENESIS</p>
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 pt-8" style={{ borderTop: "1px solid rgba(255,255,255,0.10)" }}>
+            {[
+              { value: "20+", label: "Modules" },
+              { value: "MoMo", label: "Payments" },
+              { value: "Offline", label: "POS ready" },
+            ].map((s) => (
+              <div key={s.label}>
+                <p className="text-xl font-extrabold tracking-tight font-mono" style={{ color: "var(--lime)" }}>
+                  {s.value}
+                </p>
+                <p className="text-white/50 text-xs font-medium mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Right panel — form ─────────────────── */}
+      <div
+        className="flex-1 flex items-center justify-center px-6 py-12 overflow-y-auto"
+        style={{ backgroundColor: "var(--cream)" }}
+      >
+        <div className="w-full max-w-[400px] animate-fade-in">
+          {/* Mobile logo */}
+          <div className="flex items-center gap-2.5 mb-8 lg:hidden">
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs"
+              style={{ backgroundColor: "var(--forest)", color: "var(--lime)" }}
+            >
+              NX
+            </div>
+            <span className="font-extrabold text-lg tracking-tight" style={{ color: "var(--forest)", letterSpacing: "-0.03em" }}>
+              Nexus-GH
+            </span>
+          </div>
+
+          <h2
+            className="text-3xl font-extrabold mb-1"
+            style={{ color: "var(--forest)", letterSpacing: "-0.025em" }}
+          >
+            Welcome back
+          </h2>
+          <p className="text-sm mb-8" style={{ color: "var(--muted-foreground)" }}>
+            Sign in to your Nexus-GH account
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--forest)" }}>
+                Email address
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@business.com"
+                required
+                className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all"
+                style={{
+                  border: "2px solid hsl(var(--border))",
+                  backgroundColor: "white",
+                  color: "var(--forest)",
+                  fontFamily: "inherit",
+                }}
+                onFocus={(e) => { e.target.style.borderColor = "var(--forest)"; }}
+                onBlur={(e)  => { e.target.style.borderColor = "hsl(var(--border))"; }}
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-semibold" style={{ color: "var(--forest)" }}>
+                  Password
+                </label>
+                <Link
+                  to="/register"
+                  className="text-xs font-medium hover:underline"
+                  style={{ color: "var(--muted-foreground)" }}
+                >
+                  No account? Sign up
+                </Link>
+              </div>
+              <div className="relative">
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full px-4 py-3 pr-16 rounded-2xl text-sm outline-none transition-all"
+                  style={{
+                    border: "2px solid hsl(var(--border))",
+                    backgroundColor: "white",
+                    color: "var(--forest)",
+                    fontFamily: "inherit",
+                  }}
+                  onFocus={(e) => { e.target.style.borderColor = "var(--forest)"; }}
+                  onBlur={(e)  => { e.target.style.borderColor = "hsl(var(--border))"; }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw(!showPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold px-2 py-1 rounded-lg"
+                  style={{ color: "var(--muted-foreground)" }}
+                >
+                  {showPw ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-full font-bold text-base transition-all duration-150 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 mt-2"
+              style={{ backgroundColor: "var(--forest)", color: "white" }}
+            >
+              {loading
+                ? <Loader2 className="h-5 w-5 animate-spin" />
+                : "Sign in"
+              }
+            </button>
+          </form>
+
+          <p className="text-center text-xs mt-8" style={{ color: "var(--muted-foreground)" }}>
+            © 2026 Nexus-GH · By GENESIS
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Pacifico&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,97 +6,63 @@
 
 @layer base {
   :root {
-    --background: 220 40% 8%;
-    --foreground: 210 40% 96%;
+    /* ── Backgrounds ─────────────────────────────── */
+    --background:   45 30% 96%;       /* cream warm off-white */
+    --foreground:   140 25% 12%;      /* near-black forest text */
 
-    --card: 220 35% 12%;
-    --card-foreground: 210 40% 96%;
+    --card:         0 0% 100%;        /* pure white cards */
+    --card-foreground: 140 25% 12%;
 
-    --popover: 220 35% 12%;
-    --popover-foreground: 210 40% 96%;
+    --popover:      0 0% 100%;
+    --popover-foreground: 140 25% 12%;
 
-    --primary: 37 90% 55%;
-    --primary-foreground: 220 40% 8%;
+    /* ── Brand ───────────────────────────────────── */
+    --primary:      140 28% 16%;      /* forest green */
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 30% 18%;
-    --secondary-foreground: 210 40% 96%;
+    --secondary:    45 25% 92%;       /* cream-dark */
+    --secondary-foreground: 140 28% 16%;
 
-    --muted: 220 25% 16%;
-    --muted-foreground: 215 15% 55%;
+    --muted:        45 20% 93%;
+    --muted-foreground: 140 10% 44%;
 
-    --accent: 37 90% 55%;
-    --accent-foreground: 220 40% 8%;
+    --accent:       86 68% 68%;       /* lime */
+    --accent-foreground: 140 28% 16%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 220 20% 20%;
-    --input: 220 20% 20%;
-    --ring: 37 90% 55%;
-
-    --radius: 0.75rem;
-
-    --sidebar-background: 220 40% 6%;
-    --sidebar-foreground: 215 15% 55%;
-    --sidebar-primary: 37 90% 55%;
-    --sidebar-primary-foreground: 220 40% 8%;
-    --sidebar-accent: 220 30% 14%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 220 20% 15%;
-    --sidebar-ring: 37 90% 55%;
-
-    --success: 142 76% 36%;
-    --success-foreground: 210 40% 98%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 220 40% 8%;
-    --info: 210 92% 45%;
-    --info-foreground: 210 40% 98%;
-  }
-
-  .light {
-    --background: 0 0% 98%;
-    --foreground: 222 47% 11%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-
-    --primary: 37 90% 50%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 14% 92%;
-    --secondary-foreground: 222 47% 11%;
-
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 8% 46%;
-
-    --accent: 37 90% 50%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 72% 51%;
+    --destructive:  0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 87%;
-    --input: 220 13% 87%;
-    --ring: 37 90% 50%;
+    --border:       45 15% 87%;
+    --input:        45 15% 87%;
+    --ring:         86 68% 68%;       /* lime ring */
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 8% 46%;
-    --sidebar-primary: 37 90% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 95%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 220 13% 90%;
-    --sidebar-ring: 37 90% 50%;
+    --radius: 1rem;
 
-    --success: 142 76% 36%;
+    /* ── Sidebar (white, forest active) ─────────── */
+    --sidebar-background:          0 0% 100%;
+    --sidebar-foreground:          140 10% 44%;
+    --sidebar-primary:             140 28% 16%;
+    --sidebar-primary-foreground:  0 0% 98%;
+    --sidebar-accent:              45 25% 94%;
+    --sidebar-accent-foreground:   140 28% 16%;
+    --sidebar-border:              45 15% 90%;
+    --sidebar-ring:                86 68% 68%;
+
+    /* ── Semantic status ─────────────────────────── */
+    --success:  142 76% 36%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 222 47% 11%;
-    --info: 210 92% 45%;
+    --warning:  38 92% 50%;
+    --warning-foreground: 140 28% 16%;
+    --info:     210 92% 45%;
     --info-foreground: 0 0% 100%;
+
+    /* ── Brand custom tokens (inline-style use) ─── */
+    --forest:      hsl(140, 28%, 16%);
+    --forest-dark: hsl(140, 30%, 10%);
+    --lime:        hsl(86, 68%, 68%);
+    --lime-dark:   hsl(86, 62%, 58%);
+    --cream:       hsl(45, 30%, 96%);
+    --cream-dark:  hsl(45, 25%, 92%);
   }
 }
 
@@ -106,122 +72,127 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans transition-colors duration-300;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    letter-spacing: -0.03em;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
   }
 }
 
 @layer utilities {
-  .gold-gradient {
-    background: linear-gradient(135deg, hsl(37, 90%, 55%), hsl(45, 93%, 65%));
+  /* ── Forest / Lime utilities ─────────────────── */
+  .bg-forest      { background-color: var(--forest); }
+  .bg-forest-dark { background-color: var(--forest-dark); }
+  .bg-lime        { background-color: var(--lime); }
+  .bg-lime-dark   { background-color: var(--lime-dark); }
+  .bg-cream       { background-color: var(--cream); }
+  .bg-cream-dark  { background-color: var(--cream-dark); }
+  .text-forest    { color: var(--forest); }
+  .text-lime      { color: var(--lime); }
+
+  /* ── Card lift (replaces glass-card) ──────────── */
+  .card-lift {
+    background: white;
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .gold-text {
-    background: linear-gradient(135deg, hsl(37, 90%, 55%), hsl(45, 93%, 65%));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .card-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.10);
   }
+
+  /* ── Legacy glass aliases (keep for existing JSX) */
   .glass-card {
-    background: hsl(220 35% 12% / 0.4);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid hsl(220 20% 30% / 0.3);
-    box-shadow: 0 8px 32px hsl(220 40% 4% / 0.4), inset 0 1px 0 hsl(220 20% 40% / 0.15);
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
-  }
-  .light .glass-card {
-    background: hsl(0 0% 100% / 0.7);
-    border: 1px solid hsl(220 13% 80% / 0.5);
-    box-shadow: 0 8px 32px hsl(220 14% 50% / 0.15), inset 0 1px 0 hsl(0 0% 100% / 0.8);
+    background: white;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s ease;
   }
   .glass-card:hover {
-    border-color: hsl(220 20% 40% / 0.5);
-    box-shadow: 0 12px 40px hsl(220 40% 4% / 0.5), inset 0 1px 0 hsl(220 20% 50% / 0.2);
-  }
-  .light .glass-card:hover {
-    border-color: hsl(220 13% 70% / 0.6);
-    box-shadow: 0 12px 40px hsl(220 14% 50% / 0.2), inset 0 1px 0 hsl(0 0% 100% / 0.9);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   }
   .glass-card-strong {
-    background: hsl(220 35% 14% / 0.6);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid hsl(220 20% 35% / 0.4);
-    box-shadow: 0 8px 32px hsl(220 40% 4% / 0.5), inset 0 1px 0 hsl(220 20% 50% / 0.1);
-  }
-  .light .glass-card-strong {
-    background: hsl(0 0% 100% / 0.85);
-    border: 1px solid hsl(220 13% 80% / 0.6);
-    box-shadow: 0 8px 32px hsl(220 14% 50% / 0.2), inset 0 1px 0 hsl(0 0% 100% / 0.9);
+    background: white;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   .glass-nav {
-    background: hsl(220 40% 6% / 0.7);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid hsl(220 20% 20% / 0.4);
-  }
-  .light .glass-nav {
-    background: hsl(0 0% 100% / 0.8);
-    border-bottom: 1px solid hsl(220 13% 85% / 0.6);
+    background: hsl(0 0% 100% / 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid hsl(var(--border));
   }
   .glass-glow {
-    box-shadow: 0 0 40px hsl(37 90% 55% / 0.15), 0 8px 32px hsl(220 40% 4% / 0.4);
-    transition: box-shadow 0.3s ease;
-  }
-  .light .glass-glow {
-    box-shadow: 0 0 40px hsl(37 90% 45% / 0.2), 0 8px 32px hsl(220 14% 50% / 0.15);
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+    transition: box-shadow 0.2s ease;
   }
   .glass-glow:hover {
-    box-shadow: 0 0 50px hsl(37 90% 55% / 0.25), 0 12px 40px hsl(220 40% 4% / 0.5);
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.35);
   }
-  .light .glass-glow:hover {
-    box-shadow: 0 0 50px hsl(37 90% 45% / 0.3), 0 12px 40px hsl(220 14% 50% / 0.2);
+
+  /* ── Lime gradient (replaces gold-gradient) ─── */
+  .lime-gradient {
+    background: linear-gradient(135deg, var(--lime), var(--lime-dark));
   }
-  .font-brand {
-    font-family: 'Outfit', 'Space Grotesk', system-ui, sans-serif;
+  /* keep gold-gradient as alias so existing JSX doesn't break */
+  .gold-gradient {
+    background: var(--forest);
   }
-  .font-display {
-    font-family: 'Outfit', 'Space Grotesk', system-ui, sans-serif;
-    letter-spacing: -0.04em;
+  .gold-text {
+    color: var(--forest);
   }
+
+  /* ── Font utilities ───────────────────────────── */
+  .font-brand   { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+  .font-display { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; letter-spacing: -0.03em; font-weight: 800; }
+
+  /* ── Dot texture (used on forest panels) ──────── */
+  .dot-texture {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.04;
+  }
+
+  /* ── Hover lift ───────────────────────────────── */
   .hover-lift {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px hsl(220 40% 4% / 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
   }
-  .light .hover-lift:hover {
-    box-shadow: 0 8px 25px hsl(220 14% 50% / 0.2);
+
+  /* ── Progress shimmer (for progress bars) ──────── */
+  .progress-shimmer {
+    background: linear-gradient(90deg, var(--lime) 0%, var(--lime-dark) 50%, var(--lime) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 }
 
-/* Hide scrollbar utility */
+/* ── Scrollbar ───────────────────────────────────── */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: hsl(var(--background));
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: hsl(var(--background)); }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
+  background: hsl(var(--border));
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary));
-}
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.5); }

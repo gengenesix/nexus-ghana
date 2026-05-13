@@ -1,5 +1,4 @@
 import { LucideIcon } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 
 interface StatCardProps {
   title: string;
@@ -11,23 +10,38 @@ interface StatCardProps {
 
 export function StatCard({ title, value, icon: Icon, trend, trendUp }: StatCardProps) {
   return (
-    <Card className="animate-fade-in hover:scale-[1.02] transition-transform duration-200">
-      <CardContent className="p-5">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold font-display">{value}</p>
-            {trend && (
-              <p className={`text-xs ${trendUp ? "text-success" : "text-destructive"}`}>
-                {trendUp ? "↑" : "↓"} {trend}
-              </p>
-            )}
-          </div>
-          <div className="rounded-xl bg-primary/10 p-3">
-            <Icon className="h-6 w-6 text-primary" />
-          </div>
+    <div
+      className="rounded-2xl p-5 animate-fade-in transition-all duration-200 hover:-translate-y-1"
+      style={{
+        backgroundColor: "white",
+        border: "1px solid hsl(var(--border))",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+            {title}
+          </p>
+          <p
+            className="text-2xl font-extrabold font-mono tracking-tight"
+            style={{ color: "var(--forest)", letterSpacing: "-0.025em" }}
+          >
+            {value}
+          </p>
+          {trend && (
+            <p className={`text-xs font-medium ${trendUp ? "text-success" : "text-destructive"}`}>
+              {trendUp ? "↑" : "↓"} {trend}
+            </p>
+          )}
         </div>
-      </CardContent>
-    </Card>
+        <div
+          className="rounded-xl p-3"
+          style={{ backgroundColor: "var(--cream-dark)" }}
+        >
+          <Icon className="h-5 w-5" style={{ color: "var(--forest)" }} />
+        </div>
+      </div>
+    </div>
   );
 }
