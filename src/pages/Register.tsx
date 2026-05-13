@@ -54,8 +54,10 @@ export default function Register() {
         />
         <div className="relative z-10 flex flex-col h-full px-12 py-10">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <img src="/brand/nexis-horizontal-dark.png" alt="Nexis" style={{ height: 32 }} />
+          <div
+            style={{ width: 72, height: 72, borderRadius: "50%", overflow: "hidden", flexShrink: 0, boxShadow: "0 0 0 4px rgba(255,255,255,0.18), 0 8px 28px rgba(0,0,0,0.35)" }}
+          >
+            <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
 
           {/* Hero copy */}
@@ -128,9 +130,11 @@ export default function Register() {
             </Link>
           </div>
 
-          {/* Mobile logo */}
-          <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 32 }} />
+          {/* App icon — always visible at top of form */}
+          <div className="mb-8">
+            <div style={{ width: 64, height: 64, borderRadius: "50%", overflow: "hidden", boxShadow: "0 4px 20px rgba(26,58,34,0.18), 0 0 0 3px rgba(26,58,34,0.08)" }}>
+              <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            </div>
           </div>
 
           <h2
