@@ -4,7 +4,6 @@ import {
   BadgeCheck, Nfc, Scale, ArrowRight, Check, WifiOff,
   Phone, Mail, Download, Star,
 } from "lucide-react";
-import { NexisWordmark, NexisBadge } from "@/components/NexisLogo";
 
 import heroDashboard   from "@/assets/hero-dashboard.png";
 import featurePos      from "@/assets/feature-pos.png";
@@ -110,8 +109,7 @@ export default function Landing() {
       >
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
-            <NexisBadge size={32} />
-            <NexisWordmark onDark style={{ color: "white", fontSize: 18 }} />
+            <img src="/brand/nexis-horizontal-dark.png" alt="Nexis" style={{ height: 32 }} />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
@@ -560,8 +558,7 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
             <div className="flex items-center gap-2.5">
-              <NexisBadge size={32} />
-              <NexisWordmark onDark style={{ color: "white", fontSize: 18 }} />
+              <img src="/brand/nexis-horizontal-dark.png" alt="Nexis" style={{ height: 28 }} />
             </div>
 
             <div className="flex flex-wrap gap-6 text-sm">

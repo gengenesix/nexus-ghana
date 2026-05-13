@@ -3,7 +3,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { NexisBadge, NexisWordmark } from "@/components/NexisLogo";
 
 export default function Login() {
   const [email, setEmail]       = useState("");
@@ -46,8 +45,7 @@ export default function Login() {
         <div className="relative z-10 flex flex-col h-full px-12 py-10">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <NexisBadge size={36} />
-            <NexisWordmark onDark style={{ color: "white", fontSize: 18 }} />
+            <img src="/brand/nexis-horizontal-dark.png" alt="Nexis" style={{ height: 32 }} />
           </div>
 
           {/* Hero copy */}
@@ -101,8 +99,7 @@ export default function Login() {
 
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <NexisBadge size={32} />
-            <NexisWordmark style={{ color: "var(--forest)", fontSize: 18 }} />
+            <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 32 }} />
           </div>
 
           <h2

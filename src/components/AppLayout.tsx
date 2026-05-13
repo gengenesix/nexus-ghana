@@ -1,5 +1,4 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { NexisBadge, NexisWordmark } from "@/components/NexisLogo";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileNav } from "@/components/MobileNav";
 import { Outlet, useLocation } from "react-router-dom";
@@ -26,8 +25,7 @@ export function AppLayout() {
             <div className="flex items-center gap-4">
               <SidebarTrigger className="mr-2 hidden md:flex" />
               <div className="flex items-center gap-2 md:hidden">
-                <NexisBadge size={28} />
-                <NexisWordmark style={{ color: "var(--forest)", fontSize: 16 }} />
+                <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 28 }} />
               </div>
               <GlobalSearch />
             </div>

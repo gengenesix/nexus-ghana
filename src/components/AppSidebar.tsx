@@ -4,7 +4,6 @@ import {
   Shield, Wallet, Handshake, ShoppingBag, Factory, Cpu, FolderKanban,
   Headphones, Users2, ArrowRightLeft, ChevronDown, Lock, Landmark,
 } from "lucide-react";
-import { NexisBadge, NexisWordmark } from "@/components/NexisLogo";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/hooks/useBusiness";
@@ -165,9 +164,10 @@ export function AppSidebar() {
         className="flex items-center gap-3 px-4 py-5 shrink-0"
         style={{ borderBottom: "1px solid hsl(var(--border))" }}
       >
-        <NexisBadge size={36} />
-        {!collapsed && (
-          <NexisWordmark style={{ color: "var(--forest)", fontSize: 18 }} />
+        {collapsed ? (
+          <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ height: 36, width: 36, borderRadius: 8 }} />
+        ) : (
+          <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 32 }} />
         )}
       </div>
 
