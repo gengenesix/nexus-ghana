@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        // Cache all app shell assets
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         // Runtime caching strategies
         runtimeCaching: [
