@@ -1,7 +1,8 @@
 {
   "name": "nexus-gh",
+  "description": "Multi-tenant ERP and business management platform for Ghanaian SMBs — POS, inventory, invoicing, MoMo payments, and more.",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
