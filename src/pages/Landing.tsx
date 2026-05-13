@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import {
   ScanLine, Boxes, ReceiptText, UsersRound, Wallet, BarChart2,
-  BadgeCheck, Nfc, Scale, ArrowRight, Check, TrendingUp,
-  Phone, Mail, Download, Star, Sparkles,
+  BadgeCheck, Nfc, Scale, ArrowRight, Check, WifiOff,
+  Phone, Mail, Download, Star,
 } from "lucide-react";
 import { NexisWordmark, NexisBadge } from "@/components/NexisLogo";
 
@@ -153,7 +153,7 @@ export default function Landing() {
 
             {/* Left — copy */}
             <div className="animate-fade-in">
-              {/* badge pill — no colour dot, use sparkle */}
+              {/* badge pill */}
               <div
                 className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase mb-8"
                 style={{
@@ -163,7 +163,7 @@ export default function Landing() {
                   border: "1px solid hsl(var(--border))",
                 }}
               >
-                <Sparkles className="h-3.5 w-3.5" style={{ color: "hsl(142,55%,38%)" }} />
+                <span style={{ fontSize: "14px", lineHeight: 1 }}>🇬🇭</span>
                 Built for Ghana business
               </div>
 
@@ -177,7 +177,7 @@ export default function Landing() {
               >
                 The business<br />
                 platform built<br />
-                <span style={{ color: "hsl(142,55%,38%)" }}>for Ghana.</span>
+                <span style={{ color: "var(--lime)" }}>for Ghana.</span>
               </h1>
 
               <p
@@ -207,16 +207,16 @@ export default function Landing() {
 
               <div className="mt-8 flex flex-wrap gap-3">
                 {[
-                  { icon: Check,       label: "Free forever plan" },
-                  { icon: TrendingUp,  label: "500+ businesses" },
-                  { icon: BadgeCheck,  label: "All 16 regions" },
+                  { icon: Check,    label: "Free forever plan" },
+                  { icon: WifiOff,  label: "Works offline" },
+                  { icon: Nfc,      label: "MoMo payments built-in" },
                 ].map(({ icon: Icon, label }) => (
                   <span
                     key={label}
                     className="inline-flex items-center gap-1.5 text-sm font-semibold px-3.5 py-1.5 rounded-full"
                     style={{ backgroundColor: "white", color: "hsl(140,20%,38%)", border: "1px solid hsl(var(--border))" }}
                   >
-                    <Icon className="h-3.5 w-3.5" style={{ color: "hsl(142,55%,38%)" }} />
+                    <Icon className="h-3.5 w-3.5" style={{ color: "var(--forest)" }} />
                     {label}
                   </span>
                 ))}
@@ -244,26 +244,31 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Stats band ─────────────────────────────── */}
-      <section style={{ backgroundColor: "var(--forest)" }} className="py-14">
+      {/* ── Product highlights band ─────────────────── */}
+      <section style={{ backgroundColor: "var(--forest)" }} className="py-12 overflow-hidden">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", overflow: "hidden" }}>
             {[
-              { value: "50+",   label: "Businesses served" },
-              { value: "₵200k+",label: "Sales processed" },
-              { value: "16",    label: "Regions covered" },
-              { value: "99.9%", label: "Platform uptime" },
-            ].map((s) => (
-              <div key={s.label} className="text-center">
-                <p
-                  className="text-3xl font-extrabold font-mono mb-1"
-                  style={{ color: "var(--lime)", letterSpacing: "-0.04em" }}
+              { icon: Nfc,      headline: "MoMo Ready",    sub: "MTN · Vodafone · AirtelTigo" },
+              { icon: WifiOff,  headline: "Offline-First",  sub: "Full POS without internet" },
+              { icon: Scale,    headline: "Ghana Tax",      sub: "VAT · NHIL · GETFL auto-calc" },
+              { icon: Check,    headline: "Free to Start",  sub: "No credit card required" },
+            ].map(({ icon: Icon, headline, sub }) => (
+              <div
+                key={headline}
+                className="flex flex-col items-center text-center px-6 py-8 gap-3"
+                style={{ backgroundColor: "transparent" }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
                 >
-                  {s.value}
-                </p>
-                <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  {s.label}
-                </p>
+                  <Icon className="h-5 w-5" style={{ color: "var(--lime)" }} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <p className="font-bold text-sm mb-0.5" style={{ color: "white" }}>{headline}</p>
+                  <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>{sub}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -342,7 +347,7 @@ export default function Landing() {
                 <Link
                   to="/register"
                   className="inline-flex items-center gap-1.5 text-sm font-bold transition-opacity hover:opacity-70"
-                  style={{ color: "hsl(142,55%,38%)", textDecoration: "none" }}
+                  style={{ color: "var(--forest)", textDecoration: "none" }}
                 >
                   Try it free <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -534,7 +539,7 @@ export default function Landing() {
             Ready to transform<br />your business?
           </h2>
           <p className="text-base font-medium mb-10" style={{ color: "rgba(255,255,255,0.55)" }}>
-            Join hundreds of Ghanaian entrepreneurs already on Nexis.
+            Start free. No credit card. Built for every Ghanaian business.
           </p>
           <Link
             to="/register"
