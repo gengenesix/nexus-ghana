@@ -40,19 +40,32 @@ export function useBusiness() {
       return data as Business | null;
     },
     enabled: !!user,
+    // Keep cached data while refetching so guards never see a stale null
+    staleTime: 5 * 60 * 1000,
   });
 
   const createBusiness = useMutation({
-    mutationFn: async (values: { name: string; phone?: string; email?: string; region?: string; address?: string }) => {
+    mutationFn: async (values: {
+      name: string;
+      phone?: string;
+      email?: string;
+      region?: string;
+      address?: string;
+    }) => {
       const { data, error } = await supabase
         .from("businesses")
         .insert({ ...values, owner_id: user!.id })
         .select()
         .single();
       if (error) throw error;
-      return data;
+      return data as Business;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["business"] }),
+    onSuccess: (data) => {
+      // Write directly into the cache so BusinessGuard immediately sees the
+      // new business — avoids the race where invalidate triggers a background
+      // refetch and the guard sees null during the brief refetch window.
+      queryClient.setQueryData(["business", user!.id], data);
+    },
   });
 
   const updateBusiness = useMutation({
@@ -64,14 +77,18 @@ export function useBusiness() {
         .select()
         .single();
       if (error) throw error;
-      return data;
+      return data as Business;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["business"] }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["business", user!.id], data);
+    },
   });
 
   return {
-    business: query.data,
-    isLoading: query.isLoading,
+    business:   query.data ?? null,
+    isLoading:  query.isLoading,
+    isFetching: query.isFetching,
+    isError:    query.isError,
     createBusiness,
     updateBusiness,
   };

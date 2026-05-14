@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { GHANA_REGIONS } from "@/lib/ghana";
 import { Loader2, Building2, MapPin, Lock } from "lucide-react";
 import { useBusiness } from "@/hooks/useBusiness";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,9 +22,15 @@ export default function Onboarding() {
   const [address, setAddress]       = useState("");
   const [adminPin, setAdminPin]     = useState("");
   const [confirmPin, setConfirmPin] = useState("");
-  const { createBusiness } = useBusiness();
-  const { user } = useAuth();
+  const { business, isLoading, isFetching, createBusiness } = useBusiness();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  // If the user already has a business, send them straight to the dashboard.
+  // Wait until auth + business query have resolved before deciding.
+  if (!authLoading && !isLoading && !(isFetching && !business) && business) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
