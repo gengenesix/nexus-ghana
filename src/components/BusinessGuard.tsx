@@ -1,10 +1,12 @@
 import { useBusiness } from "@/hooks/useBusiness";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
 export function BusinessGuard({ children }: { children: React.ReactNode }) {
-  const { loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { isStaffLoggedIn } = useStaffSession();
   const { business, isError, status } = useBusiness();
 
   // 1. Wait for the Supabase auth session to restore on page refresh.
@@ -60,8 +62,20 @@ export function BusinessGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // 4. status === 'success' and no business → new user, send to onboarding.
+  // 4. status === 'success' and no business found.
+  //    - If a staff session is already active (kiosk PIN) but business is null,
+  //      something is wrong — retry.
+  //    - If this is a Supabase-auth staff user (isStaffLoggedIn), their business
+  //      should have resolved via staff_members lookup; guard against a brief
+  //      race by waiting (status would still be pending in that case).
+  //    - Otherwise route to the correct setup page:
+  //        owner account   → /onboarding (create their business)
+  //        staff account   → /join-business (enter their business code)
   if (!business) {
+    const isStaffAccount = user?.user_metadata?.account_type === "staff";
+    if (isStaffAccount || isStaffLoggedIn) {
+      return <Navigate to="/join-business" replace />;
+    }
     return <Navigate to="/onboarding" replace />;
   }
 

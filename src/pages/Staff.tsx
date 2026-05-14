@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatGHS } from "@/lib/ghana";
-import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Users, Circle, RefreshCw, Key, BarChart3, Award } from "lucide-react";
+import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Users, Circle, RefreshCw, Key, BarChart3, Award, Copy, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
@@ -264,6 +264,41 @@ export default function Staff() {
           <Plus className="h-4 w-4 mr-1" /> Add Staff
         </Button>
       </div>
+
+      {/* Business Access Code — staff use this to join on their own devices */}
+      {business?.access_code && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+                  <Share2 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Business Access Code</p>
+                  <p className="text-2xl font-extrabold font-mono tracking-widest text-primary">{business.access_code}</p>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-muted-foreground">
+                  Share this code with staff so they can join your business on their own device. They go to <strong>nexis.app/register</strong> → "I'm joining a team" → enter this code after logging in.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                onClick={() => {
+                  navigator.clipboard.writeText(business.access_code!);
+                  toast.success("Code copied!");
+                }}
+              >
+                <Copy className="h-4 w-4 mr-1" /> Copy
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

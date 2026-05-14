@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface StaffSession {
@@ -43,6 +44,8 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 };
 
 export function StaffSessionProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+
   const [staff, setStaff] = useState<StaffSession | null>(() => {
     const saved = sessionStorage.getItem("nexus_staff_session");
     return saved ? JSON.parse(saved) : null;
@@ -56,6 +59,30 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
     sessionStorage.setItem("nexus_owner_session", "1");
     setOwnerBypass(true);
   }, []);
+
+  // Auto-create staff session for users who have their own Supabase account
+  // linked to a staff_members record (the "Join a Business" flow).
+  // This means they never see a PIN gate — they authenticated with email+password.
+  useEffect(() => {
+    if (!user || staff) return; // Already have a session
+    supabase
+      .from("staff_members")
+      .select("id, name, role, business_id, businesses(owner_id)")
+      .eq("supabase_user_id", user.id)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        // Safety: don't auto-create a staff session for the business owner
+        const biz = data.businesses as any;
+        if (biz?.owner_id === user.id) return;
+        const session: StaffSession = { id: data.id, name: data.name, role: data.role };
+        setStaff(session);
+        sessionStorage.setItem("nexus_staff_session", JSON.stringify(session));
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const loginWithPin = useCallback(async (businessId: string, pin: string, staffId?: string): Promise<StaffSession | null> => {
     const { data, error } = await supabase.rpc("verify_staff_pin", {

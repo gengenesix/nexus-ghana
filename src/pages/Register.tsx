@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link, Navigate } from "react-router-dom";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, Building2, Users } from "lucide-react";
 import { toast } from "sonner";
 
 const PERKS = [
@@ -12,7 +12,10 @@ const PERKS = [
   "Financial reporting in GHS",
 ];
 
+type Mode = "owner" | "staff";
+
 export default function Register() {
+  const [mode, setMode]         = useState<Mode>("owner");
   const [fullName, setFullName] = useState("");
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +24,6 @@ export default function Register() {
   const { signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Already authenticated — send to dashboard so they don't register twice.
   if (!authLoading && user) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -31,9 +33,17 @@ export default function Register() {
     if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
     setLoading(true);
     try {
-      await signUp(email, password, fullName);
-      toast.success("Account created! Check your email to confirm.");
-      navigate("/login");
+      if (mode === "owner") {
+        await signUp(email, password, fullName);
+        toast.success("Account created! Check your email to confirm.");
+        navigate("/login");
+      } else {
+        // Staff account — mark with account_type so BusinessGuard routes them
+        // to /join-business (not /onboarding) after email confirmation + login.
+        await signUp(email, password, fullName, { account_type: "staff" });
+        toast.success("Account created! Confirm your email, then log in and enter your business code.");
+        navigate("/login");
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to create account");
     } finally {
@@ -149,9 +159,43 @@ export default function Register() {
           >
             Create your account
           </h2>
-          <p className="text-sm mb-8" style={{ color: "var(--muted-foreground)" }}>
-            Start managing your business with Nexis
+          <p className="text-sm mb-6" style={{ color: "var(--muted-foreground)" }}>
+            {mode === "owner" ? "Start managing your business with Nexis" : "Join your team on Nexis"}
           </p>
+
+          {/* Mode toggle */}
+          <div
+            className="flex rounded-2xl p-1 mb-6"
+            style={{ backgroundColor: "white", border: "1.5px solid hsl(var(--border))" }}
+          >
+            {(["owner", "staff"] as Mode[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150"
+                style={
+                  mode === m
+                    ? { backgroundColor: "var(--forest)", color: "white" }
+                    : { color: "var(--muted-foreground)" }
+                }
+              >
+                {m === "owner"
+                  ? <><Building2 className="h-4 w-4" /> I own a business</>
+                  : <><Users className="h-4 w-4" /> I'm joining a team</>
+                }
+              </button>
+            ))}
+          </div>
+
+          {mode === "staff" && (
+            <div
+              className="rounded-2xl p-4 mb-4 text-sm"
+              style={{ backgroundColor: "white", border: "1.5px solid hsl(var(--border))", color: "var(--muted-foreground)" }}
+            >
+              Create your account below. After confirming your email and logging in, you'll be asked for your <strong style={{ color: "var(--forest)" }}>Business Access Code</strong> — get this from your manager.
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full name */}

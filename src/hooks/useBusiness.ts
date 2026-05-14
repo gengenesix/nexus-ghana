@@ -20,6 +20,7 @@ export interface Business {
   receipt_header: string;
   receipt_footer: string;
   receipt_show_logo: boolean;
+  access_code: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -31,22 +32,32 @@ export function useBusiness() {
   const query = useQuery({
     queryKey: ["business", user?.id],
     queryFn: async () => {
-      // Use array + limit(1) instead of maybeSingle() so the query never
-      // errors if a user accidentally ended up with duplicate rows in the DB.
-      // The UNIQUE(owner_id) DB constraint (fix_duplicate_businesses.sql)
-      // ensures duplicates cannot happen going forward.
-      const { data, error } = await supabase
+      // 1. Try owner lookup first (most common case)
+      const { data: owned, error: ownerErr } = await supabase
         .from("businesses")
         .select("*")
         .eq("owner_id", user!.id)
         .order("created_at", { ascending: true })
         .limit(1);
-      if (error) throw error;
-      return (data && data.length > 0 ? (data[0] as Business) : null);
+      if (ownerErr) throw ownerErr;
+      if (owned && owned.length > 0) return owned[0] as Business;
+
+      // 2. Not an owner — check if this user is a staff member of a business
+      //    (they registered via the "Join a Business" flow and have their
+      //    supabase_user_id stored in staff_members)
+      const { data: staffRow, error: staffErr } = await supabase
+        .from("staff_members")
+        .select("businesses(*)")
+        .eq("supabase_user_id", user!.id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
+      if (staffErr) throw staffErr;
+      if (staffRow?.businesses) return staffRow.businesses as unknown as Business;
+
+      return null;
     },
     enabled: !!user,
-    // Keep cached data fresh for 5 minutes so guards never see stale null
-    // during background refetches.
     staleTime: 5 * 60 * 1000,
   });
 
