@@ -193,6 +193,7 @@ export default function MRP() {
                   <span className="font-display font-bold text-primary text-lg">{formatGHS(totalEstCost)}</span>
                 </div>
               )}
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -229,6 +230,7 @@ export default function MRP() {
                     ))}
                 </TableBody>
               </Table>
+              </div>
             </div>
           )}
         </CardContent>

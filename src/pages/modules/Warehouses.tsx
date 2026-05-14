@@ -74,6 +74,7 @@ export default function Warehouses() {
           </div>
           <Card><CardContent className="pt-4">
             {(warehouses as any[]).length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Code</TableHead><TableHead>Name</TableHead><TableHead>Address</TableHead><TableHead>Default</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
                 <TableBody>{(warehouses as any[]).map(w => (
@@ -86,6 +87,7 @@ export default function Warehouses() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <Warehouse className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -108,6 +110,7 @@ export default function Warehouses() {
           )}
           <Card><CardContent className="pt-4">
             {(transfers as any[]).length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -132,6 +135,7 @@ export default function Warehouses() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <ArrowRightLeft className="h-12 w-12 mx-auto mb-4 opacity-50" />

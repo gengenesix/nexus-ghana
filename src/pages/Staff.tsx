@@ -319,6 +319,7 @@ export default function Staff() {
           <TabsContent key={tab} value={tab}>
             <Card>
               <CardContent className="p-0">
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -397,6 +398,7 @@ export default function Staff() {
                     })()}
                   </TableBody>
                 </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

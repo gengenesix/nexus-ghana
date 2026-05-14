@@ -69,6 +69,7 @@ export default function Banking() {
           <div className="flex justify-between"><h3 className="font-semibold">Bank Accounts</h3><Button onClick={() => setBankDialogOpen(true)}><Plus className="h-4 w-4 mr-1" />Add Account</Button></div>
           <Card><CardContent className="pt-4">
             {bankAccounts.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Bank</TableHead><TableHead>Type</TableHead><TableHead>Currency</TableHead><TableHead className="text-right">Balance</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
                 <TableBody>{bankAccounts.map((ba: any) => (
@@ -82,6 +83,7 @@ export default function Banking() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><Landmark className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No bank accounts registered. Add your company bank accounts.</p></div>
             )}
@@ -92,6 +94,7 @@ export default function Banking() {
           <div className="flex justify-between"><h3 className="font-semibold">Incoming Payments</h3><Button onClick={() => setPaymentDialog({ open: true, type: "incoming" })}><Plus className="h-4 w-4 mr-1" />Record Payment</Button></div>
           <Card><CardContent className="pt-4">
             {payments.filter((p: any) => p.type === "incoming").length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Payment #</TableHead><TableHead>Date</TableHead><TableHead>Method</TableHead><TableHead>Reference</TableHead><TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
                 <TableBody>{payments.filter((p: any) => p.type === "incoming").map((p: any) => (
@@ -105,6 +108,7 @@ export default function Banking() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><ArrowDownLeft className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No incoming payments recorded.</p></div>
             )}
@@ -115,6 +119,7 @@ export default function Banking() {
           <div className="flex justify-between"><h3 className="font-semibold">Outgoing Payments</h3><Button onClick={() => setPaymentDialog({ open: true, type: "outgoing" })}><Plus className="h-4 w-4 mr-1" />Record Payment</Button></div>
           <Card><CardContent className="pt-4">
             {payments.filter((p: any) => p.type === "outgoing").length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Payment #</TableHead><TableHead>Date</TableHead><TableHead>Method</TableHead><TableHead>Reference</TableHead><TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
                 <TableBody>{payments.filter((p: any) => p.type === "outgoing").map((p: any) => (
@@ -128,6 +133,7 @@ export default function Banking() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><ArrowUpRight className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No outgoing payments recorded.</p></div>
             )}

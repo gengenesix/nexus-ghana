@@ -122,6 +122,7 @@ export default function Projects() {
           </div>
           <Card><CardContent className="pt-4">
             {filteredTasks.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Task</TableHead><TableHead>Project</TableHead><TableHead>Priority</TableHead><TableHead>Status</TableHead><TableHead>Start</TableHead><TableHead>Due</TableHead><TableHead className="text-right">Hours</TableHead></TableRow></TableHeader>
                 <TableBody>{filteredTasks.map((t: any) => {
@@ -139,6 +140,7 @@ export default function Projects() {
                   );
                 })}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><ListTodo className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>{selectedProject ? "No tasks for this project." : "No tasks yet."}</p></div>
             )}

@@ -83,6 +83,7 @@ export default function Purchasing() {
           <div className="flex justify-between"><h3 className="font-semibold">Purchase Orders</h3><Button onClick={() => setPoOpen(true)}><Plus className="h-4 w-4 mr-1" />New PO</Button></div>
           <Card><CardContent className="pt-4">
             {purchaseOrders.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>PO #</TableHead><TableHead>Supplier</TableHead><TableHead>Date</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead><TableHead className="w-[120px]"></TableHead></TableRow></TableHeader>
                 <TableBody>{purchaseOrders.map((po: any) => (
@@ -102,6 +103,7 @@ export default function Purchasing() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No purchase orders yet.</p></div>
             )}

@@ -395,6 +395,7 @@ export default function Invoices() {
 
       <Card>
         <CardContent className="p-0">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -404,7 +405,7 @@ export default function Invoices() {
                 <TableHead className="hidden md:table-cell">Due</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="w-[200px]"></TableHead>
+                <TableHead className="w-10 sm:w-auto"></TableHead>
               </TableRow>
             </TableHeader>
             {isLoading ? (
@@ -426,20 +427,22 @@ export default function Invoices() {
                     </TableCell>
                     <TableCell className="text-right font-medium">{formatGHS(Number(invoice.total))}</TableCell>
                     <TableCell onClick={e => e.stopPropagation()}>
-                      <div className="flex gap-1">
-                        <Select value={invoice.status} onValueChange={(s) => updateStatus.mutate({ id: invoice.id, status: s })}>
-                          <SelectTrigger className="h-8 text-xs w-[90px]"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {["draft", "sent", "paid", "overdue", "partial"].map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                      <div className="flex items-center gap-0.5">
+                        <div className="hidden sm:flex items-center gap-0.5">
+                          <Select value={invoice.status} onValueChange={(s) => updateStatus.mutate({ id: invoice.id, status: s })}>
+                            <SelectTrigger className="h-8 text-xs w-[90px]"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {["draft", "sent", "paid", "overdue", "partial"].map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => downloadInvoice(invoice)} title="Download PDF"><Download className="h-4 w-4" /></Button>
+                          {["sent", "partial", "overdue"].includes(invoice.status) && (
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-green-500 hover:bg-green-500/10" onClick={() => { setSelectedInvoice(invoice); setPaymentAmount(String(Number(invoice.total))); setShowPayment(true); }} title="Record Payment">
+                              <CreditCard className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSelectedInvoice(invoice)} title="View"><Eye className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => downloadInvoice(invoice)} title="Download PDF"><Download className="h-4 w-4" /></Button>
-                        {["sent", "partial", "overdue"].includes(invoice.status) && (
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-green-500 hover:bg-green-500/10" onClick={() => { setSelectedInvoice(invoice); setPaymentAmount(String(Number(invoice.total))); setShowPayment(true); }} title="Record Payment">
-                            <CreditCard className="h-4 w-4" />
-                          </Button>
-                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -448,6 +451,7 @@ export default function Invoices() {
             </TableBody>
             )}
           </Table>
+          </div>
         </CardContent>
       </Card>
 

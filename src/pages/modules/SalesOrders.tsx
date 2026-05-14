@@ -212,6 +212,7 @@ export default function SalesOrders() {
           <div className="flex justify-between"><h3 className="font-semibold">Sales Quotations</h3><Button onClick={() => setQuotationOpen(true)}><Plus className="h-4 w-4 mr-1" />New Quotation</Button></div>
           <Card><CardContent className="pt-4">
             {quotations.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Quote #</TableHead><TableHead>Customer</TableHead><TableHead>Date</TableHead><TableHead>Valid Until</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead><TableHead className="w-28"></TableHead></TableRow></TableHeader>
                 <TableBody>{quotations.map((q: any) => (
@@ -232,6 +233,7 @@ export default function SalesOrders() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><FileText className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No quotations yet. Create one to start the sales process.</p></div>
             )}
@@ -243,6 +245,7 @@ export default function SalesOrders() {
           <div className="flex justify-between"><h3 className="font-semibold">Sales Orders</h3></div>
           <Card><CardContent className="pt-4">
             {salesOrders.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Order #</TableHead><TableHead>Customer</TableHead><TableHead>Date</TableHead><TableHead>Source</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead><TableHead className="w-48"></TableHead></TableRow></TableHeader>
                 <TableBody>{salesOrders.map((o: any) => (
@@ -275,6 +278,7 @@ export default function SalesOrders() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No sales orders yet.</p></div>
             )}
@@ -286,6 +290,7 @@ export default function SalesOrders() {
           <div className="flex justify-between"><h3 className="font-semibold">Delivery Notes</h3></div>
           <Card><CardContent className="pt-4">
             {deliveries.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Delivery #</TableHead><TableHead>Customer</TableHead><TableHead>Date</TableHead><TableHead>Carrier</TableHead><TableHead>Tracking</TableHead><TableHead>Status</TableHead><TableHead className="w-36"></TableHead></TableRow></TableHeader>
                 <TableBody>{deliveries.map((d: any) => (
@@ -313,6 +318,7 @@ export default function SalesOrders() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><Truck className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No delivery notes yet. Create a sales order and click "Deliver" to generate one.</p></div>
             )}
@@ -324,6 +330,7 @@ export default function SalesOrders() {
           <div className="flex justify-between"><h3 className="font-semibold">Credit Notes & Returns</h3></div>
           <Card><CardContent className="pt-4">
             {creditNotes.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Credit #</TableHead><TableHead>Customer</TableHead><TableHead>Date</TableHead><TableHead>Reason</TableHead><TableHead className="text-right">Total</TableHead><TableHead>Status</TableHead><TableHead className="w-28"></TableHead></TableRow></TableHeader>
                 <TableBody>{creditNotes.map((cn: any) => (
@@ -344,6 +351,7 @@ export default function SalesOrders() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><RotateCcw className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No credit notes yet. Create one from the Invoices module to process a return.</p></div>
             )}

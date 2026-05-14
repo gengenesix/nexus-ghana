@@ -331,6 +331,7 @@ export default function Expenses() {
           <Card>
             <CardHeader><CardTitle className="font-display text-base">Recent Expenses</CardTitle></CardHeader>
             <CardContent className="p-0">
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -351,6 +352,7 @@ export default function Expenses() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -379,6 +381,7 @@ export default function Expenses() {
 
           <Card>
             <CardContent className="p-0">
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -410,6 +413,7 @@ export default function Expenses() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
 

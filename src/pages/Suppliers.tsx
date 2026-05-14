@@ -170,6 +170,7 @@ export default function Suppliers() {
 
       <Card>
         <CardContent className="p-0">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -215,6 +216,7 @@ export default function Suppliers() {
               })}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -282,6 +284,7 @@ export default function Suppliers() {
                 ) : (
                   <Card>
                     <CardContent className="p-0">
+                      <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>
                           <TableRow>
@@ -306,6 +309,7 @@ export default function Suppliers() {
                           ))}
                         </TableBody>
                       </Table>
+                      </div>
                     </CardContent>
                   </Card>
                 )}

@@ -200,7 +200,7 @@ export default function Inventory() {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Inventory</h1>
           <p className="text-muted-foreground text-sm">{totalCount} products · {lowStockCount} low stock</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
           <Button variant="outline" size="sm" onClick={() => { if (products.length > 0) exportInventoryCsv(products); else toast.error("No products to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
           <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
@@ -231,19 +231,19 @@ export default function Inventory() {
 
       {/* Filters row */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search products or SKU..." className="pl-10" value={search} onChange={e => handleSearch(e.target.value)} />
         </div>
         <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); resetPage(); }}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="All Categories" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="All Categories" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
             {categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={stockFilter} onValueChange={(v) => { setStockFilter(v); resetPage(); }}>
-          <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[140px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Stock</SelectItem>
             <SelectItem value="low">Low Stock</SelectItem>
@@ -254,6 +254,7 @@ export default function Inventory() {
 
       <Card>
         <CardContent className="p-0">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -263,7 +264,7 @@ export default function Inventory() {
                 <TableHead className="hidden sm:table-cell text-right">Cost</TableHead>
                 <TableHead className="text-right">Price</TableHead>
                 <TableHead className="hidden md:table-cell text-right">Margin</TableHead>
-                <TableHead className="w-[130px]"></TableHead>
+                <TableHead className="w-10 sm:w-[130px]"></TableHead>
               </TableRow>
             </TableHeader>
             {isLoading ? (
@@ -304,6 +305,7 @@ export default function Inventory() {
             </TableBody>
             )}
           </Table>
+          </div>
         </CardContent>
       </Card>
 

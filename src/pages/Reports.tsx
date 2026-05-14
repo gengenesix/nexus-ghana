@@ -439,6 +439,7 @@ export default function Reports() {
                   ].map((section) => (
                     <div key={section.label}>
                       <h3 className={`font-semibold text-sm mb-2 ${section.color}`}>{section.label}</h3>
+                      <div className="overflow-x-auto">
                       <Table>
                         <TableBody>
                           {section.rows.map((a: any) => (
@@ -454,6 +455,7 @@ export default function Reports() {
                           </TableRow>
                         </TableBody>
                       </Table>
+                      </div>
                     </div>
                   ))}
                   <Card className="bg-secondary/30">
@@ -476,6 +478,7 @@ export default function Reports() {
               {trialBalanceData.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No accounts found. Set up Chart of Accounts first.</p>
               ) : (
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -503,6 +506,7 @@ export default function Reports() {
                     </TableRow>
                   </TableBody>
                 </Table>
+                </div>
               )}
               {trialBalanceData.length > 0 && Math.abs(totalTrialDebit - totalTrialCredit) > 0.01 && (
                 <div className="mt-3 p-3 bg-destructive/10 rounded-lg text-sm text-destructive flex items-center gap-2">
@@ -615,6 +619,7 @@ export default function Reports() {
           <Card>
             <CardHeader><CardTitle className="font-display text-base">Staff Leaderboard</CardTitle></CardHeader>
             <CardContent>
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -644,6 +649,7 @@ export default function Reports() {
                   )}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -749,6 +755,7 @@ export default function Reports() {
                 <Card>
                   <CardHeader><CardTitle className="font-display text-base flex items-center gap-2"><TrendingUp className="h-5 w-5 text-green-500" /> Margin Analysis (Sold SKUs)</CardTitle></CardHeader>
                   <CardContent>
+                    <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -775,6 +782,7 @@ export default function Reports() {
                         ))}
                       </TableBody>
                     </Table>
+                    </div>
                   </CardContent>
                 </Card>
               )}

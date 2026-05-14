@@ -130,6 +130,7 @@ export default function ServiceModule() {
           </div>
           <Card><CardContent className="pt-4">
             {serviceCalls.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Call #</TableHead><TableHead>Customer</TableHead><TableHead>Subject</TableHead><TableHead>Priority</TableHead><TableHead>Status</TableHead><TableHead>Opened</TableHead></TableRow></TableHeader>
                 <TableBody>{serviceCalls.map((sc: any) => (
@@ -143,6 +144,7 @@ export default function ServiceModule() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><Headphones className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No service calls yet. Log the first one!</p></div>
             )}
@@ -157,6 +159,7 @@ export default function ServiceModule() {
           </div>
           <Card><CardContent className="pt-4">
             {contracts.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Contract #</TableHead><TableHead>Customer</TableHead><TableHead>Type</TableHead><TableHead>Period</TableHead><TableHead>Value</TableHead><TableHead>Status</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
                 <TableBody>{contracts.map((c: any) => {
@@ -187,6 +190,7 @@ export default function ServiceModule() {
                   );
                 })}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><FileSignature className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No contracts yet. Add maintenance or warranty agreements.</p></div>
             )}
@@ -201,6 +205,7 @@ export default function ServiceModule() {
           </div>
           <Card><CardContent className="pt-4">
             {equipment.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Customer</TableHead><TableHead>Brand / Model</TableHead><TableHead>Serial #</TableHead><TableHead>Warranty End</TableHead><TableHead>Status</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
                 <TableBody>{equipment.map((eq: any) => {
@@ -226,6 +231,7 @@ export default function ServiceModule() {
                   );
                 })}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><Cpu className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No equipment registered. Track devices and machines you service.</p></div>
             )}

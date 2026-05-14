@@ -61,6 +61,7 @@ export default function Production() {
           <div className="flex justify-between"><h3 className="font-semibold">Bills of Material</h3><Button><Plus className="h-4 w-4 mr-1" />New BOM</Button></div>
           <Card><CardContent className="pt-4">
             {boms.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Qty to Produce</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
                 <TableBody>{boms.map((b: any) => (
@@ -71,6 +72,7 @@ export default function Production() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><Layers className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No bills of material yet. Define components needed to produce finished goods.</p></div>
             )}
@@ -81,6 +83,7 @@ export default function Production() {
           <div className="flex justify-between"><h3 className="font-semibold">Production Orders</h3><Button onClick={() => setProdOrderOpen(true)}><Plus className="h-4 w-4 mr-1" />New Order</Button></div>
           <Card><CardContent className="pt-4">
             {prodOrders.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Order #</TableHead><TableHead>Qty</TableHead><TableHead>Planned Date</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
                 <TableBody>{prodOrders.map((po: any) => (
@@ -92,6 +95,7 @@ export default function Production() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><ClipboardList className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No production orders yet.</p></div>
             )}

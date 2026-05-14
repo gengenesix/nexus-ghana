@@ -104,6 +104,7 @@ export default function HumanResources() {
           <div className="flex justify-between"><h3 className="font-semibold">Employee Directory</h3><Button onClick={() => setDialog({ open: true })}><Plus className="h-4 w-4 mr-1" />Add Employee</Button></div>
           <Card><CardContent className="pt-4">
             {employees.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Position</TableHead><TableHead>Department</TableHead><TableHead>Hire Date</TableHead><TableHead className="text-right">Salary</TableHead><TableHead>Status</TableHead><TableHead className="w-20"></TableHead></TableRow></TableHeader>
                 <TableBody>{employees.map((emp: any) => (
@@ -123,6 +124,7 @@ export default function HumanResources() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><Users className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No employees yet. Add your team members.</p></div>
             )}
@@ -132,6 +134,7 @@ export default function HumanResources() {
         <TabsContent value="payroll">
           <Card><CardContent className="pt-4">
             {employees.filter((e: any) => e.status === "active").length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Employee</TableHead><TableHead>Position</TableHead><TableHead>Frequency</TableHead><TableHead className="text-right">Gross Salary</TableHead><TableHead className="text-right">SSNIT (5.5%)</TableHead><TableHead className="text-right">Net Pay</TableHead></TableRow></TableHeader>
                 <TableBody>{employees.filter((e: any) => e.status === "active").map((emp: any) => {
@@ -150,6 +153,7 @@ export default function HumanResources() {
                   );
                 })}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><p>No active employees for payroll.</p></div>
             )}
@@ -163,6 +167,7 @@ export default function HumanResources() {
           </div>
           <Card><CardContent className="pt-4">
             {leaveRequests.length > 0 ? (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead>Employee</TableHead><TableHead>Type</TableHead><TableHead>From</TableHead><TableHead>To</TableHead><TableHead>Days</TableHead><TableHead>Status</TableHead><TableHead>Reason</TableHead><TableHead className="w-24"></TableHead></TableRow></TableHeader>
                 <TableBody>{leaveRequests.map((lr: any) => (
@@ -193,6 +198,7 @@ export default function HumanResources() {
                   </TableRow>
                 ))}</TableBody>
               </Table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No leave requests yet.</p></div>
             )}
