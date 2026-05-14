@@ -22,7 +22,7 @@ import { useChartColors } from "@/hooks/useChartColors";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-const COLORS = ["hsl(140,28%,16%)", "hsl(86,68%,52%)", "hsl(142,60%,38%)", "hsl(210,70%,48%)", "hsl(0,72%,51%)"];
+const COLORS = ["hsl(86,68%,52%)", "hsl(140,38%,36%)", "hsl(142,60%,50%)", "hsl(210,70%,55%)", "hsl(0,72%,55%)"];
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -177,7 +177,7 @@ export default function Dashboard() {
   ]);
 
   const growthPct = stats?.growthPct ?? 0;
-  const { tooltipStyle, gridColor, axisColor } = useChartColors();
+  const { tooltipStyle, gridColor, axisColor, primaryColor, gradientStart } = useChartColors();
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -351,15 +351,15 @@ export default function Dashboard() {
               <AreaChart data={weeklySales}>
                 <defs>
                   <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(140,28%,16%)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(140,28%,16%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor={gradientStart} stopOpacity={0.2} />
+                    <stop offset="95%" stopColor={gradientStart} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                 <XAxis dataKey="day" stroke={axisColor} fontSize={12} />
                 <YAxis stroke={axisColor} fontSize={12} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [formatGHS(value), "Sales"]} />
-                <Area type="monotone" dataKey="sales" stroke="hsl(140,28%,16%)" strokeWidth={2} fill="url(#salesGradient)" />
+                <Area type="monotone" dataKey="sales" stroke={primaryColor} strokeWidth={2} fill="url(#salesGradient)" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>

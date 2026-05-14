@@ -22,6 +22,15 @@
     <meta name="author" content="GENESIS" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#1a3a22" />
+    <!-- Theme: apply class before paint to avoid flash -->
+    <script>
+      (function() {
+        var stored = localStorage.getItem('nexus-theme');
+        var isDark = stored ? stored === 'dark' : true;
+        document.documentElement.classList.add(isDark ? 'dark' : 'light');
+      })();
+    </script>
+
     <!-- Fonts: preconnect early, then async-load CSS so font bytes arrive ASAP -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

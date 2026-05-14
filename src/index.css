@@ -64,6 +64,58 @@
     --cream:       hsl(45, 30%, 96%);
     --cream-dark:  hsl(45, 25%, 92%);
   }
+
+  /* ── Dark mode overrides ─────────────────────── */
+  .dark {
+    --background:   140 22% 7%;
+    --foreground:   45 25% 90%;
+
+    --card:         140 20% 11%;
+    --card-foreground: 45 25% 90%;
+
+    --popover:      140 20% 10%;
+    --popover-foreground: 45 25% 90%;
+
+    --primary:      86 65% 60%;       /* lime as primary in dark */
+    --primary-foreground: 140 28% 10%;
+
+    --secondary:    140 18% 16%;
+    --secondary-foreground: 45 20% 80%;
+
+    --muted:        140 15% 15%;
+    --muted-foreground: 45 10% 55%;
+
+    --accent:       86 65% 60%;
+    --accent-foreground: 140 28% 10%;
+
+    --destructive:  0 65% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border:       140 15% 20%;
+    --input:        140 15% 18%;
+    --ring:         86 65% 60%;
+
+    --sidebar-background:          140 22% 9%;
+    --sidebar-foreground:          45 15% 65%;
+    --sidebar-primary:             86 65% 60%;
+    --sidebar-primary-foreground:  140 28% 10%;
+    --sidebar-accent:              140 18% 14%;
+    --sidebar-accent-foreground:   45 20% 80%;
+    --sidebar-border:              140 15% 18%;
+    --sidebar-ring:                86 65% 60%;
+
+    --success:  142 65% 45%;
+    --warning:  38 85% 55%;
+    --info:     210 80% 55%;
+
+    /* Brand tokens — flipped for dark readability */
+    --forest:      hsl(140, 20%, 78%);   /* light sage — readable on dark bg */
+    --forest-dark: hsl(140, 18%, 68%);
+    --lime:        hsl(86, 65%, 62%);
+    --lime-dark:   hsl(86, 60%, 53%);
+    --cream:       hsl(140, 22%, 9%);    /* dark surface for "cream" areas */
+    --cream-dark:  hsl(140, 18%, 13%);
+  }
 }
 
 @layer base {
