@@ -3,7 +3,7 @@ import {
   ScanLine, Boxes, ReceiptText, UsersRound, Wallet, BarChart2,
   BadgeCheck, Nfc, Scale, ArrowRight, Check, WifiOff,
   Phone, Mail, Download, TrendingUp, ShoppingCart, Users, Package,
-  Zap, Globe2, BookOpen,
+  Landmark, KeyRound, BookOpen,
 } from "lucide-react";
 
 import heroDashboard    from "@/assets/hero-dashboard.jpg";
@@ -99,12 +99,12 @@ const promises = [
     body: "From the cashier at the counter to the manager reviewing reports — everyone gets exactly what they need. Role-based access, staff PINs, and one system that keeps your entire operation in sync.",
   },
   {
-    icon: Zap,
+    icon: Landmark,
     title: "Built for the real Ghana market.",
     body: "VAT, NHIL, GETFL, MTN MoMo, Telecel Cash, AirtelTigo Money, GHS currency, GRA invoice formatting — all of it baked in, not bolted on. This is not a generic SaaS re-skinned for Africa.",
   },
   {
-    icon: Globe2,
+    icon: KeyRound,
     title: "Your data is yours. Always.",
     body: "Every product, sale, customer, and invoice you create belongs to you. Export everything to CSV any time. We run on enterprise-grade infrastructure with row-level security — your business data is never shared.",
   },
