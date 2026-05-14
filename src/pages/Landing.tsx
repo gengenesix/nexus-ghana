@@ -109,7 +109,7 @@ export default function Landing() {
       >
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
-            <img src="/brand/nexis-horizontal-dark.png" alt="Nexis" style={{ height: 32 }} />
+            <img src="/brand/nexis-horizontal-dark.png" alt="Nexis" style={{ height: 38, mixBlendMode: "lighten" }} />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
@@ -530,6 +530,11 @@ export default function Landing() {
       {/* ── CTA band ───────────────────────────────── */}
       <section style={{ backgroundColor: "var(--forest)" }} className="py-24">
         <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
+          <img
+            src="/brand/nexis-horizontal-dark.png"
+            alt="Nexis"
+            style={{ height: 44, mixBlendMode: "lighten", margin: "0 auto 28px" }}
+          />
           <h2
             className="font-extrabold text-white leading-[1.0] mb-4"
             style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", letterSpacing: "-0.05em" }}
@@ -558,7 +563,7 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
             <div className="flex items-center gap-2.5">
-              <img src="/brand/nexis-horizontal-dark.png" alt="Nexis" style={{ height: 28 }} />
+              <img src="/brand/nexis-horizontal-dark.png" alt="Nexis" style={{ height: 34, mixBlendMode: "lighten" }} />
             </div>
 
             <div className="flex flex-wrap gap-6 text-sm">
