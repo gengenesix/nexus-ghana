@@ -118,7 +118,7 @@ export default function Landing() {
               border: "1.5px solid rgba(255,255,255,0.22)",
               boxShadow: "0 2px 16px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.06)",
             }}>
-              <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 30, display: "block" }} />
+              <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 40, display: "block" }} />
             </div>
           </Link>
 
@@ -550,7 +550,7 @@ export default function Landing() {
               border: "1.5px solid rgba(255,255,255,0.22)",
               boxShadow: "0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06)",
             }}>
-              <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 34, display: "block" }} />
+              <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 44, display: "block" }} />
             </div>
           </div>
           <h2
@@ -590,7 +590,7 @@ export default function Landing() {
                 border: "1.5px solid rgba(255,255,255,0.22)",
                 boxShadow: "0 2px 16px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.06)",
               }}>
-                <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 28, display: "block" }} />
+                <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 38, display: "block" }} />
               </div>
             </div>
 
