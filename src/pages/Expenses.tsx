@@ -48,6 +48,8 @@ export default function Expenses() {
   const [formReceiptFile, setFormReceiptFile] = useState<File | null>(null);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
 
+  const { tooltipStyle } = useChartColors();
+
   const { data: expenses = [], isLoading } = useQuery({
     queryKey: ["expenses", business?.id],
     queryFn: async () => {

@@ -242,10 +242,10 @@ export default function Dashboard() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Percent className="h-5 w-5 text-primary" /></div>
+              <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0"><Percent className="h-5 w-5 text-primary" /></div>
               <div className="min-w-0 flex-1">
-                <p className="text-base sm:text-xl font-bold truncate">{(stats?.profitMargin ?? 0).toFixed(1)}%</p>
-                <p className="text-xs text-muted-foreground">Inventory Margin</p>
+                <p className="text-sm sm:text-xl font-bold leading-tight">{(stats?.profitMargin ?? 0).toFixed(1)}%</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Inventory Margin</p>
               </div>
             </div>
           </CardContent>
@@ -253,10 +253,10 @@ export default function Dashboard() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Package className="h-5 w-5 text-primary" /></div>
+              <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0"><Package className="h-5 w-5 text-primary" /></div>
               <div className="min-w-0 flex-1">
-                <p className="text-base sm:text-xl font-bold truncate">{formatGHS(stats?.inventoryRetail ?? 0)}</p>
-                <p className="text-xs text-muted-foreground">{stats?.totalProducts ?? 0} Products (Retail)</p>
+                <p className="text-sm sm:text-xl font-bold leading-tight">{formatGHS(stats?.inventoryRetail ?? 0)}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{stats?.totalProducts ?? 0} Products (Retail)</p>
               </div>
             </div>
           </CardContent>
@@ -264,14 +264,14 @@ export default function Dashboard() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+              <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10 shrink-0">
                 {(stats?.monthExpenses ?? 0) > (stats?.todayTotal ?? 0) * 30
                   ? <TrendingDown className="h-5 w-5 text-destructive" />
                   : <TrendingUp className="h-5 w-5 text-green-500" />}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-base sm:text-xl font-bold truncate">{formatGHS(stats?.monthExpenses ?? 0)}</p>
-                <p className="text-xs text-muted-foreground">This Month Expenses</p>
+                <p className="text-sm sm:text-xl font-bold leading-tight">{formatGHS(stats?.monthExpenses ?? 0)}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">This Month Expenses</p>
               </div>
             </div>
           </CardContent>
@@ -279,10 +279,10 @@ export default function Dashboard() {
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/banking")}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><CreditCard className="h-5 w-5 text-primary" /></div>
+              <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0"><CreditCard className="h-5 w-5 text-primary" /></div>
               <div className="min-w-0 flex-1">
-                <p className="text-base sm:text-xl font-bold truncate">{formatGHS(stats?.totalBankBalance ?? 0)}</p>
-                <p className="text-xs text-muted-foreground">{stats?.bankAccountCount ?? 0} Bank Accounts</p>
+                <p className="text-sm sm:text-xl font-bold leading-tight">{formatGHS(stats?.totalBankBalance ?? 0)}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{stats?.bankAccountCount ?? 0} Bank Accounts</p>
               </div>
             </div>
           </CardContent>
@@ -298,37 +298,37 @@ export default function Dashboard() {
       >
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/crm")}>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Briefcase className="h-5 w-5 text-primary" /></div>
+            <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0"><Briefcase className="h-5 w-5 text-primary" /></div>
             <div className="min-w-0 flex-1">
-              <p className="text-base sm:text-xl font-bold truncate">{stats?.openLeads ?? 0}</p>
-              <p className="text-xs text-muted-foreground">Open Leads</p>
+              <p className="text-sm sm:text-xl font-bold leading-tight">{stats?.openLeads ?? 0}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Open Leads</p>
             </div>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/opportunities")}>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Handshake className="h-5 w-5 text-primary" /></div>
+            <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0"><Handshake className="h-5 w-5 text-primary" /></div>
             <div className="min-w-0 flex-1">
-              <p className="text-base sm:text-xl font-bold truncate">{stats?.pipelineCount ?? 0}</p>
-              <p className="text-xs text-muted-foreground">Pipeline ({formatGHS(stats?.pipelineValue ?? 0)})</p>
+              <p className="text-sm sm:text-xl font-bold leading-tight">{stats?.pipelineCount ?? 0}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Pipeline ({formatGHS(stats?.pipelineValue ?? 0)})</p>
             </div>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/purchasing")}>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Receipt className="h-5 w-5 text-primary" /></div>
+            <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0"><Receipt className="h-5 w-5 text-primary" /></div>
             <div className="min-w-0 flex-1">
-              <p className="text-base sm:text-xl font-bold truncate">{stats?.openPOsCount ?? 0}</p>
-              <p className="text-xs text-muted-foreground">Open POs ({formatGHS(stats?.openPOsTotal ?? 0)})</p>
+              <p className="text-sm sm:text-xl font-bold leading-tight">{stats?.openPOsCount ?? 0}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Open POs ({formatGHS(stats?.openPOsTotal ?? 0)})</p>
             </div>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/production")}>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Factory className="h-5 w-5 text-primary" /></div>
+            <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0"><Factory className="h-5 w-5 text-primary" /></div>
             <div className="min-w-0 flex-1">
-              <p className="text-base sm:text-xl font-bold truncate">{stats?.activeProduction ?? 0}</p>
-              <p className="text-xs text-muted-foreground">Active Production</p>
+              <p className="text-sm sm:text-xl font-bold leading-tight">{stats?.activeProduction ?? 0}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Active Production</p>
             </div>
           </CardContent>
         </Card>

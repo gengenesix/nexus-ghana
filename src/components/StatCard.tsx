@@ -10,25 +10,25 @@ interface StatCardProps {
 
 export function StatCard({ title, value, icon: Icon, trend, trendUp }: StatCardProps) {
   return (
-    <div className="rounded-2xl p-5 animate-fade-in transition-all duration-200 hover:-translate-y-1 bg-card border border-border shadow-sm">
-      <div className="flex items-start justify-between gap-2">
-        <div className="space-y-1 min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide truncate text-muted-foreground">
-            {title}
-          </p>
-          <p className="text-lg sm:text-2xl font-extrabold font-mono tracking-tight truncate text-foreground" style={{ letterSpacing: "-0.025em" }}>
-            {value}
-          </p>
-          {trend && (
-            <p className={`text-xs font-medium ${trendUp ? "text-success" : "text-destructive"}`}>
-              {trendUp ? "↑" : "↓"} {trend}
-            </p>
-          )}
-        </div>
-        <div className="rounded-xl p-3 bg-secondary shrink-0">
-          <Icon className="h-5 w-5 text-primary" />
+    <div className="rounded-2xl p-4 sm:p-5 animate-fade-in transition-all duration-200 hover:-translate-y-1 bg-card border border-border shadow-sm">
+      {/* Title + icon on one row — icon is kept small so title never truncates */}
+      <div className="flex items-center justify-between gap-1 mb-1.5">
+        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground leading-tight">
+          {title}
+        </p>
+        <div className="rounded-lg p-1.5 sm:p-2.5 bg-secondary shrink-0">
+          <Icon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
         </div>
       </div>
+      {/* Value gets the full card width — no truncation on any screen size */}
+      <p className="text-base sm:text-2xl font-extrabold leading-tight text-foreground" style={{ letterSpacing: "-0.025em" }}>
+        {value}
+      </p>
+      {trend && (
+        <p className={`text-[10px] sm:text-xs font-medium mt-1 ${trendUp ? "text-success" : "text-destructive"}`}>
+          {trendUp ? "↑" : "↓"} {trend}
+        </p>
+      )}
     </div>
   );
 }
