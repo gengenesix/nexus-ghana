@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileNav } from "@/components/MobileNav";
@@ -12,6 +13,20 @@ import { LowStockBanner } from "@/components/LowStockBanner";
 
 export function AppLayout() {
   const location = useLocation();
+
+  useEffect(() => {
+    // Apply the stored theme when entering the app shell
+    const stored = localStorage.getItem("nexus-theme");
+    const isDark = stored ? stored === "dark" : true;
+    document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.classList.toggle("light", !isDark);
+
+    return () => {
+      // Strip theme classes when leaving the app (sign-out → login page, etc.)
+      // so public pages always render in their own light-mode styles.
+      document.documentElement.classList.remove("dark", "light");
+    };
+  }, []);
 
   return (
     <SidebarProvider>

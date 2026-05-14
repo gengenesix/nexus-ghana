@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Landmark, Lock, Loader2, UserCircle, ShieldAlert, ChevronLeft, ShieldCheck } from "lucide-react";
+import { Lock, Loader2, UserCircle, ShieldAlert, ChevronLeft, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 interface StaffPinGuardProps {
@@ -92,10 +92,11 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
         <Card>
           <CardHeader className="text-center space-y-4 pb-4">
             <div className="flex justify-center">
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1a3a22] shadow-xl shadow-[#1a3a22]/30">
-                <Landmark className="h-8 w-8 text-[#a3e635]" />
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent to-white/10" />
-              </div>
+              <img
+                src="/brand/nexis-icon-green.png"
+                alt="Nexis"
+                style={{ width: 64, height: 64, borderRadius: 18, boxShadow: "0 4px 18px rgba(26,58,34,0.25)", display: "block" }}
+              />
             </div>
             <div>
               <CardTitle className="font-display text-2xl">Who's there?</CardTitle>

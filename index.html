@@ -22,9 +22,17 @@
     <meta name="author" content="GENESIS" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#1a3a22" />
-    <!-- Theme: apply class before paint to avoid flash -->
+    <!-- Theme: only apply inside the app — never on public pages -->
     <script>
       (function() {
+        var path = window.location.pathname;
+        // Public pages always use light mode — don't touch the class
+        var publicPaths = ['/', '/login', '/register', '/onboarding', '/join-business'];
+        var isPublic = publicPaths.some(function(p) {
+          return path === p || path === p + '/';
+        });
+        if (isPublic) return;
+        // Inside the app: apply stored preference immediately to avoid flash
         var stored = localStorage.getItem('nexus-theme');
         var isDark = stored ? stored === 'dark' : true;
         document.documentElement.classList.add(isDark ? 'dark' : 'light');
