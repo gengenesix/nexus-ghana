@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { usePWAUpdate } from "@/hooks/usePWAUpdate";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -77,7 +78,9 @@ function SmartRoot() {
   );
 }
 
-const App = () => (
+const App = () => {
+  usePWAUpdate();
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -135,6 +138,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
