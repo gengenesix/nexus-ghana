@@ -176,155 +176,158 @@ export default function Landing() {
       {/* ── Hero ───────────────────────────────────── */}
       <section className="pt-28 pb-0 sm:pt-36 overflow-hidden" style={{ backgroundColor: "var(--cream)" }}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-12">
-            {/* badge */}
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase mb-8"
-              style={{
-                backgroundColor: "white",
-                color: "var(--forest)",
-                letterSpacing: "0.08em",
-                border: "1px solid hsl(var(--border))",
-              }}
-            >
-              <span style={{ fontSize: "14px" }}>🇬🇭</span>
-              Built for Ghana business
-            </div>
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
-            <h1
-              className="font-extrabold leading-[0.93] mb-6 mx-auto"
-              style={{
-                fontSize: "clamp(2.8rem, 7vw, 5.5rem)",
-                letterSpacing: "-0.05em",
-                color: "var(--forest)",
-                maxWidth: "820px",
-              }}
-            >
-              The business platform<br />
-              <span style={{ color: "var(--lime)", WebkitTextStroke: "1px var(--forest)" }}>built for Ghana.</span>
-            </h1>
-
-            <p
-              className="text-lg leading-relaxed mb-10 mx-auto"
-              style={{ color: "hsl(140,15%,42%)", fontWeight: 500, maxWidth: "540px" }}
-            >
-              All-in-one POS, inventory, invoicing, MoMo payments, and analytics — engineered for Ghanaian businesses that want to grow.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <Link
-                to="/register"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{ backgroundColor: "var(--forest)", color: "white", textDecoration: "none" }}
+            {/* ── Left: copy — left-aligned ── */}
+            <div className="flex-1 lg:max-w-[520px] w-full">
+              {/* badge */}
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase mb-7"
+                style={{
+                  backgroundColor: "white",
+                  color: "var(--forest)",
+                  letterSpacing: "0.08em",
+                  border: "1px solid hsl(var(--border))",
+                }}
               >
-                Start Free — No Credit Card
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a
-                href="#features"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-base transition-all hover:opacity-80"
-                style={{ backgroundColor: "white", color: "var(--forest)", border: "1px solid hsl(var(--border))", textDecoration: "none" }}
-              >
-                See How It Works
-              </a>
-            </div>
+                <span style={{ fontSize: "14px" }}>🇬🇭</span>
+                Built for Ghana business
+              </div>
 
-            <div className="flex flex-wrap gap-3 justify-center">
-              {[
-                { icon: Check,   label: "Free forever plan" },
-                { icon: WifiOff, label: "Works offline" },
-                { icon: Nfc,     label: "MoMo payments built-in" },
-              ].map(({ icon: Icon, label }) => (
-                <span
-                  key={label}
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold px-3.5 py-1.5 rounded-full"
-                  style={{ backgroundColor: "white", color: "hsl(140,20%,38%)", border: "1px solid hsl(var(--border))" }}
+              <h1
+                className="font-extrabold leading-[0.93] mb-6"
+                style={{
+                  fontSize: "clamp(2.6rem, 5.5vw, 4.75rem)",
+                  letterSpacing: "-0.05em",
+                  color: "var(--forest)",
+                }}
+              >
+                The business platform<br />
+                <span style={{ color: "var(--lime)", WebkitTextStroke: "1px var(--forest)" }}>built for Ghana.</span>
+              </h1>
+
+              <p
+                className="text-lg leading-relaxed mb-9"
+                style={{ color: "hsl(140,15%,42%)", fontWeight: 500, maxWidth: "460px" }}
+              >
+                All-in-one POS, inventory, invoicing, MoMo payments, and analytics — engineered for Ghanaian businesses that want to grow.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 mb-7">
+                <Link
+                  to="/register"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
+                  style={{ backgroundColor: "var(--forest)", color: "white", textDecoration: "none" }}
                 >
-                  <Icon className="h-3.5 w-3.5" style={{ color: "var(--forest)" }} />
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
+                  Start Free — No Credit Card
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <a
+                  href="#features"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-semibold text-base transition-all hover:opacity-80"
+                  style={{ backgroundColor: "white", color: "var(--forest)", border: "1px solid hsl(var(--border))", textDecoration: "none" }}
+                >
+                  See How It Works
+                </a>
+              </div>
 
-          {/* Hero image — iPad mockup in real store environment */}
-          <div className="relative mx-auto" style={{ maxWidth: "1000px" }}>
-            {/* Floating live-stats card — top left */}
-            <div
-              className="absolute hidden sm:flex flex-col gap-1 z-10"
-              style={{
-                top: "12%",
-                left: "-28px",
-                backgroundColor: "white",
-                borderRadius: "14px",
-                padding: "14px 18px",
-                boxShadow: "0 8px 40px rgba(26,58,34,0.18)",
-                border: "1px solid hsl(var(--border))",
-                minWidth: "148px",
-              }}
-            >
-              <span className="text-xs font-bold uppercase" style={{ color: "hsl(140,15%,58%)", letterSpacing: "0.08em" }}>Today's Sales</span>
-              <span className="font-extrabold" style={{ fontSize: "1.5rem", color: "var(--forest)", letterSpacing: "-0.04em" }}>GH₵ 2,450</span>
-              <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "hsl(142,55%,38%)" }}>
-                <TrendingUp className="h-3 w-3" />+15.6% vs yesterday
-              </span>
-            </div>
-
-            {/* Floating orders card — top right */}
-            <div
-              className="absolute hidden sm:flex flex-col gap-1 z-10"
-              style={{
-                top: "8%",
-                right: "-24px",
-                backgroundColor: "var(--forest)",
-                borderRadius: "14px",
-                padding: "14px 18px",
-                boxShadow: "0 8px 40px rgba(26,58,34,0.3)",
-                minWidth: "138px",
-              }}
-            >
-              <span className="text-xs font-bold uppercase" style={{ color: "rgba(255,255,255,0.5)", letterSpacing: "0.08em" }}>Total Orders</span>
-              <span className="font-extrabold" style={{ fontSize: "1.5rem", color: "var(--lime)", letterSpacing: "-0.04em" }}>320</span>
-              <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "rgba(255,255,255,0.55)" }}>
-                <TrendingUp className="h-3 w-3" style={{ color: "var(--lime)" }} />+8.4% this month
-              </span>
-            </div>
-
-            {/* Floating low-stock alert — bottom right */}
-            <div
-              className="absolute hidden md:flex items-center gap-3 z-10"
-              style={{
-                bottom: "16%",
-                right: "-20px",
-                backgroundColor: "white",
-                borderRadius: "12px",
-                padding: "12px 16px",
-                boxShadow: "0 8px 32px rgba(26,58,34,0.16)",
-                border: "1px solid hsl(var(--border))",
-              }}
-            >
-              <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#f59e0b", flexShrink: 0 }} />
-              <div>
-                <p className="text-xs font-bold" style={{ color: "var(--forest)" }}>Low Stock Alert</p>
-                <p className="text-xs" style={{ color: "hsl(140,10%,52%)" }}>Indomie Noodles — 8 left</p>
+              <div className="flex flex-wrap gap-2.5">
+                {[
+                  { icon: Check,   label: "Free forever plan" },
+                  { icon: WifiOff, label: "Works offline" },
+                  { icon: Nfc,     label: "MoMo built-in" },
+                ].map(({ icon: Icon, label }) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold px-3.5 py-1.5 rounded-full"
+                    style={{ backgroundColor: "white", color: "hsl(140,20%,38%)", border: "1px solid hsl(var(--border))" }}
+                  >
+                    <Icon className="h-3.5 w-3.5" style={{ color: "var(--forest)" }} />
+                    {label}
+                  </span>
+                ))}
               </div>
             </div>
 
-            <div
-              className="rounded-2xl overflow-hidden"
-              style={{
-                boxShadow: "0 40px 120px rgba(26,58,34,0.22), 0 8px 24px rgba(26,58,34,0.1)",
-                border: "1px solid rgba(26,58,34,0.1)",
-              }}
-            >
-              <img
-                src={heroDashboard}
-                alt="Nexis Dashboard on iPad in a real Ghana store"
-                className="w-full block"
-                loading="eager"
-                style={{ display: "block" }}
-              />
+            {/* ── Right: hero image with floating cards ── */}
+            <div className="flex-1 w-full relative" style={{ minWidth: 0 }}>
+              {/* Floating live-stats card — top left */}
+              <div
+                className="absolute hidden sm:flex flex-col gap-1 z-10"
+                style={{
+                  top: "10%",
+                  left: "-18px",
+                  backgroundColor: "white",
+                  borderRadius: "14px",
+                  padding: "14px 18px",
+                  boxShadow: "0 8px 40px rgba(26,58,34,0.18)",
+                  border: "1px solid hsl(var(--border))",
+                  minWidth: "148px",
+                }}
+              >
+                <span className="text-xs font-bold uppercase" style={{ color: "hsl(140,15%,58%)", letterSpacing: "0.08em" }}>Today's Sales</span>
+                <span className="font-extrabold" style={{ fontSize: "1.5rem", color: "var(--forest)", letterSpacing: "-0.04em" }}>GH₵ 2,450</span>
+                <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "hsl(142,55%,38%)" }}>
+                  <TrendingUp className="h-3 w-3" />+15.6% vs yesterday
+                </span>
+              </div>
+
+              {/* Floating orders card — top right */}
+              <div
+                className="absolute hidden sm:flex flex-col gap-1 z-10"
+                style={{
+                  top: "6%",
+                  right: "-16px",
+                  backgroundColor: "var(--forest)",
+                  borderRadius: "14px",
+                  padding: "14px 18px",
+                  boxShadow: "0 8px 40px rgba(26,58,34,0.3)",
+                  minWidth: "138px",
+                }}
+              >
+                <span className="text-xs font-bold uppercase" style={{ color: "rgba(255,255,255,0.5)", letterSpacing: "0.08em" }}>Total Orders</span>
+                <span className="font-extrabold" style={{ fontSize: "1.5rem", color: "var(--lime)", letterSpacing: "-0.04em" }}>320</span>
+                <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  <TrendingUp className="h-3 w-3" style={{ color: "var(--lime)" }} />+8.4% this month
+                </span>
+              </div>
+
+              {/* Floating low-stock alert — bottom right */}
+              <div
+                className="absolute hidden md:flex items-center gap-3 z-10"
+                style={{
+                  bottom: "14%",
+                  right: "-16px",
+                  backgroundColor: "white",
+                  borderRadius: "12px",
+                  padding: "12px 16px",
+                  boxShadow: "0 8px 32px rgba(26,58,34,0.16)",
+                  border: "1px solid hsl(var(--border))",
+                }}
+              >
+                <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#f59e0b", flexShrink: 0 }} />
+                <div>
+                  <p className="text-xs font-bold" style={{ color: "var(--forest)" }}>Low Stock Alert</p>
+                  <p className="text-xs" style={{ color: "hsl(140,10%,52%)" }}>Indomie Noodles — 8 left</p>
+                </div>
+              </div>
+
+              <div
+                className="rounded-2xl overflow-hidden"
+                style={{
+                  boxShadow: "0 40px 120px rgba(26,58,34,0.22), 0 8px 24px rgba(26,58,34,0.1)",
+                  border: "1px solid rgba(26,58,34,0.1)",
+                }}
+              >
+                <img
+                  src={heroDashboard}
+                  alt="Nexis Dashboard on iPad in a real Ghana store"
+                  className="w-full block"
+                  loading="eager"
+                />
+              </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -471,7 +474,6 @@ export default function Landing() {
                   style={{
                     boxShadow: "0 24px 80px rgba(26,58,34,0.15), 0 4px 16px rgba(26,58,34,0.06)",
                     border: "1px solid rgba(26,58,34,0.08)",
-                    transform: i % 2 === 0 ? "rotate(0.5deg)" : "rotate(-0.5deg)",
                   }}
                 >
                   <img
