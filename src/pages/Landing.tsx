@@ -3,7 +3,7 @@ import {
   ScanLine, Boxes, ReceiptText, UsersRound, Wallet, BarChart2,
   BadgeCheck, Nfc, Scale, ArrowRight, Check, WifiOff,
   Phone, Mail, Download, TrendingUp, ShoppingCart, Users, Package,
-  ShieldCheck, Zap, Globe2, BookOpen,
+  Zap, Globe2, BookOpen,
 } from "lucide-react";
 
 import heroDashboard    from "@/assets/hero-dashboard.jpg";
@@ -94,9 +94,9 @@ const plans = [
 
 const promises = [
   {
-    icon: ShieldCheck,
-    title: "No fake reviews.",
-    body: "We just launched. We are not going to invent customer quotes to make you feel comfortable. What we will show you is what we actually built — and let the product speak.",
+    icon: UsersRound,
+    title: "Built for your whole team.",
+    body: "From the cashier at the counter to the manager reviewing reports — everyone gets exactly what they need. Role-based access, staff PINs, and one system that keeps your entire operation in sync.",
   },
   {
     icon: Zap,
@@ -625,9 +625,8 @@ export default function Landing() {
               We're new.<br />And we built it right.
             </h2>
             <p className="text-base font-medium leading-relaxed" style={{ color: "hsl(140,10%,46%)", maxWidth: 520 }}>
-              No invented testimonials. No inflated user counts. Just a product
-              engineered from the ground up for how business actually works in Ghana —
-              honest, fast, and built to grow with you.
+              Four things that set Nexis apart — built into the product from day one,
+              not added as an afterthought.
             </p>
           </div>
 
