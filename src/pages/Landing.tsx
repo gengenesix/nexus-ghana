@@ -308,7 +308,7 @@ export default function Landing() {
                 <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#f59e0b", flexShrink: 0 }} />
                 <div>
                   <p className="text-xs font-bold" style={{ color: "var(--forest)" }}>Low Stock Alert</p>
-                  <p className="text-xs" style={{ color: "hsl(140,10%,52%)" }}>Indomie Noodles — 8 left</p>
+                  <p className="text-xs" style={{ color: "hsl(140,10%,52%)" }}>Royal Umbrella Rice — 8 left</p>
                 </div>
               </div>
 
