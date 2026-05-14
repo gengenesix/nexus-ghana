@@ -2,13 +2,13 @@ import { Link } from "react-router-dom";
 import {
   ScanLine, Boxes, ReceiptText, UsersRound, Wallet, BarChart2,
   BadgeCheck, Nfc, Scale, ArrowRight, Check, WifiOff,
-  Phone, Mail, Download, Star,
+  Phone, Mail, Download, Star, TrendingUp, ShoppingCart, Users, Package,
 } from "lucide-react";
 
-import heroDashboard   from "@/assets/hero-dashboard.png";
-import featurePos      from "@/assets/feature-pos.png";
-import featureInvoicing from "@/assets/feature-invoicing.png";
-import featureInventory from "@/assets/feature-inventory.png";
+import heroDashboard    from "@/assets/hero-dashboard.jpg";
+import featureAnalytics from "@/assets/feature-analytics.jpg";
+import featureInvoicing from "@/assets/feature-invoicing.jpg";
+import featureInventory from "@/assets/feature-inventory.jpg";
 
 const allFeatures = [
   { icon: ScanLine,    label: "Point of Sale",    desc: "Fast sales & MoMo QR payments" },
@@ -24,22 +24,40 @@ const allFeatures = [
 
 const showcases = [
   {
-    icon: ScanLine,
-    title: "Point of Sale — built for speed",
-    desc: "Touch-optimised POS with barcode scanning, MoMo QR codes, split payments, loyalty points, and instant thermal receipt printing. Works fully offline.",
-    image: featurePos,
+    icon: BarChart2,
+    tag: "Analytics",
+    title: "Know your numbers in real time",
+    desc: "Sales performance charts, product statistics, customer growth by region, and month-over-month comparisons — all in one clean dashboard. See Accra vs Kumasi vs Takoradi at a glance.",
+    image: featureAnalytics,
+    stats: [
+      { label: "Total Sales", value: "GH₵ 120,540" },
+      { label: "Orders", value: "1,250" },
+      { label: "Customers", value: "980" },
+    ],
   },
   {
     icon: ReceiptText,
-    title: "Invoicing with Ghana tax",
-    desc: "Auto-numbered invoices (NXG-YYYY-NNN) with VAT, NHIL, and GETFL computed automatically. Export to PDF and email in one click.",
+    tag: "Invoicing",
+    title: "Professional invoices with Ghana tax built in",
+    desc: "Auto-numbered invoices (NXG-YYYY-NNN) with VAT (15%), NHIL (2.5%), and GETFL (2.5%) computed automatically. Export to PDF and email directly from the app — GCB Bank payment details included.",
     image: featureInvoicing,
+    stats: [
+      { label: "Auto VAT calc", value: "15%" },
+      { label: "NHIL + GETFL", value: "5%" },
+      { label: "Export", value: "PDF" },
+    ],
   },
   {
     icon: Boxes,
-    title: "Inventory that never sleeps",
-    desc: "Real-time stock levels, reorder alerts, categories, and automatic deduction on every sale. Supports barcodes and warehouse transfers.",
+    tag: "Inventory",
+    title: "Inventory that never lets you run out",
+    desc: "Real-time stock levels, low-stock alerts, reorder thresholds, categories, and automatic deduction on every sale. Works on desktop and mobile simultaneously — see the same live data everywhere.",
     image: featureInventory,
+    stats: [
+      { label: "Products tracked", value: "1,240" },
+      { label: "Low stock alerts", value: "12" },
+      { label: "Revenue risk", value: "GH₵ 4,200" },
+    ],
   },
 ];
 
@@ -102,6 +120,7 @@ export default function Landing() {
       className="min-h-screen overflow-x-hidden"
       style={{ backgroundColor: "var(--cream)", color: "var(--forest)", fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
     >
+
       {/* ── Navbar ─────────────────────────────────── */}
       <nav
         className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center"
@@ -116,7 +135,7 @@ export default function Landing() {
               display: "inline-flex",
               alignItems: "center",
               border: "1.5px solid rgba(255,255,255,0.22)",
-              boxShadow: "0 2px 16px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.06)",
+              boxShadow: "0 2px 16px rgba(0,0,0,0.28)",
             }}>
               <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 40, display: "block" }} />
             </div>
@@ -155,112 +174,170 @@ export default function Landing() {
       </nav>
 
       {/* ── Hero ───────────────────────────────────── */}
-      <section className="pt-28 pb-20 sm:pt-36 sm:pb-28">
+      <section className="pt-28 pb-0 sm:pt-36 overflow-hidden" style={{ backgroundColor: "var(--cream)" }}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-[1fr_1.1fr] lg:gap-16 lg:items-center">
+          <div className="text-center mb-12">
+            {/* badge */}
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase mb-8"
+              style={{
+                backgroundColor: "white",
+                color: "var(--forest)",
+                letterSpacing: "0.08em",
+                border: "1px solid hsl(var(--border))",
+              }}
+            >
+              <span style={{ fontSize: "14px" }}>🇬🇭</span>
+              Built for Ghana business
+            </div>
 
-            {/* Left — copy */}
-            <div className="animate-fade-in">
-              {/* badge pill */}
-              <div
-                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase mb-8"
-                style={{
-                  backgroundColor: "white",
-                  color: "var(--forest)",
-                  letterSpacing: "0.08em",
-                  border: "1px solid hsl(var(--border))",
-                }}
+            <h1
+              className="font-extrabold leading-[0.93] mb-6 mx-auto"
+              style={{
+                fontSize: "clamp(2.8rem, 7vw, 5.5rem)",
+                letterSpacing: "-0.05em",
+                color: "var(--forest)",
+                maxWidth: "820px",
+              }}
+            >
+              The business platform<br />
+              <span style={{ color: "var(--lime)", WebkitTextStroke: "1px var(--forest)" }}>built for Ghana.</span>
+            </h1>
+
+            <p
+              className="text-lg leading-relaxed mb-10 mx-auto"
+              style={{ color: "hsl(140,15%,42%)", fontWeight: 500, maxWidth: "540px" }}
+            >
+              All-in-one POS, inventory, invoicing, MoMo payments, and analytics — engineered for Ghanaian businesses that want to grow.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+              <Link
+                to="/register"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ backgroundColor: "var(--forest)", color: "white", textDecoration: "none" }}
               >
-                <span style={{ fontSize: "14px", lineHeight: 1 }}>🇬🇭</span>
-                Built for Ghana business
-              </div>
-
-              <h1
-                className="font-extrabold leading-[0.95] mb-6"
-                style={{
-                  fontSize: "clamp(3rem, 7vw, 5.25rem)",
-                  letterSpacing: "-0.05em",
-                  color: "var(--forest)",
-                }}
+                Start Free — No Credit Card
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href="#features"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-base transition-all hover:opacity-80"
+                style={{ backgroundColor: "white", color: "var(--forest)", border: "1px solid hsl(var(--border))", textDecoration: "none" }}
               >
-                The business<br />
-                platform built<br />
-                <span style={{ color: "var(--lime)" }}>for Ghana.</span>
-              </h1>
+                See How It Works
+              </a>
+            </div>
 
-              <p
-                className="text-lg leading-relaxed mb-10 max-w-[460px]"
-                style={{ color: "hsl(140,15%,42%)", fontWeight: 500 }}
-              >
-                All-in-one POS, inventory, invoicing, MoMo payments, and analytics — engineered for Ghanaian businesses that want to grow.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/register"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
-                  style={{ backgroundColor: "var(--forest)", color: "white", textDecoration: "none" }}
+            <div className="flex flex-wrap gap-3 justify-center">
+              {[
+                { icon: Check,   label: "Free forever plan" },
+                { icon: WifiOff, label: "Works offline" },
+                { icon: Nfc,     label: "MoMo payments built-in" },
+              ].map(({ icon: Icon, label }) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold px-3.5 py-1.5 rounded-full"
+                  style={{ backgroundColor: "white", color: "hsl(140,20%,38%)", border: "1px solid hsl(var(--border))" }}
                 >
-                  Start Free — No Credit Card
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <a
-                  href="#features"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-base transition-all hover:opacity-80"
-                  style={{ backgroundColor: "white", color: "var(--forest)", border: "1px solid hsl(var(--border))", textDecoration: "none" }}
-                >
-                  See How It Works
-                </a>
-              </div>
+                  <Icon className="h-3.5 w-3.5" style={{ color: "var(--forest)" }} />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                {[
-                  { icon: Check,    label: "Free forever plan" },
-                  { icon: WifiOff,  label: "Works offline" },
-                  { icon: Nfc,      label: "MoMo payments built-in" },
-                ].map(({ icon: Icon, label }) => (
-                  <span
-                    key={label}
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold px-3.5 py-1.5 rounded-full"
-                    style={{ backgroundColor: "white", color: "hsl(140,20%,38%)", border: "1px solid hsl(var(--border))" }}
-                  >
-                    <Icon className="h-3.5 w-3.5" style={{ color: "var(--forest)" }} />
-                    {label}
-                  </span>
-                ))}
+          {/* Hero image — iPad mockup in real store environment */}
+          <div className="relative mx-auto" style={{ maxWidth: "1000px" }}>
+            {/* Floating live-stats card — top left */}
+            <div
+              className="absolute hidden sm:flex flex-col gap-1 z-10"
+              style={{
+                top: "12%",
+                left: "-28px",
+                backgroundColor: "white",
+                borderRadius: "14px",
+                padding: "14px 18px",
+                boxShadow: "0 8px 40px rgba(26,58,34,0.18)",
+                border: "1px solid hsl(var(--border))",
+                minWidth: "148px",
+              }}
+            >
+              <span className="text-xs font-bold uppercase" style={{ color: "hsl(140,15%,58%)", letterSpacing: "0.08em" }}>Today's Sales</span>
+              <span className="font-extrabold" style={{ fontSize: "1.5rem", color: "var(--forest)", letterSpacing: "-0.04em" }}>GH₵ 2,450</span>
+              <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "hsl(142,55%,38%)" }}>
+                <TrendingUp className="h-3 w-3" />+15.6% vs yesterday
+              </span>
+            </div>
+
+            {/* Floating orders card — top right */}
+            <div
+              className="absolute hidden sm:flex flex-col gap-1 z-10"
+              style={{
+                top: "8%",
+                right: "-24px",
+                backgroundColor: "var(--forest)",
+                borderRadius: "14px",
+                padding: "14px 18px",
+                boxShadow: "0 8px 40px rgba(26,58,34,0.3)",
+                minWidth: "138px",
+              }}
+            >
+              <span className="text-xs font-bold uppercase" style={{ color: "rgba(255,255,255,0.5)", letterSpacing: "0.08em" }}>Total Orders</span>
+              <span className="font-extrabold" style={{ fontSize: "1.5rem", color: "var(--lime)", letterSpacing: "-0.04em" }}>320</span>
+              <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <TrendingUp className="h-3 w-3" style={{ color: "var(--lime)" }} />+8.4% this month
+              </span>
+            </div>
+
+            {/* Floating low-stock alert — bottom right */}
+            <div
+              className="absolute hidden md:flex items-center gap-3 z-10"
+              style={{
+                bottom: "16%",
+                right: "-20px",
+                backgroundColor: "white",
+                borderRadius: "12px",
+                padding: "12px 16px",
+                boxShadow: "0 8px 32px rgba(26,58,34,0.16)",
+                border: "1px solid hsl(var(--border))",
+              }}
+            >
+              <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#f59e0b", flexShrink: 0 }} />
+              <div>
+                <p className="text-xs font-bold" style={{ color: "var(--forest)" }}>Low Stock Alert</p>
+                <p className="text-xs" style={{ color: "hsl(140,10%,52%)" }}>Indomie Noodles — 8 left</p>
               </div>
             </div>
 
-            {/* Right — hero image */}
-            <div className="mt-14 lg:mt-0 animate-fade-in" style={{ animationDelay: "0.15s" }}>
-              <div
-                className="rounded-2xl overflow-hidden"
-                style={{
-                  boxShadow: "0 32px 100px rgba(26,58,34,0.2), 0 4px 16px rgba(26,58,34,0.08)",
-                  border: "1px solid hsl(var(--border))",
-                }}
-              >
-                <img
-                  src={heroDashboard}
-                  alt="Nexis Dashboard"
-                  className="w-full block"
-                  loading="eager"
-                />
-              </div>
+            <div
+              className="rounded-2xl overflow-hidden"
+              style={{
+                boxShadow: "0 40px 120px rgba(26,58,34,0.22), 0 8px 24px rgba(26,58,34,0.1)",
+                border: "1px solid rgba(26,58,34,0.1)",
+              }}
+            >
+              <img
+                src={heroDashboard}
+                alt="Nexis Dashboard on iPad in a real Ghana store"
+                className="w-full block"
+                loading="eager"
+                style={{ display: "block" }}
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Product highlights band ─────────────────── */}
-      <section style={{ backgroundColor: "var(--forest)" }} className="py-12 overflow-hidden">
+      {/* ── Stats band ─────────────────────────────── */}
+      <section style={{ backgroundColor: "var(--forest)" }} className="py-14">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", overflow: "hidden" }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: "16px", overflow: "hidden" }}>
             {[
-              { icon: Nfc,      headline: "MoMo Ready",    sub: "MTN · Vodafone · AirtelTigo" },
-              { icon: WifiOff,  headline: "Offline-First",  sub: "Full POS without internet" },
-              { icon: Scale,    headline: "Ghana Tax",      sub: "VAT · NHIL · GETFL auto-calc" },
-              { icon: Check,    headline: "Free to Start",  sub: "No credit card required" },
+              { icon: TrendingUp,   headline: "GH₵ 120,540",  sub: "Monthly revenue tracked" },
+              { icon: ShoppingCart, headline: "1,250+",        sub: "Orders processed" },
+              { icon: Users,        headline: "980+",          sub: "Customers managed" },
+              { icon: Package,      headline: "3,470",         sub: "Products sold this month" },
             ].map(({ icon: Icon, headline, sub }) => (
               <div
                 key={headline}
@@ -274,8 +351,8 @@ export default function Landing() {
                   <Icon className="h-5 w-5" style={{ color: "var(--lime)" }} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <p className="font-bold text-sm mb-0.5" style={{ color: "white" }}>{headline}</p>
-                  <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>{sub}</p>
+                  <p className="font-extrabold text-xl" style={{ color: "var(--lime)", letterSpacing: "-0.03em" }}>{headline}</p>
+                  <p className="text-xs font-medium mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>{sub}</p>
                 </div>
               </div>
             ))}
@@ -330,28 +407,54 @@ export default function Landing() {
 
       {/* ── Feature showcases ──────────────────────── */}
       <section className="py-20 sm:py-28" style={{ backgroundColor: "white" }}>
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 space-y-28">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 space-y-32">
           {showcases.map((s, i) => (
             <div
               key={s.title}
               className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 ${i % 2 === 1 ? "lg:flex-row-reverse" : ""}`}
             >
-              <div className="flex-1 space-y-5">
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                  style={{ backgroundColor: "var(--cream)" }}
-                >
-                  <s.icon className="h-6 w-6" style={{ color: "var(--forest)" }} strokeWidth={1.7} />
+              {/* Copy side */}
+              <div className="flex-1 space-y-6">
+                <div className="inline-flex items-center gap-2">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: "var(--cream)" }}
+                  >
+                    <s.icon className="h-5 w-5" style={{ color: "var(--forest)" }} strokeWidth={1.7} />
+                  </div>
+                  <span
+                    className="text-xs font-black uppercase"
+                    style={{ color: "hsl(140,20%,52%)", letterSpacing: "0.12em" }}
+                  >
+                    {s.tag}
+                  </span>
                 </div>
+
                 <h3
                   className="font-extrabold leading-tight"
-                  style={{ fontSize: "clamp(1.5rem, 2.5vw, 2.1rem)", letterSpacing: "-0.04em", color: "var(--forest)" }}
+                  style={{ fontSize: "clamp(1.6rem, 2.8vw, 2.25rem)", letterSpacing: "-0.04em", color: "var(--forest)" }}
                 >
                   {s.title}
                 </h3>
+
                 <p className="text-base leading-relaxed" style={{ color: "hsl(140,10%,46%)", fontWeight: 500 }}>
                   {s.desc}
                 </p>
+
+                {/* Mini stat pills */}
+                <div className="flex flex-wrap gap-3">
+                  {s.stats.map((stat) => (
+                    <div
+                      key={stat.label}
+                      className="rounded-xl px-4 py-2.5"
+                      style={{ backgroundColor: "var(--cream)", border: "1px solid hsl(var(--border))" }}
+                    >
+                      <p className="text-xs font-medium" style={{ color: "hsl(140,10%,52%)" }}>{stat.label}</p>
+                      <p className="font-extrabold text-sm" style={{ color: "var(--forest)", letterSpacing: "-0.02em" }}>{stat.value}</p>
+                    </div>
+                  ))}
+                </div>
+
                 <Link
                   to="/register"
                   className="inline-flex items-center gap-1.5 text-sm font-bold transition-opacity hover:opacity-70"
@@ -360,12 +463,15 @@ export default function Landing() {
                   Try it free <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
+
+              {/* Image side */}
               <div className="flex-1 w-full">
                 <div
                   className="rounded-2xl overflow-hidden transition-transform duration-300 hover:-translate-y-1"
                   style={{
-                    boxShadow: "0 20px 70px rgba(26,58,34,0.12)",
-                    border: "1px solid hsl(var(--border))",
+                    boxShadow: "0 24px 80px rgba(26,58,34,0.15), 0 4px 16px rgba(26,58,34,0.06)",
+                    border: "1px solid rgba(26,58,34,0.08)",
+                    transform: i % 2 === 0 ? "rotate(0.5deg)" : "rotate(-0.5deg)",
                   }}
                 >
                   <img
@@ -385,6 +491,12 @@ export default function Landing() {
       <section id="pricing" className="py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center mb-14">
+            <p
+              className="text-xs font-bold uppercase mb-3"
+              style={{ color: "hsl(140,20%,52%)", letterSpacing: "0.12em" }}
+            >
+              Pricing
+            </p>
             <h2
               className="font-extrabold mb-3"
               style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)", letterSpacing: "-0.04em", color: "var(--forest)" }}
@@ -493,6 +605,12 @@ export default function Landing() {
       <section id="reviews" className="py-20 sm:py-28" style={{ backgroundColor: "white" }}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center mb-14">
+            <p
+              className="text-xs font-bold uppercase mb-3"
+              style={{ color: "hsl(140,20%,52%)", letterSpacing: "0.12em" }}
+            >
+              Testimonials
+            </p>
             <h2
               className="font-extrabold mb-3"
               style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)", letterSpacing: "-0.04em", color: "var(--forest)" }}
@@ -548,7 +666,7 @@ export default function Landing() {
               display: "inline-flex",
               alignItems: "center",
               border: "1.5px solid rgba(255,255,255,0.22)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
             }}>
               <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 44, display: "block" }} />
             </div>
@@ -580,18 +698,16 @@ export default function Landing() {
       >
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
-            <div className="flex items-center gap-2.5">
-              <div style={{
-                backgroundColor: "white",
-                borderRadius: 12,
-                padding: "5px 16px 5px 8px",
-                display: "inline-flex",
-                alignItems: "center",
-                border: "1.5px solid rgba(255,255,255,0.22)",
-                boxShadow: "0 2px 16px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.06)",
-              }}>
-                <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 38, display: "block" }} />
-              </div>
+            <div style={{
+              backgroundColor: "white",
+              borderRadius: 12,
+              padding: "5px 16px 5px 8px",
+              display: "inline-flex",
+              alignItems: "center",
+              border: "1.5px solid rgba(255,255,255,0.22)",
+              boxShadow: "0 2px 16px rgba(0,0,0,0.28)",
+            }}>
+              <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 38, display: "block" }} />
             </div>
 
             <div className="flex flex-wrap gap-6 text-sm">
