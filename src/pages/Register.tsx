@@ -119,10 +119,17 @@ export default function Register() {
             </Link>
             <Link
               to="/login"
-              className="text-sm font-semibold hover:opacity-70 transition-opacity"
-              style={{ color: "var(--muted-foreground)", textDecoration: "none" }}
+              className="inline-flex items-center gap-1.5 text-sm font-bold transition-all hover:opacity-90 active:scale-[0.97]"
+              style={{
+                backgroundColor: "white",
+                color: "var(--forest)",
+                border: "2px solid var(--forest)",
+                borderRadius: "999px",
+                padding: "6px 18px",
+                textDecoration: "none",
+              }}
             >
-              Sign in instead
+              Sign In
             </Link>
           </div>
 
@@ -236,8 +243,31 @@ export default function Register() {
             </button>
           </form>
 
+          {/* Sign in prompt */}
+          <div
+            className="flex items-center justify-center gap-3 mt-5 py-4 rounded-2xl"
+            style={{ backgroundColor: "white", border: "1.5px solid hsl(var(--border))" }}
+          >
+            <span className="text-sm font-medium" style={{ color: "hsl(140,10%,46%)" }}>
+              Already have an account?
+            </span>
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-1.5 text-sm font-bold transition-all hover:opacity-90 active:scale-[0.97]"
+              style={{
+                backgroundColor: "var(--forest)",
+                color: "white",
+                borderRadius: "999px",
+                padding: "7px 20px",
+                textDecoration: "none",
+              }}
+            >
+              Sign In
+            </Link>
+          </div>
+
           <p
-            className="text-center text-xs mt-6 leading-relaxed"
+            className="text-center text-xs mt-5 leading-relaxed"
             style={{ color: "var(--muted-foreground)" }}
           >
             By creating an account you agree to our terms of service.
