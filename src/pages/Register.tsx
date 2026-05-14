@@ -319,7 +319,8 @@ export default function Register() {
             className="text-center text-xs mt-5 leading-relaxed"
             style={{ color: "var(--muted-foreground)" }}
           >
-            By creating an account you agree to our terms of service.
+            By creating an account you agree to our{" "}
+            <a href="/terms" target="_blank" rel="noreferrer" style={{ color: "var(--forest)", fontWeight: 700, textDecoration: "underline" }}>terms of service</a>.
             <br />© 2026 Nexis · By GENESIS
           </p>
         </div>

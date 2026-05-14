@@ -21,6 +21,8 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const JoinBusiness = lazy(() => import("./pages/JoinBusiness"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const UserGuide = lazy(() => import("./pages/UserGuide"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const POS = lazy(() => import("./pages/POS"));
 const Inventory = lazy(() => import("./pages/Inventory"));
@@ -94,6 +96,8 @@ const App = () => {
                 <Route path="/" element={<SmartRoot />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/user-guide" element={<UserGuide />} />
                 <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
                 <Route path="/join-business" element={<ProtectedRoute><JoinBusiness /></ProtectedRoute>} />
                 <Route element={<ProtectedRoute><BusinessGuard><StaffPinGuard><AppLayout /></StaffPinGuard></BusinessGuard></ProtectedRoute>}>

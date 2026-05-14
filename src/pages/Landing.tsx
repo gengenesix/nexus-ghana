@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import {
   ScanLine, Boxes, ReceiptText, UsersRound, Wallet, BarChart2,
   BadgeCheck, Nfc, Scale, ArrowRight, Check, WifiOff,
-  Phone, Mail, Download, Star, TrendingUp, ShoppingCart, Users, Package,
+  Phone, Mail, Download, TrendingUp, ShoppingCart, Users, Package,
+  ShieldCheck, Zap, Globe2, BookOpen,
 } from "lucide-react";
 
 import heroDashboard    from "@/assets/hero-dashboard.jpg";
@@ -91,24 +92,26 @@ const plans = [
   },
 ];
 
-const testimonials = [
+const promises = [
   {
-    name: "Ama Serwaa",
-    role: "Owner, Serwaa's Cosmetics — Kumasi",
-    text: "Nexis changed how I run my shop. Every cedi is tracked and my MoMo payments are sorted automatically.",
-    initials: "AS",
+    icon: ShieldCheck,
+    title: "No fake reviews.",
+    body: "We just launched. We are not going to invent customer quotes to make you feel comfortable. What we will show you is what we actually built — and let the product speak.",
   },
   {
-    name: "Kwame Mensah",
-    role: "Manager, FreshMart Supermarket — Accra",
-    text: "The invoicing with automatic Ghana tax calculation saves me hours every week. No more manual VAT math!",
-    initials: "KM",
+    icon: Zap,
+    title: "Built for the real Ghana market.",
+    body: "VAT, NHIL, GETFL, MTN MoMo, Telecel Cash, AirtelTigo Money, GHS currency, GRA invoice formatting — all of it baked in, not bolted on. This is not a generic SaaS re-skinned for Africa.",
   },
   {
-    name: "Abena Osei",
-    role: "Founder, TechHub GH — Takoradi",
-    text: "Finally a business tool built for Ghana. The POS is lightning fast and my staff learned it in minutes.",
-    initials: "AO",
+    icon: Globe2,
+    title: "Your data is yours. Always.",
+    body: "Every product, sale, customer, and invoice you create belongs to you. Export everything to CSV any time. We run on enterprise-grade infrastructure with row-level security — your business data is never shared.",
+  },
+  {
+    icon: WifiOff,
+    title: "Works when the internet doesn't.",
+    body: "Erratic connectivity is a real problem in Ghana. The Nexis POS runs fully offline — sales queue locally and sync the moment you reconnect. Your checkout never stops because the WiFi did.",
   },
 ];
 
@@ -142,7 +145,7 @@ export default function Landing() {
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            {[["Features","#features"],["Pricing","#pricing"],["Reviews","#reviews"]].map(([label,href]) => (
+            {[["Features","#features"],["Pricing","#pricing"],["Why Nexis","#why"]].map(([label,href]) => (
               <a
                 key={label}
                 href={href}
@@ -603,57 +606,102 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Testimonials ───────────────────────────── */}
-      <section id="reviews" className="py-20 sm:py-28" style={{ backgroundColor: "white" }}>
+      {/* ── Why Nexis (honest section) ─────────────── */}
+      <section id="why" className="py-20 sm:py-28" style={{ backgroundColor: "white" }}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-14">
+
+          {/* Heading */}
+          <div className="mb-14 max-w-2xl">
             <p
               className="text-xs font-bold uppercase mb-3"
               style={{ color: "hsl(140,20%,52%)", letterSpacing: "0.12em" }}
             >
-              Testimonials
+              Why Nexis
             </p>
             <h2
-              className="font-extrabold mb-3"
-              style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)", letterSpacing: "-0.04em", color: "var(--forest)" }}
+              className="font-extrabold mb-4 leading-tight"
+              style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.75rem)", letterSpacing: "-0.04em", color: "var(--forest)" }}
             >
-              Loved by Ghana businesses
+              We're new.<br />And we built it right.
             </h2>
-            <p className="text-base font-medium" style={{ color: "hsl(140,10%,46%)" }}>
-              Real stories from real entrepreneurs.
+            <p className="text-base font-medium leading-relaxed" style={{ color: "hsl(140,10%,46%)", maxWidth: 520 }}>
+              No invented testimonials. No inflated user counts. Just a product
+              engineered from the ground up for how business actually works in Ghana —
+              honest, fast, and built to grow with you.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
+          {/* Promise cards */}
+          <div className="grid sm:grid-cols-2 gap-5 mb-16">
+            {promises.map((p) => (
               <div
-                key={t.name}
-                className="rounded-2xl p-7"
-                style={{ backgroundColor: "var(--cream)", border: "1px solid hsl(var(--border))" }}
+                key={p.title}
+                className="rounded-2xl p-7 flex flex-col gap-4"
+                style={{
+                  backgroundColor: "var(--cream)",
+                  border: "1px solid hsl(var(--border))",
+                }}
               >
-                <div className="flex gap-1 mb-5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" style={{ color: "hsl(38,92%,50%)" }} />
-                  ))}
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: "var(--forest)" }}
+                >
+                  <p.icon className="h-5 w-5" style={{ color: "var(--lime)" }} strokeWidth={1.8} />
                 </div>
-                <p className="text-sm leading-relaxed mb-6 font-medium" style={{ color: "hsl(140,10%,40%)" }}>
-                  "{t.text}"
-                </p>
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
-                    style={{ backgroundColor: "var(--forest)", color: "var(--lime)" }}
-                  >
-                    {t.initials}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold" style={{ color: "var(--forest)" }}>{t.name}</p>
-                    <p className="text-xs font-medium" style={{ color: "hsl(140,10%,52%)" }}>{t.role}</p>
-                  </div>
+                <div>
+                  <p className="font-extrabold text-base mb-2" style={{ color: "var(--forest)", letterSpacing: "-0.02em" }}>
+                    {p.title}
+                  </p>
+                  <p className="text-sm leading-relaxed font-medium" style={{ color: "hsl(140,10%,44%)" }}>
+                    {p.body}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Founder statement */}
+          <div
+            className="rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-start gap-8"
+            style={{ backgroundColor: "var(--forest)" }}
+          >
+            <div
+              className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center"
+              style={{ backgroundColor: "var(--lime)" }}
+            >
+              <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ width: 40, height: 40, borderRadius: 8 }} />
+            </div>
+            <div>
+              <p
+                className="font-extrabold text-white mb-3 leading-snug"
+                style={{ fontSize: "clamp(1.1rem, 2vw, 1.375rem)", letterSpacing: "-0.025em" }}
+              >
+                "We built Nexis because we got tired of watching Ghanaian business owners
+                manage growing companies on WhatsApp, exercise books, and spreadsheets.
+                They deserve better tools."
+              </p>
+              <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.45)" }}>
+                — GENESIS, Founders of Nexis
+              </p>
+              <div className="mt-5 flex gap-3">
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:opacity-90"
+                  style={{ backgroundColor: "var(--lime)", color: "var(--forest)", textDecoration: "none" }}
+                >
+                  Start Free <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  to="/user-guide"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:opacity-80"
+                  style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.75)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.18)" }}
+                >
+                  <BookOpen className="h-4 w-4" /> Read the Guide
+                </Link>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -713,7 +761,7 @@ export default function Landing() {
             </div>
 
             <div className="flex flex-wrap gap-6 text-sm">
-              {[["Features","#features"],["Pricing","#pricing"],["Reviews","#reviews"]].map(([label,href]) => (
+              {[["Features","#features"],["Pricing","#pricing"],["Why Nexis","#why"]].map(([label,href]) => (
                 <a
                   key={label}
                   href={href}
@@ -723,13 +771,9 @@ export default function Landing() {
                   {label}
                 </a>
               ))}
-              <Link
-                to="/login"
-                style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}
-                className="hover:opacity-100 transition-opacity font-medium"
-              >
-                Sign In
-              </Link>
+              <Link to="/user-guide" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }} className="hover:opacity-100 transition-opacity font-medium">User Guide</Link>
+              <Link to="/terms" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }} className="hover:opacity-100 transition-opacity font-medium">Terms</Link>
+              <Link to="/login" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }} className="hover:opacity-100 transition-opacity font-medium">Sign In</Link>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 text-sm">
@@ -757,14 +801,22 @@ export default function Landing() {
             <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.28)" }}>
               © 2026 Nexis · By GENESIS
             </p>
-            <a
-              href="/nexis_user_guide.pdf"
-              download
-              className="flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80"
-              style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
-            >
-              <Download className="h-3.5 w-3.5" /> Download User Guide
-            </a>
+            <div className="flex items-center gap-5">
+              <Link
+                to="/user-guide"
+                className="flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80"
+                style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
+              >
+                <BookOpen className="h-3.5 w-3.5" /> User Guide
+              </Link>
+              <Link
+                to="/terms"
+                className="flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80"
+                style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
+              >
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
