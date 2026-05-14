@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatGHS } from "@/lib/ghana";
-import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Users, Circle, RefreshCw, Key, BarChart3, Award, Copy, Share2 } from "lucide-react";
+import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Users, Circle, RefreshCw, Key, BarChart3, Award, Copy, Share2, MoreVertical, ChevronRight, UserCheck, UserX, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
@@ -55,6 +57,8 @@ export default function Staff() {
   const [showPin, setShowPin] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [detailStaff, setDetailStaff] = useState<any>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleteTargetName, setDeleteTargetName] = useState("");
 
   // Form state
   const [formName, setFormName] = useState("");
@@ -220,8 +224,23 @@ export default function Staff() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
+      setDeleteTargetId(null);
       toast.success("Staff member removed");
     },
+  });
+
+  const quickRoleChange = useMutation({
+    mutationFn: async ({ id, role }: { id: string; role: string }) => {
+      const { error } = await supabase.from("staff_members").update({ role }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { role }) => {
+      queryClient.invalidateQueries({ queryKey: ["staff"] });
+      // keep detail dialog in sync
+      if (detailStaff) setDetailStaff((prev: any) => ({ ...prev, role }));
+      toast.success(`Role updated to ${role}`);
+    },
+    onError: (err: any) => toast.error(err.message),
   });
 
   const openEdit = (s: any) => {
@@ -406,26 +425,64 @@ export default function Staff() {
                               {s.last_login ? formatDistanceToNow(new Date(s.last_login), { addSuffix: true }) : "Never"}
                             </TableCell>
                             <TableCell className="text-right" onClick={e => e.stopPropagation()}>
-                              <div className="flex items-center justify-end gap-1">
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(s)} title="Edit">
-                                  <Pencil className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openResetPin(s.id)} title="Reset PIN">
-                                  <Key className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className={`h-8 w-8 ${s.status === "active" ? "text-yellow-500" : "text-green-500"}`}
-                                  onClick={() => toggleStatus.mutate({ id: s.id, status: s.status })}
-                                  title={s.status === "active" ? "Deactivate" : "Activate"}
-                                >
-                                  <RefreshCw className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(s.id)} title="Delete">
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-52">
+                                  <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">{s.name}</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => openDetail(s)}>
+                                    <UserCog className="h-4 w-4 mr-2" /> View Profile
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => openEdit(s)}>
+                                    <Pencil className="h-4 w-4 mr-2" /> Edit Info
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger>
+                                      <ShieldCheck className="h-4 w-4 mr-2" /> Change Role
+                                      <ChevronRight className="h-3.5 w-3.5 ml-auto" />
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent className="w-52">
+                                      <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Select new role</DropdownMenuLabel>
+                                      <DropdownMenuSeparator />
+                                      {[...DEFAULT_ROLES, ...EXTENDED_ROLES.filter(r => !DEFAULT_ROLES.includes(r))].map(r => (
+                                        <DropdownMenuItem
+                                          key={r}
+                                          className={s.role === r ? "bg-primary/10 font-medium" : ""}
+                                          onClick={() => quickRoleChange.mutate({ id: s.id, role: r })}
+                                        >
+                                          {r === "Administrator" && <Shield className="h-3.5 w-3.5 mr-2 text-primary" />}
+                                          {r}
+                                          {s.role === r && <span className="ml-auto text-primary text-xs">current</span>}
+                                        </DropdownMenuItem>
+                                      ))}
+                                    </DropdownMenuSubContent>
+                                  </DropdownMenuSub>
+                                  <DropdownMenuItem onClick={() => openResetPin(s.id)}>
+                                    <Key className="h-4 w-4 mr-2" /> Reset PIN
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className={s.status === "active" ? "text-yellow-600" : "text-green-600"}
+                                    onClick={() => toggleStatus.mutate({ id: s.id, status: s.status })}
+                                  >
+                                    {s.status === "active"
+                                      ? <><UserX className="h-4 w-4 mr-2" /> Deactivate</>
+                                      : <><UserCheck className="h-4 w-4 mr-2" /> Activate</>
+                                    }
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="text-destructive focus:text-destructive"
+                                    onClick={() => { setDeleteTargetId(s.id); setDeleteTargetName(s.name); }}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" /> Remove Member
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </TableCell>
                           </TableRow>
                         );
@@ -532,6 +589,69 @@ export default function Staff() {
               <div><span className="text-muted-foreground">Email:</span> {detailStaff?.email || "—"}</div>
               <div><span className="text-muted-foreground">Status:</span> <Badge variant={detailStaff?.status === "active" ? "default" : "secondary"}>{detailStaff?.status}</Badge></div>
               <div><span className="text-muted-foreground">Last Login:</span> {detailStaff?.last_login ? formatDistanceToNow(new Date(detailStaff.last_login), { addSuffix: true }) : "Never"}</div>
+            </div>
+
+            {/* Quick role change */}
+            <div className="rounded-lg border border-border bg-secondary/30 p-3 space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5" /> Role & Access
+              </p>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={detailStaff?.role ?? ""}
+                  onValueChange={(role) => {
+                    if (detailStaff) quickRoleChange.mutate({ id: detailStaff.id, role });
+                  }}
+                >
+                  <SelectTrigger className="flex-1 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEFAULT_ROLES.map(r => (
+                      <SelectItem key={r} value={r}>
+                        <span className="flex items-center gap-2">
+                          {r === "Administrator" && <Shield className="h-3 w-3 text-primary" />}
+                          {r}
+                        </span>
+                      </SelectItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    {EXTENDED_ROLES.filter(r => !DEFAULT_ROLES.includes(r)).map(r => (
+                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {quickRoleChange.isPending && <Loader2 className="h-4 w-4 animate-spin text-primary shrink-0" />}
+              </div>
+              <p className="text-[10px] text-muted-foreground">{ROLE_DESCRIPTIONS[detailStaff?.role ?? ""] || "Custom role — permissions defined by your access policy"}</p>
+            </div>
+
+            {/* Danger zone */}
+            <div className="flex gap-2 pt-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => { setShowDetail(false); openEdit(detailStaff); }}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit Info
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={detailStaff?.status === "active" ? "text-yellow-600 border-yellow-300 hover:bg-yellow-50" : "text-green-600 border-green-300 hover:bg-green-50"}
+                onClick={() => { toggleStatus.mutate({ id: detailStaff.id, status: detailStaff.status }); setShowDetail(false); }}
+              >
+                {detailStaff?.status === "active" ? <><UserX className="h-3.5 w-3.5 mr-1" /> Deactivate</> : <><UserCheck className="h-3.5 w-3.5 mr-1" /> Activate</>}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive border-destructive/30 hover:bg-destructive/5"
+                onClick={() => { setShowDetail(false); setDeleteTargetId(detailStaff.id); setDeleteTargetName(detailStaff.name); }}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
+              </Button>
             </div>
             {detailSales.length > 0 && (
               <>
@@ -669,6 +789,31 @@ export default function Staff() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => { if (!open) setDeleteTargetId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-destructive" /> Remove Staff Member?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <strong className="text-foreground">{deleteTargetName}</strong> will be permanently removed from your team. This cannot be undone. Their historical sales records will be preserved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteTargetId && deleteMutation.mutate(deleteTargetId)}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Yes, Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Reset PIN Dialog */}
       <Dialog open={showResetPin} onOpenChange={setShowResetPin}>
