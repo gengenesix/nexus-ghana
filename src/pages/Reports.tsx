@@ -766,7 +766,7 @@ export default function Reports() {
                             <TableCell className="text-right text-muted-foreground">{formatGHS(p.cost)}</TableCell>
                             <TableCell className="text-right">{formatGHS(p.sell)}</TableCell>
                             <TableCell className="text-right">
-                              <Badge variant="outline" className={`${p.marginPct >= 30 ? "text-green-500 border-green-500/40" : p.marginPct >= 15 ? "text-amber-500 border-amber-500/40" : "text-destructive border-destructive/40"}`}>
+                              <Badge variant="outline" className={`${p.marginPct >= 30 ? "text-green-500 border-green-500/40" : p.marginPct >= 15 ? "text-[#2d7a44] border-[#2d7a44]/40" : "text-destructive border-destructive/40"}`}>
                                 {p.marginPct.toFixed(1)}%
                               </Badge>
                             </TableCell>

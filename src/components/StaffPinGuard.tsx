@@ -92,9 +92,9 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl gold-gradient shadow-xl shadow-primary/30">
-              <Landmark className="h-8 w-8 text-primary-foreground" />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent to-white/20" />
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1a3a22] shadow-xl shadow-[#1a3a22]/30">
+              <Landmark className="h-8 w-8 text-[#a3e635]" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent to-white/10" />
             </div>
           </div>
           <div>
@@ -184,7 +184,7 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
                     )}
                   </div>
                   <Button
-                    className="w-full gold-gradient text-primary-foreground"
+                    className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]"
                     onClick={handlePinSubmit}
                     disabled={pin.length < 6 || isLoading}
                   >

@@ -420,7 +420,7 @@ export default function POS() {
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatGHS(subtotal)}</span></div>
                   {discountAmount > 0 && <div className="flex justify-between text-destructive"><span>Discount</span><span>-{formatGHS(discountAmount)}</span></div>}
-                  {pointsDiscount > 0 && <div className="flex justify-between text-amber-500"><span><Star className="h-3 w-3 inline mr-0.5" />Points</span><span>-{formatGHS(pointsDiscount)}</span></div>}
+                  {pointsDiscount > 0 && <div className="flex justify-between text-[#3a7a44]"><span><Star className="h-3 w-3 inline mr-0.5" />Points</span><span>-{formatGHS(pointsDiscount)}</span></div>}
                   <Separator />
                   <div className="flex justify-between font-bold text-lg"><span>Total</span><span className="text-primary">{formatGHS(total)}</span></div>
                 </div>
@@ -454,7 +454,7 @@ export default function POS() {
                   <Button variant="outline" className="flex-1" onClick={holdSale}>
                     <PauseCircle className="h-4 w-4 mr-1" /> Hold
                   </Button>
-                  <Button className="flex-[2] gold-gradient text-primary-foreground font-semibold" onClick={completeSale} disabled={saleMutation.isPending}>
+                  <Button className="flex-[2] bg-[#1a3a22] text-white font-semibold hover:bg-[#152e1a]" onClick={completeSale} disabled={saleMutation.isPending}>
                     <CreditCard className="h-4 w-4 mr-2" /> {saleMutation.isPending ? "Processing..." : "Complete Sale"}
                   </Button>
                 </div>

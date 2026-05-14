@@ -97,7 +97,7 @@ export function SplitPaymentDialog({ open, onOpenChange, total, onConfirm }: Pro
             {Math.abs(remaining) >= 0.01 && <span className="font-bold">{formatGHS(Math.abs(remaining))}</span>}
           </div>
 
-          <Button className="w-full gold-gradient text-primary-foreground" onClick={handleConfirm} disabled={Math.abs(remaining) > 0.01}>
+          <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={handleConfirm} disabled={Math.abs(remaining) > 0.01}>
             <CheckCircle className="h-4 w-4 mr-2" /> Confirm Split
           </Button>
         </div>

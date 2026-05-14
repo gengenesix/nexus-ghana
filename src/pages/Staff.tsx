@@ -260,7 +260,7 @@ export default function Staff() {
             {staffMembers.length} members · {activeCount} active · <span className="text-green-500">{onlineCount} online</span>
           </p>
         </div>
-        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
+        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
           <Plus className="h-4 w-4 mr-1" /> Add Staff
         </Button>
       </div>
@@ -585,7 +585,7 @@ export default function Staff() {
                 <Input type="password" placeholder="••••••" maxLength={6} value={formConfirmPin} onChange={e => setFormConfirmPin(e.target.value.replace(/\D/g, ""))} />
               </div>
             </div>
-            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => addMutation.mutate()} disabled={!formName.trim() || formPin.length < 6 || addMutation.isPending}>
+            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => addMutation.mutate()} disabled={!formName.trim() || formPin.length < 6 || addMutation.isPending}>
               {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Staff Member"}
             </Button>
           </div>
@@ -626,7 +626,7 @@ export default function Staff() {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => editMutation.mutate()} disabled={!formName.trim() || editMutation.isPending}>
+            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => editMutation.mutate()} disabled={!formName.trim() || editMutation.isPending}>
               {editMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
             </Button>
           </div>
@@ -649,7 +649,7 @@ export default function Staff() {
               <Label>Confirm New PIN</Label>
               <Input type="password" placeholder="••••••" maxLength={6} value={confirmNewPin} onChange={e => setConfirmNewPin(e.target.value.replace(/\D/g, ""))} />
             </div>
-            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => resetPinMutation.mutate()} disabled={newPin.length < 6 || resetPinMutation.isPending}>
+            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => resetPinMutation.mutate()} disabled={newPin.length < 6 || resetPinMutation.isPending}>
               {resetPinMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset PIN"}
             </Button>
           </div>

@@ -149,7 +149,7 @@ export default function Purchasing() {
 
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => setReceivingPo(null)}>Cancel</Button>
-                <Button className="flex-1 gold-gradient text-primary-foreground" onClick={() => receiveMutation.mutate()} disabled={receiveMutation.isPending}>
+                <Button className="flex-1 bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => receiveMutation.mutate()} disabled={receiveMutation.isPending}>
                   {receiveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><PackageCheck className="h-4 w-4 mr-1" /> Confirm Receipt</>}
                 </Button>
               </div>

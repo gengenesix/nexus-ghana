@@ -42,7 +42,7 @@ export function TierGate({ module, children }: Props) {
 
       <div className="flex flex-col sm:flex-row gap-3">
         <Button
-          className="gold-gradient text-primary-foreground font-semibold gap-2"
+          className="bg-[#1a3a22] text-white font-semibold hover:bg-[#152e1a] gap-2"
           onClick={() => window.open("mailto:sales@nexusgh.com?subject=Upgrade%20Request", "_blank")}
         >
           <Zap className="h-4 w-4" />

@@ -201,7 +201,7 @@ export default function Dashboard() {
           <p className="text-muted-foreground text-sm">{business?.name} — {format(new Date(), "EEEE, d MMMM yyyy")}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button onClick={() => navigate("/pos")} size="sm" className="gold-gradient text-primary-foreground">
+          <Button onClick={() => navigate("/pos")} size="sm" className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
             <Plus className="h-4 w-4 mr-1" /> New Sale
           </Button>
           <Button onClick={() => navigate("/invoices")} size="sm" variant="secondary">

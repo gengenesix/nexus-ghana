@@ -166,7 +166,7 @@ export function MoMoPaymentDialog({ open, onOpenChange, paymentMethod, amount, c
           <div className="flex gap-2">
             {status === "pending" ? (
               <>
-                <Button className="flex-1 gold-gradient text-primary-foreground font-semibold" onClick={handleConfirmManual}>
+                <Button className="flex-1 bg-[#1a3a22] text-white font-semibold hover:bg-[#152e1a]" onClick={handleConfirmManual}>
                   <CheckCircle className="h-4 w-4 mr-1.5" />
                   Confirm Received
                 </Button>
@@ -177,7 +177,7 @@ export function MoMoPaymentDialog({ open, onOpenChange, paymentMethod, amount, c
             ) : status === "idle" || status === "error" ? (
               <>
                 <Button
-                  className="flex-1 gold-gradient text-primary-foreground font-semibold"
+                  className="flex-1 bg-[#1a3a22] text-white font-semibold hover:bg-[#152e1a]"
                   onClick={handleSend}
                   disabled={!phone || status === "sending"}
                 >

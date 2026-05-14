@@ -203,7 +203,7 @@ export default function Inventory() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
           <Button variant="outline" size="sm" onClick={() => { if (products.length > 0) exportInventoryCsv(products); else toast.error("No products to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
-          <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground">
+          <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
             <Plus className="h-4 w-4 mr-1" /> Add Product
           </Button>
         </div>
@@ -364,7 +364,7 @@ export default function Inventory() {
               </div>
             </div>
             <Button
-              className="w-full gold-gradient text-primary-foreground"
+              className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]"
               onClick={productForm.handleSubmit((values) => addMutation.mutate(values))}
               disabled={addMutation.isPending}
             >

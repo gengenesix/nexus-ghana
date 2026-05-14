@@ -157,7 +157,7 @@ export default function Suppliers() {
           <Button variant="outline" size="sm" onClick={() => { exportSuppliersCsv(suppliers); toast.success("Exported!"); }}>
             <Download className="h-4 w-4 mr-1" /> Export
           </Button>
-          <Button onClick={() => { resetForm(); setShowAdd(true); }} className="gold-gradient text-primary-foreground" size="sm">
+          <Button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-[#1a3a22] text-white hover:bg-[#152e1a]" size="sm">
             <Plus className="h-4 w-4 mr-1" /> Add Supplier
           </Button>
         </div>
@@ -333,7 +333,7 @@ export default function Suppliers() {
             </div>
             <div className="space-y-2"><Label>Location</Label><Input placeholder="e.g. Tema, Accra" value={formLocation} onChange={e => setFormLocation(e.target.value)} /></div>
             <div className="space-y-2"><Label>Products Supplied</Label><Textarea placeholder="e.g. Noodles, Rice, Cooking Oil" value={formProducts} onChange={e => setFormProducts(e.target.value)} /></div>
-            <Button className="w-full gold-gradient text-primary-foreground" onClick={() => saveMutation.mutate()} disabled={!formName.trim() || saveMutation.isPending}>
+            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => saveMutation.mutate()} disabled={!formName.trim() || saveMutation.isPending}>
               {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : editingSupplier ? "Update Supplier" : "Add Supplier"}
             </Button>
           </div>
