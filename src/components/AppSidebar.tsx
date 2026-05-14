@@ -84,7 +84,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { user, signOut } = useAuth();
   const { business } = useBusiness();
-  const { staff, logout: staffLogout, canAccess } = useStaffSession();
+  const { staff, ownerBypass, logout: staffLogout, canAccess } = useStaffSession();
   const { canAccess: tierCanAccess } = useLicenseTier();
   const isBusinessOwner = !!user && !!business && business.owner_id === user.id;
 
@@ -97,11 +97,14 @@ export function AppSidebar() {
   const toggleGroup = (label: string) =>
     setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
 
-  const handleLogout     = () => { staffLogout(); signOut(); };
+  // Full sign-out: clears staff session + Supabase auth
+  const handleLogout = () => { staffLogout(); signOut(); };
+  // Switch user: clears staff session + owner bypass → shows PIN gate
   const handleSwitchStaff = () => staffLogout();
   const moduleKey = (url: string) => url.replace(/^\//, "");
 
-  const displayName = staff?.name ?? user?.email ?? "User";
+  const activeUser = staff ?? (ownerBypass ? { name: business?.name ?? "Owner", role: "Owner" } : null);
+  const displayName = activeUser?.name ?? user?.email ?? "User";
   const initials = displayName.charAt(0).toUpperCase();
 
   const renderItem = (item: NavItem) => {
@@ -250,7 +253,7 @@ export function AppSidebar() {
         className="px-4 py-4 space-y-1"
         style={{ borderTop: "1px solid hsl(var(--border))" }}
       >
-        {/* User info */}
+        {/* Current user info */}
         {!collapsed && (
           <div className="flex items-center gap-3 mb-2">
             <div
@@ -260,26 +263,24 @@ export function AppSidebar() {
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold truncate" style={{ color: "var(--forest)" }}>
-                {staff?.name ?? business?.name ?? user?.email}
+              <p className="text-xs font-semibold truncate text-foreground">
+                {activeUser?.name ?? user?.email ?? "User"}
               </p>
-              <p className="text-[10px] truncate" style={{ color: "var(--muted-foreground)" }}>
-                {user?.email}
+              <p className="text-[10px] truncate text-muted-foreground">
+                {activeUser?.role ?? (isBusinessOwner ? "Business Owner" : user?.email)}
               </p>
             </div>
           </div>
         )}
 
-        {staff && (
-          <button
-            onClick={handleSwitchStaff}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150 hover:opacity-80"
-            style={{ color: "var(--muted-foreground)" }}
-          >
-            <UserCircle className="h-4 w-4 shrink-0" />
-            {!collapsed && <span>Switch Staff</span>}
-          </button>
-        )}
+        <button
+          onClick={handleSwitchStaff}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150 hover:opacity-80"
+          style={{ color: "var(--muted-foreground)" }}
+        >
+          <UserCircle className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Switch User</span>}
+        </button>
 
         <button
           onClick={handleLogout}

@@ -10,6 +10,8 @@ export interface StaffSession {
 interface StaffSessionContextType {
   staff: StaffSession | null;
   isStaffLoggedIn: boolean;
+  ownerBypass: boolean;
+  setOwnerAccess: () => void;
   loginWithPin: (businessId: string, pin: string, staffId?: string) => Promise<StaffSession | null>;
   logout: () => void;
   canAccess: (feature: string) => boolean;
@@ -46,6 +48,15 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : null;
   });
 
+  const [ownerBypass, setOwnerBypass] = useState(() =>
+    sessionStorage.getItem("nexus_owner_session") === "1"
+  );
+
+  const setOwnerAccess = useCallback(() => {
+    sessionStorage.setItem("nexus_owner_session", "1");
+    setOwnerBypass(true);
+  }, []);
+
   const loginWithPin = useCallback(async (businessId: string, pin: string, staffId?: string): Promise<StaffSession | null> => {
     const { data, error } = await supabase.rpc("verify_staff_pin", {
       _business_id: businessId,
@@ -74,7 +85,9 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
       supabase.rpc("staff_logout", { _staff_id: staff.id }).then(() => {});
     }
     setStaff(null);
+    setOwnerBypass(false);
     sessionStorage.removeItem("nexus_staff_session");
+    sessionStorage.removeItem("nexus_owner_session");
   }, [staff]);
 
   const canAccess = useCallback((feature: string): boolean => {
@@ -84,7 +97,7 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
   }, [staff]);
 
   return (
-    <StaffSessionContext.Provider value={{ staff, isStaffLoggedIn: !!staff, loginWithPin, logout, canAccess }}>
+    <StaffSessionContext.Provider value={{ staff, isStaffLoggedIn: !!staff, ownerBypass, setOwnerAccess, loginWithPin, logout, canAccess }}>
       {children}
     </StaffSessionContext.Provider>
   );
