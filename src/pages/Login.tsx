@@ -44,11 +44,7 @@ export default function Login() {
         />
         <div className="relative z-10 flex flex-col h-full px-12 py-10">
           {/* Logo */}
-          <div
-            style={{ width: 72, height: 72, borderRadius: "50%", overflow: "hidden", flexShrink: 0, boxShadow: "0 0 0 4px rgba(255,255,255,0.18), 0 8px 28px rgba(0,0,0,0.35)" }}
-          >
-            <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-          </div>
+          <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ width: 80, height: 80, borderRadius: 18, display: "block" }} />
 
           {/* Hero copy */}
           <div className="flex-1 flex flex-col justify-center">
@@ -101,9 +97,7 @@ export default function Login() {
 
           {/* App icon — always visible at top of form */}
           <div className="mb-8">
-            <div style={{ width: 64, height: 64, borderRadius: "50%", overflow: "hidden", boxShadow: "0 4px 20px rgba(26,58,34,0.18), 0 0 0 3px rgba(26,58,34,0.08)" }}>
-              <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-            </div>
+            <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ width: 68, height: 68, borderRadius: 16, display: "block", boxShadow: "0 4px 18px rgba(26,58,34,0.15)" }} />
           </div>
 
           <h2
