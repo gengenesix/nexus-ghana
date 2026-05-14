@@ -25,7 +25,8 @@ export function AppLayout() {
             <div className="flex items-center gap-4">
               <SidebarTrigger className="mr-2 hidden md:flex" />
               <div className="flex items-center gap-2 md:hidden">
-                <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 28 }} />
+                <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ height: 32, width: 32, borderRadius: 8, display: "block", boxShadow: "0 2px 8px rgba(26,58,34,0.12)" }} />
+                <img src="/brand/nexis-wordmark-dark.png" alt="" aria-hidden style={{ height: 16, display: "block" }} />
               </div>
               <GlobalSearch />
             </div>

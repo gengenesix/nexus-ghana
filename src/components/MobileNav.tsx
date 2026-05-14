@@ -61,7 +61,8 @@ export function MobileNav() {
             </SheetTrigger>
             <SheetContent side="bottom" className="bg-card border-border">
               <div className="flex items-center gap-2.5 mb-4">
-                <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 30 }} />
+                <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ width: 40, height: 40, borderRadius: 10, display: "block", boxShadow: "0 3px 14px rgba(26,58,34,0.15)" }} />
+                <img src="/brand/nexis-wordmark-dark.png" alt="" aria-hidden style={{ height: 18, display: "block" }} />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {moreItems.map((mi) => (

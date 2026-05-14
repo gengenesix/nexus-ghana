@@ -165,9 +165,12 @@ export function AppSidebar() {
         style={{ borderBottom: "1px solid hsl(var(--border))" }}
       >
         {collapsed ? (
-          <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ height: 36, width: 36, borderRadius: 8, display: "block" }} />
+          <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ height: 36, width: 36, borderRadius: 8, display: "block", boxShadow: "0 3px 10px rgba(26,58,34,0.13)" }} />
         ) : (
-          <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 32 }} />
+          <>
+            <img src="/brand/nexis-icon-green.png" alt="Nexis" style={{ width: 40, height: 40, borderRadius: 10, display: "block", flexShrink: 0, boxShadow: "0 3px 14px rgba(26,58,34,0.15)" }} />
+            <img src="/brand/nexis-wordmark-dark.png" alt="" aria-hidden style={{ height: 18, display: "block" }} />
+          </>
         )}
       </div>
 
