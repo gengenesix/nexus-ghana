@@ -243,8 +243,8 @@ export default function Dashboard() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Percent className="h-5 w-5 text-primary" /></div>
-              <div>
-                <p className="text-2xl font-bold">{(stats?.profitMargin ?? 0).toFixed(1)}%</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-base sm:text-xl font-bold truncate">{(stats?.profitMargin ?? 0).toFixed(1)}%</p>
                 <p className="text-xs text-muted-foreground">Inventory Margin</p>
               </div>
             </div>
@@ -254,8 +254,8 @@ export default function Dashboard() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Package className="h-5 w-5 text-primary" /></div>
-              <div>
-                <p className="text-2xl font-bold">{formatGHS(stats?.inventoryRetail ?? 0)}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-base sm:text-xl font-bold truncate">{formatGHS(stats?.inventoryRetail ?? 0)}</p>
                 <p className="text-xs text-muted-foreground">{stats?.totalProducts ?? 0} Products (Retail)</p>
               </div>
             </div>
@@ -269,8 +269,8 @@ export default function Dashboard() {
                   ? <TrendingDown className="h-5 w-5 text-destructive" />
                   : <TrendingUp className="h-5 w-5 text-green-500" />}
               </div>
-              <div>
-                <p className="text-2xl font-bold">{formatGHS(stats?.monthExpenses ?? 0)}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-base sm:text-xl font-bold truncate">{formatGHS(stats?.monthExpenses ?? 0)}</p>
                 <p className="text-xs text-muted-foreground">This Month Expenses</p>
               </div>
             </div>
@@ -280,8 +280,8 @@ export default function Dashboard() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><CreditCard className="h-5 w-5 text-primary" /></div>
-              <div>
-                <p className="text-2xl font-bold">{formatGHS(stats?.totalBankBalance ?? 0)}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-base sm:text-xl font-bold truncate">{formatGHS(stats?.totalBankBalance ?? 0)}</p>
                 <p className="text-xs text-muted-foreground">{stats?.bankAccountCount ?? 0} Bank Accounts</p>
               </div>
             </div>
@@ -299,8 +299,8 @@ export default function Dashboard() {
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/crm")}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Briefcase className="h-5 w-5 text-primary" /></div>
-            <div>
-              <p className="text-2xl font-bold">{stats?.openLeads ?? 0}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-base sm:text-xl font-bold truncate">{stats?.openLeads ?? 0}</p>
               <p className="text-xs text-muted-foreground">Open Leads</p>
             </div>
           </CardContent>
@@ -308,8 +308,8 @@ export default function Dashboard() {
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/opportunities")}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Handshake className="h-5 w-5 text-primary" /></div>
-            <div>
-              <p className="text-2xl font-bold">{stats?.pipelineCount ?? 0}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-base sm:text-xl font-bold truncate">{stats?.pipelineCount ?? 0}</p>
               <p className="text-xs text-muted-foreground">Pipeline ({formatGHS(stats?.pipelineValue ?? 0)})</p>
             </div>
           </CardContent>
@@ -317,8 +317,8 @@ export default function Dashboard() {
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/purchasing")}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Receipt className="h-5 w-5 text-primary" /></div>
-            <div>
-              <p className="text-2xl font-bold">{stats?.openPOsCount ?? 0}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-base sm:text-xl font-bold truncate">{stats?.openPOsCount ?? 0}</p>
               <p className="text-xs text-muted-foreground">Open POs ({formatGHS(stats?.openPOsTotal ?? 0)})</p>
             </div>
           </CardContent>
@@ -326,8 +326,8 @@ export default function Dashboard() {
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/production")}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><Factory className="h-5 w-5 text-primary" /></div>
-            <div>
-              <p className="text-2xl font-bold">{stats?.activeProduction ?? 0}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-base sm:text-xl font-bold truncate">{stats?.activeProduction ?? 0}</p>
               <p className="text-xs text-muted-foreground">Active Production</p>
             </div>
           </CardContent>

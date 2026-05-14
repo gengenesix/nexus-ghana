@@ -18,13 +18,13 @@ export function StatCard({ title, value, icon: Icon, trend, trendUp }: StatCardP
         boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
       }}
     >
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="space-y-1 min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-wide truncate" style={{ color: "var(--muted-foreground)" }}>
             {title}
           </p>
           <p
-            className="text-2xl font-extrabold font-mono tracking-tight"
+            className="text-lg sm:text-2xl font-extrabold font-mono tracking-tight truncate"
             style={{ color: "var(--forest)", letterSpacing: "-0.025em" }}
           >
             {value}
