@@ -58,6 +58,13 @@ export default function Onboarding() {
     if (adminPin.length < 6)    { toast.error("PIN must be 6 digits"); return; }
     if (adminPin !== confirmPin) { toast.error("PINs do not match"); return; }
 
+    // Safety net: if a business already exists (race condition / double-submit),
+    // just go to the dashboard instead of creating a duplicate.
+    if (business) {
+      navigate("/dashboard");
+      return;
+    }
+
     try {
       const biz = await createBusiness.mutateAsync({ name: name.trim(), phone, email, region, address });
       const fullName = user?.user_metadata?.full_name || user?.email || "Admin";

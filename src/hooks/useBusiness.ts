@@ -31,16 +31,22 @@ export function useBusiness() {
   const query = useQuery({
     queryKey: ["business", user?.id],
     queryFn: async () => {
+      // Use array + limit(1) instead of maybeSingle() so the query never
+      // errors if a user accidentally ended up with duplicate rows in the DB.
+      // The UNIQUE(owner_id) DB constraint (fix_duplicate_businesses.sql)
+      // ensures duplicates cannot happen going forward.
       const { data, error } = await supabase
         .from("businesses")
         .select("*")
         .eq("owner_id", user!.id)
-        .maybeSingle();
+        .order("created_at", { ascending: true })
+        .limit(1);
       if (error) throw error;
-      return data as Business | null;
+      return (data && data.length > 0 ? (data[0] as Business) : null);
     },
     enabled: !!user,
-    // Keep cached data while refetching so guards never see a stale null
+    // Keep cached data fresh for 5 minutes so guards never see stale null
+    // during background refetches.
     staleTime: 5 * 60 * 1000,
   });
 
@@ -61,9 +67,8 @@ export function useBusiness() {
       return data as Business;
     },
     onSuccess: (data) => {
-      // Write directly into the cache so BusinessGuard immediately sees the
-      // new business — avoids the race where invalidate triggers a background
-      // refetch and the guard sees null during the brief refetch window.
+      // Populate cache immediately — avoids the race where invalidate triggers
+      // a background refetch and BusinessGuard sees null during the refetch.
       queryClient.setQueryData(["business", user!.id], data);
     },
   });
@@ -89,6 +94,10 @@ export function useBusiness() {
     isLoading:  query.isLoading,
     isFetching: query.isFetching,
     isError:    query.isError,
+    // 'pending' = not yet resolved (no data, fetching or about to fetch)
+    // 'success' = resolved — data is either a Business or null
+    // 'error'   = query threw
+    status:     query.status,
     createBusiness,
     updateBusiness,
   };
