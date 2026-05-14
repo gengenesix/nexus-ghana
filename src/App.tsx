@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { StaffSessionProvider } from "@/contexts/StaffSessionContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BusinessGuard } from "@/components/BusinessGuard";
@@ -63,6 +63,20 @@ function PageLoader() {
   );
 }
 
+// Smart root: authenticated users go straight to dashboard,
+// everyone else sees the landing page.
+const LandingOrDashboard = lazy(() => import("./pages/Landing"));
+function SmartRoot() {
+  const { user, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  if (user) return <Navigate to="/dashboard" replace />;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <LandingOrDashboard />
+    </Suspense>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -73,7 +87,7 @@ const App = () => (
           <StaffSessionProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/" element={<Landing />} />
+                <Route path="/" element={<SmartRoot />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />

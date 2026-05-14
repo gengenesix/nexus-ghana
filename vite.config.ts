@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => ({
         theme_color: "#1a3a22",
         background_color: "#1a3a22",
         display: "standalone",
-        start_url: "/dashboard",
+        start_url: "/",
         scope: "/",
         icons: [
           { src: "/pwa-192.png",          sizes: "192x192", type: "image/png", purpose: "any" },

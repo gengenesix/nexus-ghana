@@ -640,7 +640,7 @@ export default function Landing() {
               © 2026 Nexis · By GENESIS
             </p>
             <a
-              href="/NexisGH_User_Guide.pdf"
+              href="/Nexis_User_Manual.pdf"
               download
               className="flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80"
               style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}

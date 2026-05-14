@@ -2,7 +2,7 @@
   "name": "Nexis",
   "short_name": "Nexis",
   "description": "All-in-one POS, inventory, invoicing and analytics for Ghanaian businesses.",
-  "start_url": "/dashboard",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#1a3a22",
   "theme_color": "#1a3a22",
