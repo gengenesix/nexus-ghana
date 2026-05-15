@@ -53,20 +53,15 @@ CREATE TRIGGER trg_prevent_self_role_escalation
 
 DROP POLICY IF EXISTS "Staff can link own account" ON public.staff_members;
 
+-- RLS WITH CHECK cannot reference OLD — that's only available in triggers.
+-- Column-level enforcement (blocking role/business_id changes) is handled entirely
+-- by the trg_prevent_self_role_escalation trigger above.
+-- This policy simply ensures: (a) you can only update YOUR OWN row, and
+-- (b) the updated row still carries your auth.uid() as supabase_user_id.
 CREATE POLICY "Staff can link own account" ON public.staff_members
   FOR UPDATE
-  USING  (supabase_user_id = auth.uid())
-  WITH CHECK (
-    -- The role and business_id must not change
-    role        = OLD.role
-    AND business_id = OLD.business_id
-    AND status      = OLD.status
-    -- supabase_user_id must either stay the same or be set (never cleared by self)
-    AND (
-      supabase_user_id = OLD.supabase_user_id
-      OR (OLD.supabase_user_id IS NULL AND supabase_user_id = auth.uid())
-    )
-  );
+  USING     (supabase_user_id = auth.uid())
+  WITH CHECK (supabase_user_id = auth.uid());
 
 -- ── 3. Ensure audit_logs has no DELETE policy (append-only) ──────────────
 -- If someone accidentally created one, remove it.
