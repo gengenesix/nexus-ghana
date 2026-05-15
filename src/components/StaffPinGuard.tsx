@@ -56,14 +56,19 @@ export function StaffPinGuard({ children }: StaffPinGuardProps) {
     const result = await loginWithPin(business.id, pin, selectedStaff.id);
     setIsLoading(false);
 
-    if (result) {
+    if (result.success) {
       setAttempts(0);
       setLockedUntil(null);
-      toast.success(`Welcome, ${result.name}`);
+      toast.success(`Welcome, ${result.session.name}`);
     } else {
+      setPin("");
+      // Time-restriction failures show the reason directly without counting as a failed attempt
+      if (result.reason && result.reason.startsWith("Access restricted")) {
+        toast.error(result.reason);
+        return;
+      }
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
-      setPin("");
 
       if (newAttempts >= 5) {
         setLockedUntil(new Date(Date.now() + 15 * 60 * 1000));

@@ -3,6 +3,7 @@ import {
   Receipt, BarChart3, UserCog, Settings, LogOut, UserCircle,
   Shield, Wallet, Handshake, ShoppingBag, Factory, Cpu, FolderKanban,
   Headphones, Users2, ArrowRightLeft, ChevronDown, Lock, Landmark,
+  ClipboardList, FileText as FileAudit,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +16,9 @@ import {
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { isApproverRole } from "@/lib/rbac";
 
 interface NavItem  { title: string; url: string; icon: any; feature: string; }
 interface NavGroup { label: string; items: NavItem[]; }
@@ -71,10 +75,12 @@ const navGroups: NavGroup[] = [
   {
     label: "System",
     items: [
-      { title: "Reports",      url: "/reports",        icon: BarChart3, feature: "reports" },
-      { title: "Administration",url: "/administration",icon: Shield,    feature: "administration" },
-      { title: "Staff",        url: "/staff",          icon: UserCog,   feature: "staff" },
-      { title: "Settings",     url: "/settings",       icon: Settings,  feature: "settings" },
+      { title: "Reports",        url: "/reports",        icon: BarChart3,     feature: "reports" },
+      { title: "Administration", url: "/administration", icon: Shield,        feature: "administration" },
+      { title: "Approvals",      url: "/approvals",      icon: ClipboardList, feature: "approvals" },
+      { title: "Audit Log",      url: "/audit-log",      icon: FileAudit,     feature: "audit-log" },
+      { title: "Staff",          url: "/staff",          icon: UserCog,       feature: "staff" },
+      { title: "Settings",       url: "/settings",       icon: Settings,      feature: "settings" },
     ],
   },
 ];
@@ -87,6 +93,21 @@ export function AppSidebar() {
   const { staff, ownerBypass, logout: staffLogout, canAccess } = useStaffSession();
   const { canAccess: tierCanAccess } = useLicenseTier();
   const isBusinessOwner = !!user && !!business && business.owner_id === user.id;
+  const canSeeApprovals = isBusinessOwner || ownerBypass || (staff && isApproverRole(staff.role));
+
+  const { data: pendingApprovalCount = 0 } = useQuery({
+    queryKey: ["sidebar-approval-count", business?.id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("approval_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("business_id", business!.id)
+        .eq("status", "pending");
+      return count ?? 0;
+    },
+    enabled: !!business && !!canSeeApprovals,
+    refetchInterval: 30000,
+  });
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     Main: true, "Sales & CRM": true, "Purchasing & Inventory": true,
@@ -122,6 +143,11 @@ export function AppSidebar() {
           >
             <item.icon className="h-4 w-4 shrink-0" />
             <span className="flex-1 truncate">{item.title}</span>
+            {item.url === "/approvals" && pendingApprovalCount > 0 && !collapsed && (
+              <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none shrink-0">
+                {pendingApprovalCount}
+              </span>
+            )}
             {locked && !collapsed && (
               <Lock className="h-3 w-3 opacity-40 shrink-0" />
             )}

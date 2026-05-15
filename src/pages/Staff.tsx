@@ -15,7 +15,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatGHS } from "@/lib/ghana";
-import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Users, Circle, RefreshCw, Key, BarChart3, Award, Copy, Share2, MoreVertical, ChevronRight, UserCheck, UserX, ShieldCheck } from "lucide-react";
+import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Users, Circle, RefreshCw, Key, BarChart3, Award, Copy, Share2, MoreVertical, ChevronRight, UserCheck, UserX, ShieldCheck, Lock, Save, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/contexts/AuthContext";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
+import { ALL_MODULES } from "@/lib/rbac";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
@@ -367,6 +371,7 @@ export default function Staff() {
           <TabsTrigger value="active">Active ({activeCount})</TabsTrigger>
           <TabsTrigger value="inactive">Inactive ({staffMembers.length - activeCount})</TabsTrigger>
           <TabsTrigger value="performance" className="flex items-center gap-1"><BarChart3 className="h-3.5 w-3.5" />Performance</TabsTrigger>
+          <TabsTrigger value="roles" className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" />Roles</TabsTrigger>
         </TabsList>
 
         {["all", "online", "active", "inactive"].map(tab => (
@@ -547,6 +552,9 @@ export default function Staff() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+        <TabsContent value="roles">
+          <CustomRolesTab businessId={business?.id ?? ""} />
         </TabsContent>
       </Tabs>
 
@@ -837,6 +845,326 @@ export default function Staff() {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Custom Roles Tab
+// ─────────────────────────────────────────────────────────────
+
+const MODULE_LABELS: Record<string, string> = {
+  dashboard: "Dashboard", pos: "Point of Sale", inventory: "Inventory",
+  invoices: "Invoices", customers: "Customers", suppliers: "Suppliers",
+  expenses: "Expenses", reports: "Reports", staff: "Staff",
+  settings: "Settings", crm: "CRM", sales: "Sales Orders",
+  purchasing: "Purchasing", projects: "Projects", banking: "Banking",
+  financials: "Financials", hr: "HR", production: "Production",
+};
+
+type CrudAction = "can_create" | "can_read" | "can_update" | "can_delete" | "can_approve";
+const CRUD_COLS: { key: CrudAction; label: string }[] = [
+  { key: "can_create",  label: "Create" },
+  { key: "can_read",    label: "Read" },
+  { key: "can_update",  label: "Update" },
+  { key: "can_delete",  label: "Delete" },
+  { key: "can_approve", label: "Approve" },
+];
+
+type PermMatrix = Record<string, Record<CrudAction, boolean>>;
+
+function emptyMatrix(): PermMatrix {
+  return Object.fromEntries(
+    ALL_MODULES.map((m) => [m, { can_create: false, can_read: false, can_update: false, can_delete: false, can_approve: false }])
+  );
+}
+
+function CustomRolesTab({ businessId }: { businessId: string }) {
+  const { business } = useBusiness();
+  const queryClient  = useQueryClient();
+
+  const [editingRole, setEditingRole] = useState<any>(null);
+  const [editName, setEditName]       = useState("");
+  const [editDesc, setEditDesc]       = useState("");
+  const [editMatrix, setEditMatrix]   = useState<PermMatrix>(emptyMatrix());
+  const [saving, setSaving]           = useState(false);
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+
+  // Fetch all roles for this business (custom only)
+  const { data: customRoles = [], isLoading } = useQuery({
+    queryKey: ["custom-roles", businessId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("roles")
+        .select("*")
+        .eq("business_id", businessId)
+        .eq("is_system", false)
+        .order("name");
+      return data ?? [];
+    },
+    enabled: !!businessId,
+  });
+
+  // Fetch system roles for display
+  const { data: systemRoles = [] } = useQuery({
+    queryKey: ["system-roles"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("roles")
+        .select("id, name, description, color")
+        .is("business_id", null)
+        .eq("is_system", true)
+        .order("name");
+      return data ?? [];
+    },
+  });
+
+  const loadRolePermissions = async (roleId: string): Promise<PermMatrix> => {
+    const { data } = await supabase
+      .from("role_permissions")
+      .select("module,can_create,can_read,can_update,can_delete,can_approve")
+      .eq("role_id", roleId);
+    const matrix = emptyMatrix();
+    for (const p of data ?? []) {
+      matrix[p.module] = {
+        can_create:  p.can_create,
+        can_read:    p.can_read,
+        can_update:  p.can_update,
+        can_delete:  p.can_delete,
+        can_approve: p.can_approve,
+      };
+    }
+    return matrix;
+  };
+
+  const openEdit = async (role: any) => {
+    setEditingRole(role);
+    setEditName(role.name);
+    setEditDesc(role.description ?? "");
+    const matrix = await loadRolePermissions(role.id);
+    setEditMatrix(matrix);
+  };
+
+  const openNew = () => {
+    setEditingRole(null);
+    setEditName("");
+    setEditDesc("");
+    setEditMatrix(emptyMatrix());
+    setShowNewForm(true);
+  };
+
+  const toggleCell = (module: string, col: CrudAction) => {
+    setEditMatrix((prev) => ({
+      ...prev,
+      [module]: { ...prev[module], [col]: !prev[module][col] },
+    }));
+  };
+
+  const saveRole = async () => {
+    if (!editName.trim() || !businessId) return;
+    setSaving(true);
+    try {
+      let roleId: string;
+      if (editingRole) {
+        await supabase.from("roles").update({ name: editName.trim(), description: editDesc }).eq("id", editingRole.id);
+        roleId = editingRole.id;
+      } else {
+        const { data } = await supabase
+          .from("roles")
+          .insert({ name: editName.trim(), description: editDesc, business_id: businessId, is_system: false })
+          .select("id").single();
+        roleId = data!.id;
+      }
+
+      // Upsert all module permissions
+      const rows = ALL_MODULES.map((m) => ({
+        role_id:    roleId,
+        module:     m,
+        can_create:  editMatrix[m].can_create,
+        can_read:    editMatrix[m].can_read,
+        can_update:  editMatrix[m].can_update,
+        can_delete:  editMatrix[m].can_delete,
+        can_approve: editMatrix[m].can_approve,
+      }));
+
+      await supabase.from("role_permissions").upsert(rows, { onConflict: "role_id,module" });
+
+      toast.success(editingRole ? "Role updated." : "Custom role created.");
+      queryClient.invalidateQueries({ queryKey: ["custom-roles"] });
+      setEditingRole(null);
+      setShowNewForm(false);
+    } catch {
+      toast.error("Failed to save role.");
+    }
+    setSaving(false);
+  };
+
+  const deleteRole = async (role: any) => {
+    const { error } = await supabase.from("roles").delete().eq("id", role.id);
+    if (error) { toast.error("Failed to delete role."); return; }
+    toast.success(`"${role.name}" deleted.`);
+    queryClient.invalidateQueries({ queryKey: ["custom-roles"] });
+    setDeleteTarget(null);
+  };
+
+  const isEditing = !!editingRole || showNewForm;
+
+  return (
+    <div className="space-y-4 pt-2">
+
+      {/* System Roles (read-only) */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-display flex items-center gap-2">
+            <Lock className="h-4 w-4 text-muted-foreground" />
+            System Roles <Badge variant="secondary" className="text-xs">Read-only</Badge>
+          </CardTitle>
+          <CardDescription>Built-in roles — cannot be edited or deleted.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {systemRoles.map((r: any) => (
+              <div key={r.id} className="flex items-center gap-2 rounded-lg border bg-secondary/30 px-3 py-1.5">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: r.color }} />
+                <span className="text-sm font-medium">{r.name}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Custom Roles */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-display flex items-center gap-2">
+                <Shield className="h-4 w-4 text-primary" />
+                Custom Roles
+              </CardTitle>
+              <CardDescription>Create roles with fine-grained CRUD permissions per module.</CardDescription>
+            </div>
+            {!isEditing && (
+              <Button size="sm" onClick={openNew}>
+                <Plus className="h-4 w-4 mr-1" /> New Role
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Role list */}
+          {!isEditing && (
+            <>
+              {isLoading ? (
+                <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              ) : customRoles.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No custom roles yet. Create one to assign tailored permissions.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {customRoles.map((role: any) => (
+                    <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
+                      <div>
+                        <p className="font-medium text-sm">{role.name}</p>
+                        {role.description && <p className="text-xs text-muted-foreground">{role.description}</p>}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => openEdit(role)}>
+                          <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                        </Button>
+                        <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setDeleteTarget(role)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Create / Edit form */}
+          {isEditing && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">{editingRole ? `Editing: ${editingRole.name}` : "New Custom Role"}</h3>
+                <Button size="sm" variant="ghost" onClick={() => { setEditingRole(null); setShowNewForm(false); }}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Role name *</label>
+                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="e.g. Senior Cashier" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Description</label>
+                  <Input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} placeholder="Optional description" />
+                </div>
+              </div>
+
+              {/* Permission matrix */}
+              <div className="overflow-x-auto rounded-lg border">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b bg-secondary/30">
+                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground w-36">Module</th>
+                      {CRUD_COLS.map((c) => (
+                        <th key={c.key} className="px-2 py-2 font-semibold text-muted-foreground text-center">{c.label}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ALL_MODULES.map((module, i) => (
+                      <tr key={module} className={i % 2 === 0 ? "" : "bg-secondary/10"}>
+                        <td className="px-3 py-2 font-medium capitalize text-foreground">{MODULE_LABELS[module] ?? module}</td>
+                        {CRUD_COLS.map((col) => (
+                          <td key={col.key} className="px-2 py-2 text-center">
+                            <Checkbox
+                              checked={editMatrix[module]?.[col.key] ?? false}
+                              onCheckedChange={() => toggleCell(module, col.key)}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button onClick={saveRole} disabled={saving || !editName.trim()}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                  {editingRole ? "Save Changes" : "Create Role"}
+                </Button>
+                <Button variant="outline" onClick={() => { setEditingRole(null); setShowNewForm(false); }}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Delete confirm */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete "{deleteTarget?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Staff currently assigned this role will lose their custom permissions. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={() => deleteRole(deleteTarget)}>
+              Delete Role
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

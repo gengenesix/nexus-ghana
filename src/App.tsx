@@ -47,6 +47,8 @@ const ServiceModule = lazy(() => import("./pages/modules/ServiceModule"));
 const HumanResources = lazy(() => import("./pages/modules/HumanResources"));
 const Banking = lazy(() => import("./pages/modules/Banking"));
 const Warehouses = lazy(() => import("./pages/modules/Warehouses"));
+const Approvals  = lazy(() => import("./pages/Approvals"));
+const AuditLog   = lazy(() => import("./pages/AuditLog"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -132,6 +134,8 @@ const App = () => {
                   {/* Professional-only */}
                   <Route path="/hr" element={<ErrorBoundary><TierGate module="hr"><RoleGuard feature="hr"><HumanResources /></RoleGuard></TierGate></ErrorBoundary>} />
                   <Route path="/administration" element={<ErrorBoundary><TierGate module="administration"><RoleGuard feature="administration"><Administration /></RoleGuard></TierGate></ErrorBoundary>} />
+                  <Route path="/approvals"      element={<ErrorBoundary><Approvals /></ErrorBoundary>} />
+                  <Route path="/audit-log"      element={<ErrorBoundary><AuditLog /></ErrorBoundary>} />
 
                   {/* /opportunities was a duplicate of /crm — redirect */}
                   <Route path="/opportunities" element={<Navigate to="/crm" replace />} />
