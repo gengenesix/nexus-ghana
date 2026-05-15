@@ -18,6 +18,7 @@
 --   [12] pg_cron: daily mark_overdue_invoices
 --   [13] Service Contracts + Equipment
 --   [14] Enterprise RBAC (roles, permissions, approvals, audit)
+--   [15] Security Fixes (role escalation block, RLS tightening, audit-log lock)
 -- ============================================================
 
 
@@ -1983,3 +1984,62 @@ ALTER TABLE public.businesses
 
 -- If the constraint already exists you'll see "already exists" — that's fine, ignore it.
 
+
+-- ============================================================
+-- SECTION 15: Security Fixes
+-- Source: 20260515000014_security_fixes.sql
+-- ============================================================
+
+-- ── 1. Trigger: block staff self-role-escalation ───────────────────────────
+-- A staff member with a Supabase Auth account could call
+-- supabase.from("staff_members").update({ role: "Administrator" }) on their own row.
+-- This trigger blocks any UPDATE that changes `role` when the caller IS the staff member.
+-- Business owners are unaffected — their auth.uid() is never in staff_members.supabase_user_id.
+
+CREATE OR REPLACE FUNCTION public.prevent_self_role_escalation()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF OLD.role IS NOT DISTINCT FROM NEW.role THEN
+    RETURN NEW;
+  END IF;
+  IF OLD.supabase_user_id IS NOT NULL AND OLD.supabase_user_id = auth.uid() THEN
+    RAISE EXCEPTION 'Permission denied: staff cannot change their own role';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_prevent_self_role_escalation ON public.staff_members;
+CREATE TRIGGER trg_prevent_self_role_escalation
+  BEFORE UPDATE ON public.staff_members
+  FOR EACH ROW
+  EXECUTE FUNCTION public.prevent_self_role_escalation();
+
+-- ── 2. Tighten "Staff can link own account" RLS policy ─────────────────────
+-- RLS WITH CHECK cannot reference OLD (triggers only). Column enforcement is
+-- handled by the trigger above. Policy ensures staff can only touch their own row.
+
+DROP POLICY IF EXISTS "Staff can link own account" ON public.staff_members;
+
+CREATE POLICY "Staff can link own account" ON public.staff_members
+  FOR UPDATE
+  USING     (supabase_user_id = auth.uid())
+  WITH CHECK (supabase_user_id = auth.uid());
+
+-- ── 3. Lock audit_logs — no deletes ever (append-only) ─────────────────────
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'audit_logs' AND cmd = 'DELETE'
+  ) THEN
+    EXECUTE 'DROP POLICY IF EXISTS "audit_logs_delete" ON public.audit_logs';
+  END IF;
+END $$;
+
+REVOKE DELETE ON public.audit_logs FROM authenticated;
+REVOKE DELETE ON public.audit_logs FROM anon;
