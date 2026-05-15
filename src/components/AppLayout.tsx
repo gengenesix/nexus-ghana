@@ -15,15 +15,17 @@ export function AppLayout() {
   const location = useLocation();
 
   useEffect(() => {
-    // Apply the stored theme when entering the app shell
+    // Apply the stored theme when entering the app shell.
+    // PublicLayout.tsx does the inverse — it strips these classes whenever
+    // the user navigates to a public page (belt-and-suspenders).
     const stored = localStorage.getItem("nexus-theme");
     const isDark = stored ? stored === "dark" : true;
-    document.documentElement.classList.toggle("dark", isDark);
-    document.documentElement.classList.toggle("light", !isDark);
+    document.documentElement.classList.remove("dark", "light");
+    document.documentElement.classList.add(isDark ? "dark" : "light");
 
     return () => {
-      // Strip theme classes when leaving the app (sign-out → login page, etc.)
-      // so public pages always render in their own light-mode styles.
+      // Strip theme classes when unmounting (logout, redirect to login, etc.)
+      // so public pages always render without the app-shell theme.
       document.documentElement.classList.remove("dark", "light");
     };
   }, []);

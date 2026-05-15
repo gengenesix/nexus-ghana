@@ -22,17 +22,24 @@
     <meta name="author" content="GENESIS" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#1a3a22" />
-    <!-- Theme: only apply inside the app — never on public pages -->
+    <!-- Theme initialisation: apply stored preference on hard reload of an
+         authenticated app page so there's no flash before React paints.
+         Public pages (landing, login, register, terms, user-guide, onboarding,
+         join-business) must NEVER receive the dark/light class — they control
+         their own appearance via their own CSS. PublicLayout.tsx also strips
+         any leftover class at runtime for belt-and-suspenders safety. -->
     <script>
       (function() {
         var path = window.location.pathname;
-        // Public pages always use light mode — don't touch the class
-        var publicPaths = ['/', '/login', '/register', '/onboarding', '/join-business'];
-        var isPublic = publicPaths.some(function(p) {
+        // Exact public paths that must never have a theme class applied.
+        var publicExact = ['/', '/login', '/register', '/terms',
+                           '/user-guide', '/onboarding', '/join-business'];
+        // Also treat trailing-slash variants as public.
+        var isPublic = publicExact.some(function(p) {
           return path === p || path === p + '/';
         });
         if (isPublic) return;
-        // Inside the app: apply stored preference immediately to avoid flash
+        // App page hard reload — restore preference to avoid white flash.
         var stored = localStorage.getItem('nexus-theme');
         var isDark = stored ? stored === 'dark' : true;
         document.documentElement.classList.add(isDark ? 'dark' : 'light');

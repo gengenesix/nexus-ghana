@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BusinessGuard } from "@/components/BusinessGuard";
 import { StaffPinGuard } from "@/components/StaffPinGuard";
 import { AppLayout } from "@/components/AppLayout";
+import { PublicLayout } from "@/components/PublicLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { RoleGuard } from "@/components/RoleGuard";
 import { TierGate } from "@/components/TierGate";
@@ -95,13 +96,16 @@ const App = () => {
           <StaffSessionProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/" element={<SmartRoot />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/terms" element={<TermsOfService />} />
-                <Route path="/user-guide" element={<UserGuide />} />
-                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-                <Route path="/join-business" element={<ProtectedRoute><JoinBusiness /></ProtectedRoute>} />
+                {/* ── Public pages: PublicLayout strips any app theme class ── */}
+                <Route element={<PublicLayout />}>
+                  <Route path="/" element={<SmartRoot />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/terms" element={<TermsOfService />} />
+                  <Route path="/user-guide" element={<UserGuide />} />
+                  <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+                  <Route path="/join-business" element={<ProtectedRoute><JoinBusiness /></ProtectedRoute>} />
+                </Route>
                 <Route element={<ProtectedRoute><BusinessGuard><StaffPinGuard><AppLayout /></StaffPinGuard></BusinessGuard></ProtectedRoute>}>
                   {/* Core — available on all tiers */}
                   <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
