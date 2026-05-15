@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import {
   ArrowLeft, LayoutDashboard, ShoppingCart, Package, FileText, Users,
   Truck, Receipt, BarChart2, UserCog, Settings, Moon, Smartphone,
-  ChevronRight, Shield, Key, Wifi, WifiOff, Globe, Nfc, CheckCircle2,
+  CheckCircle2, Globe, Shield, ClipboardList, FileSearch, Layers,
+  Download, Lock, Wallet, Handshake, Factory, FolderKanban,
+  Headphones, Users2, Landmark, ArrowRightLeft, Cpu,
 } from "lucide-react";
 
-const LAST_UPDATED = "14 May 2026";
+const LAST_UPDATED = "15 May 2026";
 
 interface GuideSection {
   id: string;
@@ -38,7 +40,7 @@ const sections: GuideSection[] = [
     ],
     tips: [
       "Install Nexis as a PWA on your phone (tap 'Add to Home Screen' in your browser menu) for a native app experience with offline support.",
-      "Dark mode is available — click the moon icon in the top bar to switch.",
+      "Dark mode is available — click the moon icon in the top bar to switch. The theme only affects the app interior, never the login or landing pages.",
     ],
   },
   {
@@ -81,7 +83,7 @@ const sections: GuideSection[] = [
       },
       {
         heading: "Applying a discount",
-        body: "In the cart panel, there is a Discount field. Enter a percentage (e.g. 10 for 10% off) or a fixed GHS amount. The total updates instantly.",
+        body: "In the cart panel, there is a Discount field. Enter a percentage (e.g. 10 for 10% off) or a fixed GHS amount. The total updates instantly. Discounts above 10% may trigger an approval request depending on your role settings.",
       },
       {
         heading: "Loyalty points",
@@ -234,7 +236,7 @@ const sections: GuideSection[] = [
       },
     ],
     tips: [
-      "Reports is restricted to Manager and above roles by default. Adjust role permissions in Settings.",
+      "Reports is restricted to Manager and above roles by default.",
     ],
   },
   {
@@ -244,34 +246,187 @@ const sections: GuideSection[] = [
     intro: "Each team member has their own secure account. Roles define what they can see and do.",
     steps: [
       {
-        heading: "How staff join your business",
-        body: "On the Staff page, share your Business Access Code (the coloured code card at the top). Staff go to thenexux.vercel.app/register, choose 'I'm joining a team', create their own account, then sign in and enter the code when prompted. They are linked to your business automatically.",
+        heading: "Adding staff — email invite (recommended)",
+        body: "Click Add Staff and fill in the staff member's name, role, and email address. When an email is provided, Nexis sends them a secure login invitation. They click the link in their email to set their own password and access Nexis from any device — phone, tablet, or laptop.",
+      },
+      {
+        heading: "Adding staff — PIN only (kiosk mode)",
+        body: "If the staff member will only use a shared shop device (no personal login), leave the email blank and set a 6-digit PIN instead. They log in by entering their PIN on the shared device. Both methods can coexist in the same team.",
+      },
+      {
+        heading: "How staff join on their own device",
+        body: "Share your Business Access Code (shown at the top of the Staff page). Staff go to thenexux.vercel.app/register, create their account, then enter the code when prompted. They are linked to your business automatically with the default 'Staff' role.",
       },
       {
         heading: "Changing a staff member's role",
-        body: "In the staff table, click the ⋮ menu for any team member. Choose Change Role and select the new role from the submenu — the change is instant. You can also change the role from the staff member's profile card.",
+        body: "In the staff table, click ⋮ → Change Role and select the new role from the submenu — the change is instant. You can also change the role from the staff member's profile card.",
       },
       {
-        heading: "Available roles",
+        heading: "Built-in roles",
         body: "Administrator — full access including staff and settings.\nManager — all core modules plus reports.\nSupervisor — POS, inventory, invoices, customers, reports.\nCashier — POS and customers only.\nSales Rep — POS, customers, invoices.\nWarehouse — inventory and suppliers.\nAccountant — expenses, invoices, reports.\nStaff — POS and inventory.",
       },
       {
-        heading: "Removing a staff member",
-        body: "Click ⋮ → Remove Member. A confirmation dialog appears with the staff member's name. Confirm to remove them permanently. Their historical sales records are preserved — only their access is revoked.",
-      },
-      {
         heading: "Deactivating vs removing",
-        body: "Deactivating a staff member blocks their access without deleting their account. This is useful for seasonal staff or staff on leave. Click ⋮ → Deactivate / Activate to toggle.",
+        body: "Deactivating blocks access without deleting the account — useful for seasonal staff or staff on leave. Removing permanently revokes access; historical sales records are preserved.",
       },
       {
-        heading: "Kiosk / shared device mode",
-        body: "If a device is shared by multiple staff (e.g. a shop counter tablet), staff can still use the legacy 6-digit PIN flow. Add a staff member with a PIN from the staff page and they can log in on the shared device by selecting their name and entering their PIN.",
+        heading: "Staff performance",
+        body: "The Performance tab shows each staff member's total transactions, revenue generated, and average order value. The top performers leaderboard ranks by revenue. Use this to run incentive programmes.",
       },
     ],
     tips: [
-      "The Business Access Code never expires. You can share it freely with legitimate team members.",
-      "Staff accounts are fully multi-tenant — a staff member's Nexis account can only see the business they joined.",
+      "The Business Access Code never expires. Share it freely with legitimate team members.",
       "Owners always have full access regardless of role settings.",
+      "Use the Roles tab (next section) to build custom roles with fine-grained CRUD permissions.",
+    ],
+  },
+  {
+    id: "rbac",
+    icon: Shield,
+    title: "Roles & Permissions (RBAC)",
+    intro: "Enterprise-grade access control. Define exactly what each role can create, read, update, delete, and approve — per module.",
+    steps: [
+      {
+        heading: "System roles",
+        body: "Nexis ships with 8 built-in system roles (Administrator, Manager, Supervisor, Cashier, Sales Rep, Warehouse, Accountant, Staff). These are read-only — they cannot be edited or deleted. They appear in the Roles tab on the Staff page.",
+      },
+      {
+        heading: "Custom roles",
+        body: "In Staff → Roles tab, click New Role. Give it a name (e.g. 'Senior Cashier') and use the permission matrix to toggle Create, Read, Update, Delete, and Approve access for each of the 18 modules independently. Click Create Role to save.",
+      },
+      {
+        heading: "Assigning a custom role",
+        body: "When adding or editing a staff member, select your custom role from the Role dropdown. The staff member immediately inherits the exact permissions defined in that custom role.",
+      },
+      {
+        heading: "Time-based access",
+        body: "Restrict when staff can log in by setting time windows (e.g. 08:00–18:00 Monday to Friday only). This is enforced in the Africa/Accra timezone at login. Staff who attempt to log in outside their allowed window see a clear 'Access restricted at this time' message.",
+      },
+      {
+        heading: "What 'Approve' permission means",
+        body: "Certain actions in Nexis require approval from a Manager or above: discounts over 10%, voiding a sale, deleting an invoice, large stock adjustments, and expenses above GH₵ 500. If a staff member lacks the Approve permission, the action is queued as a pending approval request instead of executing immediately.",
+      },
+      {
+        heading: "Owner override",
+        body: "The business owner always has full access to everything regardless of any role or permission setting. This cannot be changed.",
+      },
+    ],
+    tips: [
+      "Custom roles are perfect for businesses with unusual team structures — e.g. a 'Stock Counter' who can read and update inventory but cannot create or delete products.",
+      "The lock icon (🔒) next to a sidebar item means your current role does not have access to that module.",
+    ],
+  },
+  {
+    id: "approvals",
+    icon: ClipboardList,
+    title: "Approval Workflows",
+    intro: "Sensitive actions go through an approval queue instead of executing immediately, giving managers oversight of high-impact operations.",
+    steps: [
+      {
+        heading: "What triggers an approval",
+        body: "The following actions automatically create a pending approval request if the staff member does not have the 'Approve' permission:\n• Discounts over 10% at POS\n• Voiding a completed sale\n• Deleting an invoice\n• Manual stock adjustments\n• Expenses above GH₵ 500\n• Issuing a refund",
+      },
+      {
+        heading: "The approval badge",
+        body: "Managers and Administrators see an amber number badge on 'Approvals' in the sidebar showing how many requests are pending. The badge updates every 30 seconds automatically. The top-right bell icon also shows pending approvals.",
+      },
+      {
+        heading: "Reviewing a request",
+        body: "Open the Approvals page. Each request shows: who submitted it, what action they want to perform, the affected record, and a timestamp. Click Review to open the detail panel. You can Approve or Reject with an optional note.",
+      },
+      {
+        heading: "After approval",
+        body: "Approved requests execute immediately — the sale is voided, the discount applied, etc. Rejected requests notify the staff member and no action is taken. All decisions are recorded with the approver's name and timestamp.",
+      },
+    ],
+    tips: [
+      "Approvals protect your business from unauthorised discounts and write-offs without slowing down legitimate operations.",
+      "Staff submitting a request see its status update in real time — they do not need to ask the manager manually.",
+    ],
+  },
+  {
+    id: "audit-log",
+    icon: FileSearch,
+    title: "Audit Log",
+    intro: "A tamper-proof, append-only record of every significant action taken in your system. Know who did what, when.",
+    steps: [
+      {
+        heading: "What gets logged",
+        body: "Every create, update, delete, and approve action across all modules is recorded: sales, invoices, inventory adjustments, staff changes, expense entries, role changes, and approval decisions. Entries cannot be deleted — the log is permanent.",
+      },
+      {
+        heading: "Filtering the log",
+        body: "Use the date range picker to narrow down entries. Filter by module (Sales, Inventory, Invoices, etc.) using the dropdown. Use the search box to find entries by staff name, action type, or record ID.",
+      },
+      {
+        heading: "Reading an entry",
+        body: "Each log entry shows: the timestamp (Africa/Accra timezone), the staff member who performed the action, the module and action type, the affected record ID, and the old and new values where applicable.",
+      },
+      {
+        heading: "Exporting",
+        body: "Click Export CSV to download the current filtered view as a spreadsheet. Useful for compliance audits, accountant reviews, or investigations.",
+      },
+    ],
+    tips: [
+      "The Audit Log is visible to Administrator role only.",
+      "Nexis loads 50 entries per page. Use the date filters to narrow down to the period you need.",
+      "The log is stored with row-level security — even the database owner cannot delete entries.",
+    ],
+  },
+  {
+    id: "erp",
+    icon: Layers,
+    title: "ERP Modules",
+    intro: "Nexis includes a full suite of ERP modules for growing businesses. Access depends on your subscription tier.",
+    steps: [
+      {
+        heading: "Financials (GL & Chart of Accounts)",
+        body: "A full general ledger with a chart of accounts. Record journal entries, view trial balances, and generate profit & loss statements. Access: Finance tier and above.",
+      },
+      {
+        heading: "Banking",
+        body: "Manage multiple bank accounts. Record deposits, withdrawals, and transfers. Reconcile your bank statement against Nexis records to ensure accuracy. Access: Finance tier and above.",
+      },
+      {
+        heading: "CRM (Leads & Opportunities)",
+        body: "Track sales leads through a pipeline: Lead → Qualified → Proposal → Won/Lost. Log activities (calls, meetings, emails) against each opportunity. Forecast revenue from your pipeline. Access: Sales & CRM tier.",
+      },
+      {
+        heading: "Sales Orders",
+        body: "Create sales orders before invoicing — useful for wholesale and B2B customers who need a proforma. Convert confirmed orders to invoices in one click. Access: Sales & CRM tier.",
+      },
+      {
+        heading: "Purchasing",
+        body: "Raise purchase orders to suppliers. Send POs as PDF. When goods arrive, use the Receive Goods flow — stock is added to inventory automatically and the PO is marked as fulfilled. Access: Logistics tier.",
+      },
+      {
+        heading: "Warehouses",
+        body: "Manage multiple storage locations. Transfer stock between warehouses. Run per-warehouse inventory reports. Ideal for businesses with a main store and a back warehouse or multiple branches. Access: Logistics tier.",
+      },
+      {
+        heading: "Production & BOM",
+        body: "Define Bills of Materials for products you manufacture. Create production orders and track raw material consumption. Finished goods are added to inventory automatically upon completion. Access: Logistics tier.",
+      },
+      {
+        heading: "MRP (Material Requirements Planning)",
+        body: "Based on sales orders and production schedules, MRP calculates what materials you need to order and when. Prevents stock-outs on raw materials. Access: Logistics tier.",
+      },
+      {
+        heading: "Projects",
+        body: "Plan and track projects with tasks, milestones, and a Gantt chart view. Assign tasks to staff members and track completion. Link project costs to expenses. Access: Sales & CRM tier.",
+      },
+      {
+        heading: "Service (Contracts & Equipment)",
+        body: "Manage service contracts for customers. Track equipment under warranty or maintenance agreements. Log service visits and generate service reports. Access: Sales & CRM tier.",
+      },
+      {
+        heading: "Human Resources",
+        body: "Maintain an employee directory with departments, job titles, and org chart. Manage leave requests and approvals. Track leave balances per employee. Access: Professional tier.",
+      },
+    ],
+    tips: [
+      "Locked modules show a 🔒 icon in the sidebar. Contact us to upgrade your tier.",
+      "All ERP modules share the same data — a purchase order received automatically updates inventory, which updates the dashboard, which updates reports.",
     ],
   },
   {
@@ -357,252 +512,266 @@ const navItems = [
   { id: "expenses",        label: "Expenses" },
   { id: "reports",         label: "Reports" },
   { id: "staff",           label: "Staff" },
+  { id: "rbac",            label: "Roles & Permissions" },
+  { id: "approvals",       label: "Approvals" },
+  { id: "audit-log",       label: "Audit Log" },
+  { id: "erp",             label: "ERP Modules" },
   { id: "settings",        label: "Settings" },
   { id: "theme",           label: "Theme" },
   { id: "pwa",             label: "Mobile App" },
 ];
 
 export default function UserGuide() {
+  const handleDownload = () => {
+    const originalTitle = document.title;
+    document.title = "Nexis User Guide — " + LAST_UPDATED;
+    window.print();
+    document.title = originalTitle;
+  };
+
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "var(--cream)", color: "var(--forest)", fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-    >
-      {/* ── Top bar ── */}
+    <>
+      {/* Print styles */}
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          .print-break { page-break-before: always; }
+          body { background: white !important; }
+          a { color: inherit !important; text-decoration: none !important; }
+        }
+      `}</style>
+
       <div
-        className="sticky top-0 z-10 h-14 flex items-center px-6 lg:px-8"
-        style={{ backgroundColor: "var(--forest)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+        className="min-h-screen"
+        style={{ backgroundColor: "var(--cream)", color: "var(--forest)", fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
       >
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-          <Link to="/" style={{ textDecoration: "none" }}>
-            <div style={{
-              backgroundColor: "white",
-              borderRadius: 10,
-              padding: "4px 14px 4px 7px",
-              display: "inline-flex",
-              alignItems: "center",
-              boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-            }}>
-              <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 34, display: "block" }} />
-            </div>
-          </Link>
-          <Link
-            to="/"
-            className="flex items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-80"
-            style={{ color: "rgba(255,255,255,0.6)", textDecoration: "none" }}
-          >
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Link>
-        </div>
-      </div>
-
-      {/* ── Hero header ── */}
-      <div style={{ backgroundColor: "var(--forest)" }} className="pb-20 pt-14">
-        <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
-          {/* Prominent logo */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}>
-            <div style={{
-              backgroundColor: "white",
-              borderRadius: 24,
-              padding: "18px 36px 18px 24px",
-              display: "inline-flex",
-              alignItems: "center",
-              boxShadow: "0 12px 60px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)",
-              border: "2px solid rgba(255,255,255,0.3)",
-            }}>
-              <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 64, display: "block" }} />
-            </div>
-          </div>
-
-          <h1
-            className="font-extrabold text-white mb-3"
-            style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)", letterSpacing: "-0.04em" }}
-          >
-            User Guide
-          </h1>
-          <p style={{ color: "rgba(255,255,255,0.5)", fontWeight: 500, fontSize: 15 }}>
-            Everything you need to get the most out of Nexis · Updated {LAST_UPDATED}
-          </p>
-
-          {/* Quick-nav pills */}
-          <div className="flex flex-wrap justify-center gap-2 mt-10">
-            {navItems.map(n => (
-              <a
-                key={n.id}
-                href={`#${n.id}`}
-                className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:opacity-90"
-                style={{
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  color: "rgba(255,255,255,0.75)",
-                  textDecoration: "none",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                }}
-              >
-                {n.label}
-              </a>
-            ))}
+        {/* ── Top bar ── */}
+        <div
+          className="no-print sticky top-0 z-10 h-14 flex items-center px-6 lg:px-8"
+          style={{ backgroundColor: "var(--forest)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+        >
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+            <Link to="/" style={{ textDecoration: "none" }}>
+              <div style={{
+                backgroundColor: "white", borderRadius: 10,
+                padding: "4px 14px 4px 7px", display: "inline-flex",
+                alignItems: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
+              }}>
+                <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 34, display: "block" }} />
+              </div>
+            </Link>
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-80"
+              style={{ color: "rgba(255,255,255,0.6)", textDecoration: "none" }}
+            >
+              <ArrowLeft className="h-4 w-4" /> Back
+            </Link>
           </div>
         </div>
-      </div>
 
-      {/* ── Main content ── */}
-      <div className="py-16 pb-28">
-        <div className="mx-auto max-w-4xl px-6 lg:px-8 space-y-20">
-          {sections.map((sec) => (
-            <section key={sec.id} id={sec.id}>
-              {/* Section header */}
-              <div
-                className="flex items-center gap-3 mb-6 pb-4"
-                style={{ borderBottom: "2px solid hsl(var(--border))" }}
-              >
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0"
-                  style={{ backgroundColor: "var(--forest)" }}
-                >
-                  <sec.icon className="h-5 w-5" style={{ color: "var(--lime)" }} strokeWidth={1.8} />
-                </div>
-                <h2
-                  className="font-extrabold"
-                  style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.625rem)", color: "var(--forest)", letterSpacing: "-0.03em" }}
-                >
-                  {sec.title}
-                </h2>
+        {/* ── Hero header ── */}
+        <div style={{ backgroundColor: "var(--forest)" }} className="pb-20 pt-14">
+          <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}>
+              <div style={{
+                backgroundColor: "white", borderRadius: 24,
+                padding: "18px 36px 18px 24px", display: "inline-flex",
+                alignItems: "center",
+                boxShadow: "0 12px 60px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)",
+                border: "2px solid rgba(255,255,255,0.3)",
+              }}>
+                <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 64, display: "block" }} />
               </div>
+            </div>
 
-              {/* Intro */}
-              <p
-                className="text-base font-medium mb-8 leading-relaxed"
-                style={{ color: "hsl(140,12%,42%)" }}
+            <h1
+              className="font-extrabold text-white mb-3"
+              style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)", letterSpacing: "-0.04em" }}
+            >
+              User Guide
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.5)", fontWeight: 500, fontSize: 15 }}>
+              Everything you need to get the most out of Nexis · Updated {LAST_UPDATED}
+            </p>
+
+            {/* Download button */}
+            <div className="no-print flex justify-center mt-6">
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-90 active:scale-95"
+                style={{ backgroundColor: "var(--lime)", color: "var(--forest)" }}
               >
-                {sec.intro}
-              </p>
+                <Download className="h-4 w-4" />
+                Download PDF
+              </button>
+            </div>
 
-              {/* Steps */}
-              <div className="space-y-5">
-                {sec.steps.map((step, i) => (
-                  <div
-                    key={i}
-                    className="rounded-xl p-5"
-                    style={{
-                      backgroundColor: "white",
-                      border: "1px solid hsl(var(--border))",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                    }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-md text-xs font-black mt-0.5"
-                        style={{ backgroundColor: "var(--forest)", color: "var(--lime)" }}
-                      >
-                        {i + 1}
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm mb-1.5" style={{ color: "var(--forest)" }}>
-                          {step.heading}
-                        </p>
-                        <p className="text-sm leading-relaxed font-medium" style={{ color: "hsl(140,10%,44%)", whiteSpace: "pre-line" }}>
-                          {step.body}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Tips */}
-              {sec.tips && sec.tips.length > 0 && (
-                <div
-                  className="mt-5 rounded-xl p-4 space-y-2.5"
+            {/* Quick-nav pills */}
+            <div className="no-print flex flex-wrap justify-center gap-2 mt-8">
+              {navItems.map(n => (
+                <a
+                  key={n.id}
+                  href={`#${n.id}`}
+                  className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:opacity-90"
                   style={{
-                    backgroundColor: "hsl(140,22%,96%)",
-                    border: "1px solid hsl(140,18%,88%)",
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    color: "rgba(255,255,255,0.75)",
+                    textDecoration: "none",
+                    border: "1px solid rgba(255,255,255,0.15)",
                   }}
                 >
-                  <p className="text-[10px] font-black uppercase tracking-widest mb-3" style={{ color: "hsl(140,20%,48%)" }}>
-                    Tips
-                  </p>
-                  {sec.tips.map((tip, i) => (
-                    <div key={i} className="flex items-start gap-2.5">
-                      <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "var(--forest)" }} />
-                      <p className="text-sm font-medium leading-relaxed" style={{ color: "hsl(140,12%,38%)" }}>{tip}</p>
+                  {n.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Main content ── */}
+        <div className="py-16 pb-28">
+          <div className="mx-auto max-w-4xl px-6 lg:px-8 space-y-20">
+            {sections.map((sec) => (
+              <section key={sec.id} id={sec.id}>
+                {/* Section header */}
+                <div
+                  className="flex items-center gap-3 mb-6 pb-4"
+                  style={{ borderBottom: "2px solid hsl(var(--border))" }}
+                >
+                  <div
+                    className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0"
+                    style={{ backgroundColor: "var(--forest)" }}
+                  >
+                    <sec.icon className="h-5 w-5" style={{ color: "var(--lime)" }} strokeWidth={1.8} />
+                  </div>
+                  <h2
+                    className="font-extrabold"
+                    style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.625rem)", color: "var(--forest)", letterSpacing: "-0.03em" }}
+                  >
+                    {sec.title}
+                  </h2>
+                </div>
+
+                {/* Intro */}
+                <p className="text-base font-medium mb-8 leading-relaxed" style={{ color: "hsl(140,12%,42%)" }}>
+                  {sec.intro}
+                </p>
+
+                {/* Steps */}
+                <div className="space-y-5">
+                  {sec.steps.map((step, i) => (
+                    <div
+                      key={i}
+                      className="rounded-xl p-5"
+                      style={{
+                        backgroundColor: "white",
+                        border: "1px solid hsl(var(--border))",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div
+                          className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-md text-xs font-black mt-0.5"
+                          style={{ backgroundColor: "var(--forest)", color: "var(--lime)" }}
+                        >
+                          {i + 1}
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm mb-1.5" style={{ color: "var(--forest)" }}>
+                            {step.heading}
+                          </p>
+                          <p className="text-sm leading-relaxed font-medium" style={{ color: "hsl(140,10%,44%)", whiteSpace: "pre-line" }}>
+                            {step.body}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
-              )}
-            </section>
-          ))}
 
-          {/* ── Contact section ── */}
-          <section
-            className="rounded-2xl p-8 text-center"
-            style={{ backgroundColor: "var(--forest)" }}
-          >
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-              <div style={{
-                backgroundColor: "white",
-                borderRadius: 14,
-                padding: "10px 22px 10px 14px",
-                display: "inline-flex",
-                alignItems: "center",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
-              }}>
-                <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 40, display: "block" }} />
-              </div>
-            </div>
-            <h3
-              className="font-extrabold text-white mb-3"
-              style={{ fontSize: "1.5rem", letterSpacing: "-0.03em" }}
+                {/* Tips */}
+                {sec.tips && sec.tips.length > 0 && (
+                  <div
+                    className="mt-5 rounded-xl p-4 space-y-2.5"
+                    style={{ backgroundColor: "hsl(140,22%,96%)", border: "1px solid hsl(140,18%,88%)" }}
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-3" style={{ color: "hsl(140,20%,48%)" }}>
+                      Tips
+                    </p>
+                    {sec.tips.map((tip, i) => (
+                      <div key={i} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "var(--forest)" }} />
+                        <p className="text-sm font-medium leading-relaxed" style={{ color: "hsl(140,12%,38%)" }}>{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+
+            {/* ── Contact section ── */}
+            <section
+              className="rounded-2xl p-8 text-center"
+              style={{ backgroundColor: "var(--forest)" }}
             >
-              Need help?
-            </h3>
-            <p className="font-medium mb-6" style={{ color: "rgba(255,255,255,0.55)", fontSize: 15 }}>
-              Our team is here for you. Reach out any time.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a
-                href="mailto:gengenesix@gmail.com"
-                className="px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-90"
-                style={{ backgroundColor: "var(--lime)", color: "var(--forest)", textDecoration: "none" }}
-              >
-                gengenesix@gmail.com
-              </a>
-              <a
-                href="tel:+233534788852"
-                className="px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-80"
-                style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.2)" }}
-              >
-                +233 534 788 852
-              </a>
-            </div>
-          </section>
-        </div>
-      </div>
-
-      {/* ── Footer ── */}
-      <div style={{ backgroundColor: "var(--forest)", borderTop: "1px solid rgba(255,255,255,0.08)" }} className="py-8">
-        <div className="mx-auto max-w-4xl px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div style={{
-            backgroundColor: "white",
-            borderRadius: 10,
-            padding: "5px 14px 5px 7px",
-            display: "inline-flex",
-            alignItems: "center",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-          }}>
-            <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 32, display: "block" }} />
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+                <div style={{
+                  backgroundColor: "white", borderRadius: 14,
+                  padding: "10px 22px 10px 14px", display: "inline-flex",
+                  alignItems: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+                }}>
+                  <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 40, display: "block" }} />
+                </div>
+              </div>
+              <h3 className="font-extrabold text-white mb-3" style={{ fontSize: "1.5rem", letterSpacing: "-0.03em" }}>
+                Need help?
+              </h3>
+              <p className="font-medium mb-6" style={{ color: "rgba(255,255,255,0.55)", fontSize: 15 }}>
+                Our team is here for you. Reach out any time.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <a
+                  href="mailto:gengenesix@gmail.com"
+                  className="px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-90"
+                  style={{ backgroundColor: "var(--lime)", color: "var(--forest)", textDecoration: "none" }}
+                >
+                  gengenesix@gmail.com
+                </a>
+                <a
+                  href="tel:+233534788852"
+                  className="px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-80"
+                  style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.2)" }}
+                >
+                  +233 534 788 852
+                </a>
+              </div>
+            </section>
           </div>
-          <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>
-            © 2026 Nexis · By GENESIS · User Guide v2.0
-          </p>
-          <Link
-            to="/register"
-            className="px-5 py-2 rounded-full text-sm font-bold transition-all hover:opacity-90"
-            style={{ backgroundColor: "var(--lime)", color: "var(--forest)", textDecoration: "none" }}
-          >
-            Get Started Free
-          </Link>
+        </div>
+
+        {/* ── Footer ── */}
+        <div style={{ backgroundColor: "var(--forest)", borderTop: "1px solid rgba(255,255,255,0.08)" }} className="py-8">
+          <div className="mx-auto max-w-4xl px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div style={{
+              backgroundColor: "white", borderRadius: 10,
+              padding: "5px 14px 5px 7px", display: "inline-flex",
+              alignItems: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
+            }}>
+              <img src="/brand/nexis-horizontal-light.png" alt="Nexis" style={{ height: 32, display: "block" }} />
+            </div>
+            <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>
+              © 2026 Nexis · By GENESIS · User Guide v3.0
+            </p>
+            <Link
+              to="/register"
+              className="no-print px-5 py-2 rounded-full text-sm font-bold transition-all hover:opacity-90"
+              style={{ backgroundColor: "var(--lime)", color: "var(--forest)", textDecoration: "none" }}
+            >
+              Get Started Free
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
