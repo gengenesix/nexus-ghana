@@ -156,21 +156,48 @@ export default function Staff() {
       const staffId = formStaffId.trim() || generateStaffId(formName);
       const existing = staffMembers.find((s: any) => s.staff_id === staffId);
       if (existing) throw new Error(`Staff ID "${staffId}" already exists`);
-      const { error } = await supabase.from("staff_members").insert({
-        business_id: business!.id,
-        name: formName.trim(),
-        role: formRole,
-        phone: formPhone,
-        email: formEmail,
-        pin: formPin,
-        staff_id: staffId,
-      });
-      if (error) throw error;
+
+      if (formEmail.trim()) {
+        // Email provided → create a Supabase Auth account via Edge Function.
+        // Staff receives an invite email to set their password.
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await supabase.functions.invoke("create-staff-account", {
+          body: {
+            email:   formEmail.trim(),
+            pin:     formPin,
+            name:    formName.trim(),
+            role:    formRole,
+            phone:   formPhone.trim() || null,
+            staffId,
+          },
+          headers: {
+            Authorization: `Bearer ${session?.access_token ?? ""}`,
+          },
+        });
+        if (res.error) throw new Error(res.error.message);
+        const result = res.data as any;
+        if (result?.error) throw new Error(result.error);
+      } else {
+        // No email → PIN-only kiosk staff (no device login)
+        const { error } = await supabase.from("staff_members").insert({
+          business_id: business!.id,
+          name:        formName.trim(),
+          role:        formRole,
+          phone:       formPhone,
+          pin:         formPin,
+          staff_id:    staffId,
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
       setShowAdd(false); resetForm();
-      toast.success("Staff member added!");
+      toast.success(
+        formEmail.trim()
+          ? `Staff member added! Invite sent to ${formEmail.trim()}.`
+          : "Staff member added!"
+      );
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -704,7 +731,10 @@ export default function Staff() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Phone</Label><Input placeholder="024XXXXXXX" value={formPhone} onChange={e => setFormPhone(e.target.value)} /></div>
-              <div className="space-y-2"><Label>Email</Label><Input type="email" placeholder="email@company.com" value={formEmail} onChange={e => setFormEmail(e.target.value)} /></div>
+              <div className="space-y-2">
+                <Label>Email <span className="text-muted-foreground font-normal">(optional — sends login invite)</span></Label>
+                <Input type="email" placeholder="email@company.com" value={formEmail} onChange={e => setFormEmail(e.target.value)} />
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Role *</Label>

@@ -123,9 +123,11 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [staff?.id, staff?.role, staff?.customRoleId, ownerBypass]);
 
-  // Auto-create staff session for Supabase-linked staff accounts
+  // Re-validate staff role from DB on every page load/refresh for Supabase-linked staff.
+  // SECURITY: We intentionally do NOT skip this when `staff` is already set from
+  // sessionStorage. This prevents privilege escalation by tampering with stored session data.
   useEffect(() => {
-    if (!user || staff) return;
+    if (!user) return;
     supabase
       .from("staff_members")
       .select("id, name, role, custom_role_id, business_id, businesses(owner_id)")
@@ -133,18 +135,32 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
       .eq("status", "active")
       .limit(1)
       .maybeSingle()
-      .then(({ data }) => {
-        if (!data) return;
+      .then(({ data, error }) => {
+        if (error || !data) {
+          // No linked staff record — clear any stale sessionStorage staff session
+          // (could be from a different account or a deleted staff record)
+          const saved = sessionStorage.getItem("nexus_staff_session");
+          if (saved) {
+            const parsed = JSON.parse(saved) as StaffSession;
+            // Only clear if the saved session was Supabase-linked (has a user.id match expected)
+            // We clear it if there's no DB record for this user as a staff member
+            setStaff(null);
+            setPermissions(EMPTY_PERMISSIONS);
+            sessionStorage.removeItem("nexus_staff_session");
+          }
+          return;
+        }
         const biz = data.businesses as any;
+        // Don't create a staff session for the business owner
         if (biz?.owner_id === user.id) return;
-        const session: StaffSession = {
+        const freshSession: StaffSession = {
           id:           data.id,
           name:         data.name,
-          role:         data.role,
+          role:         data.role,          // Always use DB role, not sessionStorage role
           customRoleId: (data as any).custom_role_id ?? null,
         };
-        setStaff(session);
-        sessionStorage.setItem("nexus_staff_session", JSON.stringify(session));
+        setStaff(freshSession);
+        sessionStorage.setItem("nexus_staff_session", JSON.stringify(freshSession));
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);

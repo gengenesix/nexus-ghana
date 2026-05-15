@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -55,8 +54,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    // Clear all client-side session data first so nothing leaks
+    sessionStorage.clear();
+    // Remove only the Supabase auth key from localStorage; other app prefs (theme) are fine
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("sb-") || key === "nexus_staff_session" || key === "nexus_owner_session") {
+        localStorage.removeItem(key);
+      }
+    });
+    // Sign out globally (invalidates refresh tokens on the server)
+    await supabase.auth.signOut({ scope: "global" });
+    // Hard redirect — unmounts React tree, clears all in-memory state including RQ cache
+    window.location.href = "/login";
   };
 
   return (
