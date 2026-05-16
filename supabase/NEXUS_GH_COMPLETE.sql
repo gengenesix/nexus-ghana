@@ -19,6 +19,7 @@
 --   [13] Service Contracts + Equipment
 --   [14] Enterprise RBAC (roles, permissions, approvals, audit)
 --   [15] Security Fixes (role escalation block, RLS tightening, audit-log lock)
+--   [16] Enterprise Access Control (no peer enumeration, staff login RPC, re-auth gate, role audit)
 -- ============================================================
 
 
@@ -2043,3 +2044,140 @@ END $$;
 
 REVOKE DELETE ON public.audit_logs FROM authenticated;
 REVOKE DELETE ON public.audit_logs FROM anon;
+
+
+-- ============================================================
+-- SECTION 16: Enterprise Access Control
+-- Source: 20260516000015_enterprise_access_control.sql
+-- ============================================================
+
+-- ── 1. Fix staff_members SELECT — no peer visibility ──────────────────────
+DROP POLICY IF EXISTS "Business members can view staff" ON public.staff_members;
+DROP POLICY IF EXISTS "staff_members_select"            ON public.staff_members;
+
+CREATE POLICY "staff_members_select" ON public.staff_members
+  FOR SELECT
+  USING (
+    business_id = get_business_id()
+    AND (
+      EXISTS (
+        SELECT 1 FROM public.businesses
+        WHERE id = staff_members.business_id
+          AND owner_id = auth.uid()
+      )
+      OR
+      EXISTS (
+        SELECT 1 FROM public.staff_members sm
+        WHERE sm.supabase_user_id = auth.uid()
+          AND sm.status = 'active'
+          AND sm.role IN ('Administrator', 'Manager', 'Supervisor', 'System Administrator')
+          AND sm.business_id = staff_members.business_id
+      )
+      OR
+      supabase_user_id = auth.uid()
+    )
+  );
+
+-- ── 2. resolve_staff_login() — safe email resolution for staff login ───────
+CREATE OR REPLACE FUNCTION public.resolve_staff_login(
+  p_access_code text,
+  p_staff_id    text
+)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_email text;
+BEGIN
+  SELECT sm.email INTO v_email
+  FROM   public.staff_members sm
+  JOIN   public.businesses    b  ON b.id = sm.business_id
+  WHERE  UPPER(b.access_code)   = UPPER(TRIM(p_access_code))
+    AND  sm.staff_id             = TRIM(p_staff_id)
+    AND  sm.status               = 'active'
+    AND  sm.supabase_user_id    IS NOT NULL
+    AND  sm.email               IS NOT NULL
+  LIMIT 1;
+
+  RETURN v_email;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.resolve_staff_login(text, text) TO anon;
+GRANT EXECUTE ON FUNCTION public.resolve_staff_login(text, text) TO authenticated;
+
+-- ── 3. Trigger: require fresh JWT for role changes ─────────────────────────
+CREATE OR REPLACE FUNCTION public.require_fresh_auth_for_role_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_iat             bigint;
+  v_seconds_elapsed float;
+BEGIN
+  IF OLD.role IS NOT DISTINCT FROM NEW.role THEN
+    RETURN NEW;
+  END IF;
+
+  BEGIN
+    v_iat := (auth.jwt() ->> 'iat')::bigint;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE EXCEPTION 'Authentication required to change roles';
+  END;
+
+  v_seconds_elapsed := EXTRACT(EPOCH FROM now()) - v_iat;
+
+  IF v_seconds_elapsed > 600 THEN
+    RAISE EXCEPTION
+      'Role changes require recent authentication (session is % minutes old). '
+      'Please re-enter your password and try again.',
+      ROUND(v_seconds_elapsed / 60);
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_require_fresh_auth_role_change ON public.staff_members;
+CREATE TRIGGER trg_require_fresh_auth_role_change
+  BEFORE UPDATE ON public.staff_members
+  FOR EACH ROW
+  EXECUTE FUNCTION public.require_fresh_auth_for_role_change();
+
+-- ── 4. Trigger: audit every role change ───────────────────────────────────
+CREATE OR REPLACE FUNCTION public.audit_role_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF OLD.role IS NOT DISTINCT FROM NEW.role THEN
+    RETURN NEW;
+  END IF;
+
+  INSERT INTO public.audit_logs (
+    business_id, action, module, record_id, old_value, new_value, performed_by
+  ) VALUES (
+    NEW.business_id,
+    'role_change',
+    'staff',
+    NEW.id::text,
+    json_build_object('role', OLD.role)::text,
+    json_build_object('role', NEW.role, 'changed_by_uid', auth.uid())::text,
+    auth.uid()::text
+  );
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_audit_role_change ON public.staff_members;
+CREATE TRIGGER trg_audit_role_change
+  AFTER UPDATE ON public.staff_members
+  FOR EACH ROW
+  EXECUTE FUNCTION public.audit_role_change();

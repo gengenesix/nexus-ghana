@@ -8,6 +8,8 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, fullName: string, extraMeta?: Record<string, string>) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  /** Staff login flow: resolves email via RPC then signs in */
+  signInStaff: (accessCode: string, staffId: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -53,6 +55,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   };
 
+  const signInStaff = async (accessCode: string, staffId: string, password: string) => {
+    // Step 1: resolve email via SECURITY DEFINER RPC (safe, anon-callable)
+    const { data: email, error: rpcError } = await supabase.rpc("resolve_staff_login", {
+      p_access_code: accessCode,
+      p_staff_id: staffId,
+    });
+    if (rpcError) throw new Error("Invalid credentials");
+    if (!email) throw new Error("Invalid credentials");
+    // Step 2: sign in with resolved email + password
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw new Error("Invalid credentials");
+  };
+
   const signOut = async () => {
     // Clear all client-side session data first so nothing leaks
     sessionStorage.clear();
@@ -69,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInStaff, signOut }}>
       {children}
     </AuthContext.Provider>
   );

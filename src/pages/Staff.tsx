@@ -19,6 +19,7 @@ import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Us
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStaffSession } from "@/contexts/StaffSessionContext";
+import ReAuthModal from "@/components/ReAuthModal";
 import { ALL_MODULES } from "@/lib/rbac";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -63,6 +64,8 @@ export default function Staff() {
   const [detailStaff, setDetailStaff] = useState<any>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleteTargetName, setDeleteTargetName] = useState("");
+  const [showReAuth, setShowReAuth] = useState(false);
+  const [pendingRoleChange, setPendingRoleChange] = useState<{ id: string; role: string } | null>(null);
 
   // Form state
   const [formName, setFormName] = useState("");
@@ -267,12 +270,30 @@ export default function Staff() {
     },
     onSuccess: (_, { role }) => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
-      // keep detail dialog in sync
       if (detailStaff) setDetailStaff((prev: any) => ({ ...prev, role }));
       toast.success(`Role updated to ${role}`);
     },
     onError: (err: any) => toast.error(err.message),
   });
+
+  /** Intercept role changes — require fresh auth first */
+  const requestRoleChange = (id: string, role: string) => {
+    setPendingRoleChange({ id, role });
+    setShowReAuth(true);
+  };
+
+  const handleReAuthSuccess = () => {
+    setShowReAuth(false);
+    if (pendingRoleChange) {
+      quickRoleChange.mutate(pendingRoleChange);
+      setPendingRoleChange(null);
+    }
+  };
+
+  const handleReAuthCancel = () => {
+    setShowReAuth(false);
+    setPendingRoleChange(null);
+  };
 
   const openEdit = (s: any) => {
     setEditingStaff(s);
@@ -484,7 +505,7 @@ export default function Staff() {
                                         <DropdownMenuItem
                                           key={r}
                                           className={s.role === r ? "bg-primary/10 font-medium" : ""}
-                                          onClick={() => quickRoleChange.mutate({ id: s.id, role: r })}
+                                          onClick={() => requestRoleChange(s.id, r)}
                                         >
                                           {r === "Administrator" && <Shield className="h-3.5 w-3.5 mr-2 text-primary" />}
                                           {r}
@@ -635,7 +656,7 @@ export default function Staff() {
                 <Select
                   value={detailStaff?.role ?? ""}
                   onValueChange={(role) => {
-                    if (detailStaff) quickRoleChange.mutate({ id: detailStaff.id, role });
+                    if (detailStaff) requestRoleChange(detailStaff.id, role);
                   }}
                 >
                   <SelectTrigger className="flex-1 h-9">
@@ -1177,6 +1198,13 @@ function CustomRolesTab({ businessId }: { businessId: string }) {
           )}
         </CardContent>
       </Card>
+
+      {/* Re-auth gate for role changes */}
+      <ReAuthModal
+        open={showReAuth}
+        onSuccess={handleReAuthSuccess}
+        onCancel={handleReAuthCancel}
+      />
 
       {/* Delete confirm */}
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
