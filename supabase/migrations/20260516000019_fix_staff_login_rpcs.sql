@@ -110,7 +110,10 @@ GRANT EXECUTE ON FUNCTION public.verify_staff_pin(uuid, text, text) TO anon;
 
 -- ── B. Fix resolve_staff_login — reject empty-string email ──────────────────
 
-CREATE OR REPLACE FUNCTION public.resolve_staff_login(
+-- DROP first — PostgreSQL won't allow renaming parameters with CREATE OR REPLACE
+DROP FUNCTION IF EXISTS public.resolve_staff_login(text, text);
+
+CREATE FUNCTION public.resolve_staff_login(
   p_access_code text,
   p_staff_id    text
 )
