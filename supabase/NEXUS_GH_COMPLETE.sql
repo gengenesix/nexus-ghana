@@ -20,6 +20,7 @@
 --   [14] Enterprise RBAC (roles, permissions, approvals, audit)
 --   [15] Security Fixes (role escalation block, RLS tightening, audit-log lock)
 --   [16] Enterprise Access Control (no peer enumeration, staff login RPC, re-auth gate, role audit)
+--   [17] Fix staff_members_select RLS infinite recursion (get_my_staff_role SECURITY DEFINER)
 -- ============================================================
 
 
@@ -2181,3 +2182,47 @@ CREATE TRIGGER trg_audit_role_change
   AFTER UPDATE ON public.staff_members
   FOR EACH ROW
   EXECUTE FUNCTION public.audit_role_change();
+
+
+-- ============================================================
+-- SECTION 17: Fix staff_members_select RLS infinite recursion
+-- Source: 20260516000016_fix_staff_rls_recursion.sql
+-- ============================================================
+
+-- ── 1. Helper: role lookup without RLS recursion ──────────────────────────
+CREATE OR REPLACE FUNCTION public.get_my_staff_role(_business_id uuid)
+RETURNS text
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT role
+  FROM   public.staff_members
+  WHERE  supabase_user_id = auth.uid()
+    AND  status            = 'active'
+    AND  business_id       = _business_id
+  LIMIT 1;
+$$;
+
+-- ── 2. Replace recursive policy with recursion-safe version ───────────────
+DROP POLICY IF EXISTS "staff_members_select" ON public.staff_members;
+
+CREATE POLICY "staff_members_select" ON public.staff_members
+  FOR SELECT
+  USING (
+    business_id = get_business_id()
+    AND (
+      EXISTS (
+        SELECT 1 FROM public.businesses
+        WHERE id       = staff_members.business_id
+          AND owner_id = auth.uid()
+      )
+      OR
+      get_my_staff_role(staff_members.business_id) IN (
+        'Administrator', 'Manager', 'Supervisor', 'System Administrator'
+      )
+      OR
+      supabase_user_id = auth.uid()
+    )
+  );
