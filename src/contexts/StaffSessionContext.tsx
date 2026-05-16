@@ -171,9 +171,9 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
     staffId?: string
   ): Promise<{ success: true; session: StaffSession } | { success: false; reason: string }> => {
     const { data, error } = await supabase.rpc("verify_staff_pin", {
-      _business_id: businessId,
-      _pin:         pin,
-      _staff_id:    staffId ?? null,
+      _business_id:   businessId,
+      _pin:           pin,
+      _staff_id_text: staffId ?? null,  // text staff_id e.g. "kwame.mensah"
     });
 
     if (error || !data || data.length === 0) {
@@ -198,7 +198,7 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
       id:           staffData.id,
       name:         staffData.name,
       role:         staffData.role,
-      customRoleId: (staffData as any).custom_role_id ?? null,
+      customRoleId: staffData.custom_role_id ?? null,
     };
 
     setStaff(session);

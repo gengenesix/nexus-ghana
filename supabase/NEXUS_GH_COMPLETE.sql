@@ -23,6 +23,7 @@
 --   [17] Fix staff_members_select RLS infinite recursion (get_my_staff_role SECURITY DEFINER)
 --   [18] Fix cross-table RLS recursion between businesses + staff_members (is_owner/is_staff SECURITY DEFINER)
 --   [19] Fix audit_role_change() trigger — correct audit_logs column names (old_values/new_values/staff_id)
+--   [20] Fix staff login RPCs — verify_staff_pin (text staff_id, no phantom columns) + resolve_staff_login (empty email guard)
 -- ============================================================
 
 
@@ -2331,3 +2332,72 @@ CREATE TRIGGER trg_audit_role_change
   AFTER UPDATE ON public.staff_members
   FOR EACH ROW
   EXECUTE FUNCTION public.audit_role_change();
+
+
+-- ============================================================
+-- SECTION 20: Fix staff login RPCs
+-- Source: 20260516000019_fix_staff_login_rpcs.sql
+-- ============================================================
+
+DROP FUNCTION IF EXISTS public.verify_staff_pin(uuid, text, uuid);
+DROP FUNCTION IF EXISTS public.verify_staff_pin(uuid, text, text);
+DROP FUNCTION IF EXISTS public.verify_staff_pin(uuid, text);
+
+CREATE FUNCTION public.verify_staff_pin(
+  _business_id   uuid,
+  _pin           text,
+  _staff_id_text text DEFAULT NULL
+)
+RETURNS TABLE(id uuid, name text, role text, custom_role_id uuid)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions AS $$
+DECLARE _s record;
+BEGIN
+  IF _staff_id_text IS NOT NULL AND TRIM(_staff_id_text) != '' THEN
+    SELECT s.id, s.name, s.role, s.custom_role_id, s.pin, s.failed_attempts, s.locked_until
+      INTO _s FROM public.staff_members s
+     WHERE s.staff_id = TRIM(_staff_id_text) AND s.business_id = _business_id AND s.status = 'active';
+    IF NOT FOUND THEN RETURN; END IF;
+    IF _s.locked_until IS NOT NULL AND _s.locked_until > now() THEN RETURN; END IF;
+    IF extensions.crypt(_pin, _s.pin) = _s.pin THEN
+      UPDATE public.staff_members SET failed_attempts = 0, locked_until = NULL, last_login = now(), is_online = true WHERE id = _s.id;
+      RETURN QUERY SELECT _s.id, _s.name, _s.role, _s.custom_role_id; RETURN;
+    END IF;
+    UPDATE public.staff_members
+       SET failed_attempts = failed_attempts + 1,
+           locked_until = CASE WHEN failed_attempts + 1 >= 5 THEN now() + interval '15 minutes' ELSE locked_until END
+     WHERE id = _s.id;
+    RETURN;
+  END IF;
+  FOR _s IN SELECT s.id, s.name, s.role, s.custom_role_id, s.pin, s.failed_attempts, s.locked_until
+    FROM public.staff_members s WHERE s.business_id = _business_id AND s.status = 'active'
+  LOOP
+    IF _s.locked_until IS NOT NULL AND _s.locked_until > now() THEN CONTINUE; END IF;
+    IF extensions.crypt(_pin, _s.pin) = _s.pin THEN
+      UPDATE public.staff_members SET failed_attempts = 0, locked_until = NULL, last_login = now(), is_online = true WHERE id = _s.id;
+      RETURN QUERY SELECT _s.id, _s.name, _s.role, _s.custom_role_id; RETURN;
+    END IF;
+  END LOOP;
+END; $$;
+
+GRANT EXECUTE ON FUNCTION public.verify_staff_pin(uuid, text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.verify_staff_pin(uuid, text, text) TO anon;
+
+CREATE OR REPLACE FUNCTION public.resolve_staff_login(p_access_code text, p_staff_id text)
+RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_email text;
+BEGIN
+  SELECT sm.email INTO v_email
+  FROM   public.staff_members sm
+  JOIN   public.businesses    b ON b.id = sm.business_id
+  WHERE  UPPER(b.access_code)   = UPPER(TRIM(p_access_code))
+    AND  sm.staff_id             = TRIM(p_staff_id)
+    AND  sm.status               = 'active'
+    AND  sm.supabase_user_id    IS NOT NULL
+    AND  sm.email               IS NOT NULL
+    AND  TRIM(sm.email)         != ''
+  LIMIT 1;
+  RETURN v_email;
+END; $$;
+
+GRANT EXECUTE ON FUNCTION public.resolve_staff_login(text, text) TO anon;
+GRANT EXECUTE ON FUNCTION public.resolve_staff_login(text, text) TO authenticated;
