@@ -72,6 +72,7 @@ export default function Staff() {
   const [formRole, setFormRole] = useState("Staff");
   const [formPhone, setFormPhone] = useState("");
   const [formEmail, setFormEmail] = useState("");
+  const [formInitialPassword, setFormInitialPassword] = useState("");
   const [formPin, setFormPin] = useState("");
   const [formConfirmPin, setFormConfirmPin] = useState("");
   const [formStaffId, setFormStaffId] = useState("");
@@ -149,7 +150,7 @@ export default function Staff() {
 
   const resetForm = () => {
     setFormName(""); setFormRole("Staff"); setFormPhone(""); setFormEmail("");
-    setFormPin(""); setFormConfirmPin(""); setFormStaffId("");
+    setFormInitialPassword(""); setFormPin(""); setFormConfirmPin(""); setFormStaffId("");
   };
 
   const addMutation = useMutation({
@@ -162,15 +163,18 @@ export default function Staff() {
 
       if (formEmail.trim()) {
         // Email provided → create a Supabase Auth account via Edge Function.
-        // Staff receives an invite email to set their password.
+        if (!formInitialPassword || formInitialPassword.length < 8) {
+          throw new Error("Initial password must be at least 8 characters");
+        }
         const { data: { session } } = await supabase.auth.getSession();
         const res = await supabase.functions.invoke("create-staff-account", {
           body: {
-            email:   formEmail.trim(),
-            pin:     formPin,
-            name:    formName.trim(),
-            role:    formRole,
-            phone:   formPhone.trim() || null,
+            email:           formEmail.trim(),
+            initialPassword: formInitialPassword,
+            pin:             formPin,
+            name:            formName.trim(),
+            role:            formRole,
+            phone:           formPhone.trim() || null,
             staffId,
           },
           headers: {
@@ -198,7 +202,7 @@ export default function Staff() {
       setShowAdd(false); resetForm();
       toast.success(
         formEmail.trim()
-          ? `Staff member added! Invite sent to ${formEmail.trim()}.`
+          ? `Staff member added! They can now login with their credentials.`
           : "Staff member added!"
       );
     },
@@ -753,10 +757,23 @@ export default function Staff() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Phone</Label><Input placeholder="024XXXXXXX" value={formPhone} onChange={e => setFormPhone(e.target.value)} /></div>
               <div className="space-y-2">
-                <Label>Email <span className="text-muted-foreground font-normal">(optional — sends login invite)</span></Label>
+                <Label>Email <span className="text-muted-foreground font-normal">(optional — enables device login)</span></Label>
                 <Input type="email" placeholder="email@company.com" value={formEmail} onChange={e => setFormEmail(e.target.value)} />
               </div>
             </div>
+            {formEmail.trim() && (
+              <div className="space-y-2">
+                <Label>Initial Password * <span className="text-muted-foreground font-normal">(staff uses this to log in)</span></Label>
+                <Input
+                  type="password"
+                  placeholder="Min. 8 characters"
+                  value={formInitialPassword}
+                  onChange={e => setFormInitialPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <p className="text-xs text-muted-foreground">You set this password — share it with the staff member directly. They can change it later.</p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Role *</Label>
               <Select value={formRole} onValueChange={setFormRole}>
@@ -801,7 +818,7 @@ export default function Staff() {
                 <Input type="password" placeholder="••••••" maxLength={6} value={formConfirmPin} onChange={e => setFormConfirmPin(e.target.value.replace(/\D/g, ""))} />
               </div>
             </div>
-            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => addMutation.mutate()} disabled={!formName.trim() || formPin.length < 6 || addMutation.isPending}>
+            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => addMutation.mutate()} disabled={!formName.trim() || formPin.length < 6 || (!!formEmail.trim() && formInitialPassword.length < 8) || addMutation.isPending}>
               {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Staff Member"}
             </Button>
           </div>
