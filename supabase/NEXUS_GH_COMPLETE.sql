@@ -21,6 +21,7 @@
 --   [15] Security Fixes (role escalation block, RLS tightening, audit-log lock)
 --   [16] Enterprise Access Control (no peer enumeration, staff login RPC, re-auth gate, role audit)
 --   [17] Fix staff_members_select RLS infinite recursion (get_my_staff_role SECURITY DEFINER)
+--   [18] Fix cross-table RLS recursion between businesses + staff_members (is_owner/is_staff SECURITY DEFINER)
 -- ============================================================
 
 
@@ -2224,5 +2225,49 @@ CREATE POLICY "staff_members_select" ON public.staff_members
       )
       OR
       supabase_user_id = auth.uid()
+    )
+  );
+
+
+-- ============================================================
+-- SECTION 18: Fix cross-table RLS recursion (complete fix)
+-- Source: 20260516000017_fix_cross_table_rls_recursion.sql
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.get_my_staff_role(_business_id uuid)
+RETURNS text LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT role FROM public.staff_members
+  WHERE supabase_user_id = auth.uid() AND status = 'active' AND business_id = _business_id
+  LIMIT 1;
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_owner_of_business(_business_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (SELECT 1 FROM public.businesses WHERE id = _business_id AND owner_id = auth.uid());
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_staff_of_business(_business_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.staff_members
+    WHERE supabase_user_id = auth.uid() AND status = 'active' AND business_id = _business_id
+  );
+$$;
+
+-- Fix businesses "Staff can view their business" — was directly querying staff_members (recursion)
+DROP POLICY IF EXISTS "Staff can view their business" ON public.businesses;
+CREATE POLICY "Staff can view their business" ON public.businesses
+  FOR SELECT USING (is_staff_of_business(id));
+
+-- Fix staff_members_select — was directly querying businesses (cross-table recursion)
+DROP POLICY IF EXISTS "staff_members_select" ON public.staff_members;
+CREATE POLICY "staff_members_select" ON public.staff_members
+  FOR SELECT
+  USING (
+    business_id = get_business_id()
+    AND (
+      is_owner_of_business(staff_members.business_id)
+      OR get_my_staff_role(staff_members.business_id) IN ('Administrator', 'Manager', 'Supervisor', 'System Administrator')
+      OR supabase_user_id = auth.uid()
     )
   );
