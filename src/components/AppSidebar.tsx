@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, ShoppingCart, Package, FileText, Users, Truck,
-  Receipt, BarChart3, UserCog, Settings, LogOut, UserCircle,
+  Receipt, BarChart3, UserCog, Settings, LogOut,
   Shield, Wallet, Handshake, ShoppingBag, Factory, Cpu, FolderKanban,
   Headphones, Users2, ArrowRightLeft, ChevronDown, Lock, Landmark,
   ClipboardList, FileText as FileAudit,
@@ -118,10 +118,8 @@ export function AppSidebar() {
   const toggleGroup = (label: string) =>
     setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
 
-  // Full sign-out: clears staff session + Supabase auth
+  // Full sign-out: clears all session data + Supabase auth
   const handleLogout = () => { staffLogout(); signOut(); };
-  // Switch user: clears staff session + owner bypass → shows PIN gate
-  const handleSwitchStaff = () => staffLogout();
   const moduleKey = (url: string) => url.replace(/^\//, "");
 
   const activeUser = staff ?? (ownerBypass ? { name: business?.name ?? "Owner", role: "Owner" } : null);
@@ -298,15 +296,6 @@ export function AppSidebar() {
             </div>
           </div>
         )}
-
-        <button
-          onClick={handleSwitchStaff}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150 hover:opacity-80"
-          style={{ color: "var(--muted-foreground)" }}
-        >
-          <UserCircle className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>Switch User</span>}
-        </button>
 
         <button
           onClick={handleLogout}

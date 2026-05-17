@@ -793,7 +793,7 @@ export default function Staff() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="font-display">Edit Staff Member</DialogTitle>
-            <DialogDescription>Update staff details. Use "Reset PIN" to change their password.</DialogDescription>
+            <DialogDescription>Update staff details. Contact your administrator to reset their password.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">

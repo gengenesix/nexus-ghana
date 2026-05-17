@@ -2,7 +2,7 @@ import { LayoutDashboard, ShoppingCart, Package, FileText, Users, MoreHorizontal
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Truck, Receipt, BarChart3, UserCog, Settings, LogOut, UserCircle } from "lucide-react";
+import { Truck, Receipt, BarChart3, UserCog, Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useStaffSession } from "@/contexts/StaffSessionContext";
@@ -28,14 +28,12 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { business } = useBusiness();
-  const { staff, ownerBypass, logout: staffLogout, canAccess } = useStaffSession();
+  const { staff, ownerBypass, canAccess } = useStaffSession();
 
   const isOwner = !!user && !!business && business.owner_id === user.id;
   // Show all items only when owner bypass is active (no staff session) or there's no session at all
   const fullAccess = ownerBypass || (!staff && isOwner);
   const allowed = (feature: string) => fullAccess || canAccess(feature);
-
-  const handleSwitchUser = () => { staffLogout(); setOpen(false); };
 
   const visibleMain = mainItems.filter(item => allowed(item.feature));
   const moreItems = moreItemDefs.filter(item => allowed(item.feature));
@@ -83,22 +81,13 @@ export function MobileNav() {
                 ))}
               </div>
               <Separator className="my-4" />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSwitchUser}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl p-3 text-muted-foreground hover:bg-secondary"
-                >
-                  <UserCircle className="h-5 w-5" />
-                  <span className="text-sm">Switch User</span>
-                </button>
-                <button
-                  onClick={() => { signOut(); setOpen(false); }}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl p-3 text-destructive hover:bg-destructive/10"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span className="text-sm">Sign Out</span>
-                </button>
-              </div>
+              <button
+                onClick={() => { signOut(); setOpen(false); }}
+                className="flex w-full items-center justify-center gap-2 rounded-xl p-3 text-destructive hover:bg-destructive/10"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="text-sm">Sign Out</span>
+              </button>
             </SheetContent>
           </Sheet>
         )}
