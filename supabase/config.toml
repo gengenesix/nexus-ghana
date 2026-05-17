@@ -1,4 +1,4 @@
-project_id = "cnvprwrvecikmlpupwpl"
+project_id = "pulzxffewihdsyogvmhx"
 
 [functions.send-notifications]
 # Daily email digest: overdue invoices + low-stock alerts
