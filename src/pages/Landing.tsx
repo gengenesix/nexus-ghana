@@ -65,28 +65,28 @@ const showcases = [
 const plans = [
   {
     name: "Starter",
-    price: "Free",
-    period: "",
-    desc: "Solo traders just getting started.",
-    features: ["1 User", "50 Products", "POS & Sales", "Basic Reports", "Email Support"],
-    cta: "Get Started Free",
+    price: "GH₵ 200",
+    period: "/month",
+    desc: "Shops and solo traders who need a proper system.",
+    features: ["3 Staff Accounts", "Unlimited Products", "POS & Sales", "Invoicing + Tax", "Basic Reports", "Email Support"],
+    cta: "Get Started",
     popular: false,
   },
   {
-    name: "Business",
-    price: "GH₵ 99",
+    name: "Professional",
+    price: "GH₵ 500",
     period: "/month",
     desc: "Growing businesses that need full control.",
-    features: ["5 Staff Members", "Unlimited Products", "Invoicing + Tax", "Full Analytics", "MoMo Integration", "Priority Support"],
-    cta: "Start Free Trial",
+    features: ["Unlimited Staff", "All 20+ Modules", "Full Analytics", "HR & Payroll", "Purchasing & Production", "Priority Support"],
+    cta: "Get Started",
     popular: true,
   },
   {
     name: "Enterprise",
-    price: "GH₵ 249",
-    period: "/month",
+    price: "Custom",
+    period: "",
     desc: "Multi-branch businesses with advanced needs.",
-    features: ["Unlimited Staff", "Multi-Branch", "API Access", "Custom Branding", "Dedicated Manager", "SLA Guarantee"],
+    features: ["Multi-Branch", "API Access", "Custom Onboarding", "Dedicated Manager", "SLA Guarantee", "Custom Integrations"],
     cta: "Contact Sales",
     popular: false,
   },
@@ -96,12 +96,12 @@ const promises = [
   {
     icon: UsersRound,
     title: "Built for your whole team.",
-    body: "From the cashier at the counter to the manager reviewing reports — everyone gets exactly what they need. Role-based access, staff PINs, and one system that keeps your entire operation in sync.",
+    body: "From the cashier at the counter to the manager reviewing reports — everyone gets exactly what they need. Role-based access with unique per-staff logins, and one system that keeps your entire operation in sync.",
   },
   {
     icon: Banknote,
     title: "Built for the real Ghana market.",
-    body: "VAT, NHIL, GETFL, MTN MoMo, Telecel Cash, AirtelTigo Money, GHS currency, GRA invoice formatting — all of it baked in, not bolted on. This is not a generic SaaS re-skinned for Africa.",
+    body: "VAT, NHIL, GETFL, GHS currency, GRA invoice formatting — all of it baked in, not bolted on. This is not a generic SaaS re-skinned for Africa. It was built here, for here.",
   },
   {
     icon: ShieldCheck,
@@ -213,7 +213,7 @@ export default function Landing() {
                 className="text-lg leading-relaxed mb-9"
                 style={{ color: "hsl(140,15%,42%)", fontWeight: 500, maxWidth: "460px" }}
               >
-                All-in-one POS, inventory, invoicing, MoMo payments, and analytics — engineered for Ghanaian businesses that want to grow.
+                All-in-one POS, inventory, invoicing, and analytics — engineered for Ghanaian businesses that want to grow.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-7">
@@ -222,7 +222,7 @@ export default function Landing() {
                   className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
                   style={{ backgroundColor: "var(--forest)", color: "white", textDecoration: "none" }}
                 >
-                  Start Free — No Credit Card
+                  Get Started
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <a
@@ -236,9 +236,9 @@ export default function Landing() {
 
               <div className="flex flex-wrap gap-2.5">
                 {[
-                  { icon: Check,   label: "Free forever plan" },
                   { icon: WifiOff, label: "Works offline" },
-                  { icon: Nfc,     label: "MoMo built-in" },
+                  { icon: Check,   label: "Ghana tax built-in" },
+                  { icon: Check,   label: "No setup fee" },
                 ].map(({ icon: Icon, label }) => (
                   <span
                     key={label}
@@ -509,7 +509,7 @@ export default function Landing() {
               Simple, transparent pricing
             </h2>
             <p className="text-base font-medium" style={{ color: "hsl(140,10%,46%)" }}>
-              Start free, upgrade as you grow. No hidden fees.
+              Transparent pricing. No hidden fees. Cancel any time.
             </p>
           </div>
 
@@ -680,7 +680,7 @@ export default function Landing() {
                 They deserve better tools."
               </p>
               <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.45)" }}>
-                — GENESIS, Founders of Nexis
+                — Nexis, Built for Ghana
               </p>
               <div className="mt-5 flex gap-3">
                 <Link
@@ -688,7 +688,7 @@ export default function Landing() {
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:opacity-90"
                   style={{ backgroundColor: "var(--lime)", color: "var(--forest)", textDecoration: "none" }}
                 >
-                  Start Free <ArrowRight className="h-4 w-4" />
+                  Get Started <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   to="/user-guide"
@@ -727,14 +727,14 @@ export default function Landing() {
             Ready to transform<br />your business?
           </h2>
           <p className="text-base font-medium mb-10" style={{ color: "rgba(255,255,255,0.55)" }}>
-            Start free. No credit card. Built for every Ghanaian business.
+            Starter from GH&#8373; 200/month. No setup fees. Cancel any time.
           </p>
           <Link
             to="/register"
             className="inline-flex items-center gap-2.5 px-10 py-4 rounded-full font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
             style={{ backgroundColor: "var(--lime)", color: "var(--forest)", textDecoration: "none" }}
           >
-            Get Started for Free
+            Get Started
             <ArrowRight className="h-5 w-5" />
           </Link>
         </div>
