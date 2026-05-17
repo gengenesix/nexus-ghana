@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatGHS } from "@/lib/ghana";
-import { Search, Plus, Trash2, Loader2, Pencil, Shield, Eye, EyeOff, UserCog, Users, Circle, RefreshCw, Key, BarChart3, Award, Copy, Share2, MoreVertical, ChevronRight, UserCheck, UserX, ShieldCheck, Lock, Save, X } from "lucide-react";
+import { Search, Plus, Trash2, Loader2, Pencil, Shield, UserCog, Users, Circle, BarChart3, Award, Copy, Share2, MoreVertical, ChevronRight, UserCheck, UserX, ShieldCheck } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStaffSession } from "@/contexts/StaffSessionContext";
@@ -55,17 +55,15 @@ export default function Staff() {
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any>(null);
-  const [showResetPin, setShowResetPin] = useState(false);
-  const [resetPinStaffId, setResetPinStaffId] = useState<string | null>(null);
-  const [newPin, setNewPin] = useState("");
-  const [confirmNewPin, setConfirmNewPin] = useState("");
-  const [showPin, setShowPin] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [detailStaff, setDetailStaff] = useState<any>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleteTargetName, setDeleteTargetName] = useState("");
   const [showReAuth, setShowReAuth] = useState(false);
   const [pendingRoleChange, setPendingRoleChange] = useState<{ id: string; role: string } | null>(null);
+  // Shows the auto-generated Staff ID after creation so admin can share it
+  const [generatedStaffId, setGeneratedStaffId] = useState<string | null>(null);
+  const [generatedStaffName, setGeneratedStaffName] = useState("");
 
   // Form state
   const [formName, setFormName] = useState("");
@@ -73,9 +71,6 @@ export default function Staff() {
   const [formPhone, setFormPhone] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formInitialPassword, setFormInitialPassword] = useState("");
-  const [formPin, setFormPin] = useState("");
-  const [formConfirmPin, setFormConfirmPin] = useState("");
-  const [formStaffId, setFormStaffId] = useState("");
 
   const { data: staffMembers = [], isLoading } = useQuery({
     queryKey: ["staff", business?.id],
@@ -144,67 +139,41 @@ export default function Staff() {
   staffMembers.forEach((s: any) => { roleCountMap[s.role] = (roleCountMap[s.role] || 0) + 1; });
   const roleDistribution = Object.entries(roleCountMap).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
 
-  const generateStaffId = (name: string) => {
-    return name.trim().toLowerCase().replace(/\s+/g, ".").replace(/[^a-z.]/g, "");
-  };
-
   const resetForm = () => {
     setFormName(""); setFormRole("Staff"); setFormPhone(""); setFormEmail("");
-    setFormInitialPassword(""); setFormPin(""); setFormConfirmPin(""); setFormStaffId("");
+    setFormInitialPassword("");
   };
 
   const addMutation = useMutation({
     mutationFn: async () => {
-      if (formPin.length < 6) throw new Error("PIN must be 6 digits");
-      if (formPin !== formConfirmPin) throw new Error("PINs do not match");
-      const staffId = formStaffId.trim() || generateStaffId(formName);
-      const existing = staffMembers.find((s: any) => s.staff_id === staffId);
-      if (existing) throw new Error(`Staff ID "${staffId}" already exists`);
-
-      if (formEmail.trim()) {
-        // Email provided → create a Supabase Auth account via Edge Function.
-        if (!formInitialPassword || formInitialPassword.length < 8) {
-          throw new Error("Initial password must be at least 8 characters");
-        }
-        const { data: { session } } = await supabase.auth.getSession();
-        const res = await supabase.functions.invoke("create-staff-account", {
-          body: {
-            email:           formEmail.trim(),
-            initialPassword: formInitialPassword,
-            pin:             formPin,
-            name:            formName.trim(),
-            role:            formRole,
-            phone:           formPhone.trim() || null,
-            staffId,
-          },
-          headers: {
-            Authorization: `Bearer ${session?.access_token ?? ""}`,
-          },
-        });
-        if (res.error) throw new Error(res.error.message);
-        const result = res.data as any;
-        if (result?.error) throw new Error(result.error);
-      } else {
-        // No email → PIN-only kiosk staff (no device login)
-        const { error } = await supabase.from("staff_members").insert({
-          business_id: business!.id,
-          name:        formName.trim(),
-          role:        formRole,
-          phone:       formPhone,
-          pin:         formPin,
-          staff_id:    staffId,
-        });
-        if (error) throw error;
+      if (!formEmail.trim()) throw new Error("Email is required for staff login");
+      if (!formInitialPassword || formInitialPassword.length < 8) {
+        throw new Error("Password must be at least 8 characters");
       }
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke("create-staff-account", {
+        body: {
+          email:           formEmail.trim(),
+          initialPassword: formInitialPassword,
+          name:            formName.trim(),
+          role:            formRole,
+          phone:           formPhone.trim() || null,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token ?? ""}`,
+        },
+      });
+      if (res.error) throw new Error(res.error.message);
+      const result = res.data as any;
+      if (result?.error) throw new Error(result.error);
+      return result as { staffId: string };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
-      setShowAdd(false); resetForm();
-      toast.success(
-        formEmail.trim()
-          ? `Staff member added! They can now login with their credentials.`
-          : "Staff member added!"
-      );
+      setShowAdd(false);
+      setGeneratedStaffName(formName.trim());
+      setGeneratedStaffId(result.staffId);
+      resetForm();
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -217,7 +186,6 @@ export default function Staff() {
         role: formRole,
         phone: formPhone,
         email: formEmail,
-        staff_id: formStaffId.trim() || generateStaffId(formName),
       }).eq("id", editingStaff.id);
       if (error) throw error;
     },
@@ -229,20 +197,6 @@ export default function Staff() {
     onError: (err: any) => toast.error(err.message),
   });
 
-  const resetPinMutation = useMutation({
-    mutationFn: async () => {
-      if (newPin.length < 6) throw new Error("PIN must be 6 digits");
-      if (newPin !== confirmNewPin) throw new Error("PINs do not match");
-      const { error } = await supabase.from("staff_members").update({ pin: newPin }).eq("id", resetPinStaffId!);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["staff"] });
-      setShowResetPin(false); setResetPinStaffId(null); setNewPin(""); setConfirmNewPin("");
-      toast.success("PIN has been reset!");
-    },
-    onError: (err: any) => toast.error(err.message),
-  });
 
   const toggleStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
@@ -305,15 +259,7 @@ export default function Staff() {
     setFormRole(s.role);
     setFormPhone(s.phone || "");
     setFormEmail(s.email || "");
-    setFormStaffId(s.staff_id || "");
     setShowEdit(true);
-  };
-
-  const openResetPin = (id: string) => {
-    setResetPinStaffId(id);
-    setNewPin("");
-    setConfirmNewPin("");
-    setShowResetPin(true);
   };
 
   const openDetail = (s: any) => {
@@ -518,9 +464,6 @@ export default function Staff() {
                                       ))}
                                     </DropdownMenuSubContent>
                                   </DropdownMenuSub>
-                                  <DropdownMenuItem onClick={() => openResetPin(s.id)}>
-                                    <Key className="h-4 w-4 mr-2" /> Reset PIN
-                                  </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem
                                     className={s.status === "active" ? "text-yellow-600" : "text-green-600"}
@@ -739,41 +682,34 @@ export default function Staff() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="font-display">Add Staff Member</DialogTitle>
-            <DialogDescription>Create a new user with a Staff ID and 6-digit PIN</DialogDescription>
+            <DialogDescription>
+              A unique 8-digit Staff ID is auto-generated. Share the ID + password with the staff member so they can log in.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Full Name *</Label>
-              <Input placeholder="e.g. Kwame Asante" value={formName} onChange={e => {
-                setFormName(e.target.value);
-                if (!formStaffId) setFormStaffId(generateStaffId(e.target.value));
-              }} />
+              <Input placeholder="e.g. Kwame Asante" value={formName} onChange={e => setFormName(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Staff ID (username)</Label>
-              <Input placeholder="e.g. kwame.asante" value={formStaffId} onChange={e => setFormStaffId(e.target.value.toLowerCase().replace(/[^a-z0-9.]/g, ""))} />
-              <p className="text-xs text-muted-foreground">Used for login identification. Auto-generated from name if left empty.</p>
+              <Label>Email Address * <span className="text-muted-foreground font-normal">(used for login)</span></Label>
+              <Input type="email" placeholder="kwame@yourcompany.com" value={formEmail} onChange={e => setFormEmail(e.target.value)} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Phone</Label><Input placeholder="024XXXXXXX" value={formPhone} onChange={e => setFormPhone(e.target.value)} /></div>
-              <div className="space-y-2">
-                <Label>Email <span className="text-muted-foreground font-normal">(optional — enables device login)</span></Label>
-                <Input type="email" placeholder="email@company.com" value={formEmail} onChange={e => setFormEmail(e.target.value)} />
-              </div>
+            <div className="space-y-2">
+              <Label>Initial Password * <span className="text-muted-foreground font-normal">(min. 8 characters)</span></Label>
+              <Input
+                type="password"
+                placeholder="Set a strong password"
+                value={formInitialPassword}
+                onChange={e => setFormInitialPassword(e.target.value)}
+                autoComplete="new-password"
+              />
+              <p className="text-xs text-muted-foreground">You create this — give it to the staff member directly. They use it to log in.</p>
             </div>
-            {formEmail.trim() && (
-              <div className="space-y-2">
-                <Label>Initial Password * <span className="text-muted-foreground font-normal">(staff uses this to log in)</span></Label>
-                <Input
-                  type="password"
-                  placeholder="Min. 8 characters"
-                  value={formInitialPassword}
-                  onChange={e => setFormInitialPassword(e.target.value)}
-                  autoComplete="new-password"
-                />
-                <p className="text-xs text-muted-foreground">You set this password — share it with the staff member directly. They can change it later.</p>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label>Phone <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Input placeholder="024XXXXXXX" value={formPhone} onChange={e => setFormPhone(e.target.value)} />
+            </div>
             <div className="space-y-2">
               <Label>Role *</Label>
               <Select value={formRole} onValueChange={setFormRole}>
@@ -795,31 +731,58 @@ export default function Staff() {
                 </SelectContent>
               </Select>
             </div>
-            <Separator />
-            <p className="text-sm font-medium">Set Login PIN</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>6-digit PIN *</Label>
-                <div className="relative">
-                  <Input
-                    type={showPin ? "text" : "password"}
-                    placeholder="••••••"
-                    maxLength={6}
-                    value={formPin}
-                    onChange={e => setFormPin(e.target.value.replace(/\D/g, ""))}
-                  />
-                  <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPin(!showPin)}>
-                    {showPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+            <Button
+              className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]"
+              onClick={() => addMutation.mutate()}
+              disabled={!formName.trim() || !formEmail.trim() || formInitialPassword.length < 8 || addMutation.isPending}
+            >
+              {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Staff Account"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generated Staff ID Dialog — shown after successful staff creation */}
+      <Dialog open={!!generatedStaffId} onOpenChange={() => setGeneratedStaffId(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-green-600" /> Account Created!
+            </DialogTitle>
+            <DialogDescription>
+              Share these credentials with <strong>{generatedStaffName}</strong> so they can log in.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5 space-y-3">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Business Access Code</p>
+                <p className="text-xl font-extrabold font-mono tracking-widest text-primary">{business?.access_code}</p>
               </div>
-              <div className="space-y-2">
-                <Label>Confirm PIN *</Label>
-                <Input type="password" placeholder="••••••" maxLength={6} value={formConfirmPin} onChange={e => setFormConfirmPin(e.target.value.replace(/\D/g, ""))} />
+              <Separator />
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Staff ID</p>
+                <p className="text-3xl font-extrabold font-mono tracking-widest" style={{ color: "var(--forest, #1a3a22)" }}>{generatedStaffId}</p>
+              </div>
+              <Separator />
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Password</p>
+                <p className="text-sm text-muted-foreground">The password you just set</p>
               </div>
             </div>
-            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => addMutation.mutate()} disabled={!formName.trim() || formPin.length < 6 || (!!formEmail.trim() && formInitialPassword.length < 8) || addMutation.isPending}>
-              {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Staff Member"}
+            <p className="text-xs text-muted-foreground text-center">
+              Staff log in at the login page → Staff tab → enter these 3 credentials.
+            </p>
+            <Button
+              className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]"
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `Business Access Code: ${business?.access_code}\nStaff ID: ${generatedStaffId}\nPassword: (the one you set)`
+                );
+                toast.success("Credentials copied!");
+              }}
+            >
+              <Copy className="h-4 w-4 mr-2" /> Copy Credentials
             </Button>
           </div>
         </DialogContent>
@@ -836,10 +799,6 @@ export default function Staff() {
             <div className="space-y-2">
               <Label>Full Name *</Label>
               <Input value={formName} onChange={e => setFormName(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Staff ID</Label>
-              <Input value={formStaffId} onChange={e => setFormStaffId(e.target.value.toLowerCase().replace(/[^a-z0-9.]/g, ""))} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Phone</Label><Input value={formPhone} onChange={e => setFormPhone(e.target.value)} /></div>
@@ -891,28 +850,6 @@ export default function Staff() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Reset PIN Dialog */}
-      <Dialog open={showResetPin} onOpenChange={setShowResetPin}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="font-display flex items-center gap-2"><Key className="h-5 w-5 text-primary" /> Reset Staff PIN</DialogTitle>
-            <DialogDescription>Set a new 6-digit login PIN for this staff member.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>New PIN (6 digits)</Label>
-              <Input type="password" placeholder="••••••" maxLength={6} value={newPin} onChange={e => setNewPin(e.target.value.replace(/\D/g, ""))} autoFocus />
-            </div>
-            <div className="space-y-2">
-              <Label>Confirm New PIN</Label>
-              <Input type="password" placeholder="••••••" maxLength={6} value={confirmNewPin} onChange={e => setConfirmNewPin(e.target.value.replace(/\D/g, ""))} />
-            </div>
-            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => resetPinMutation.mutate()} disabled={newPin.length < 6 || resetPinMutation.isPending}>
-              {resetPinMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset PIN"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

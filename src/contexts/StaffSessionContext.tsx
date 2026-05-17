@@ -21,12 +21,8 @@ interface StaffSessionContextType {
   permissions:     LoadedPermissions;
   isStaffLoggedIn: boolean;
   ownerBypass:     boolean;
+  staffLoading:    boolean;   // true while initial DB check is in progress
   setOwnerAccess:  () => void;
-  loginWithPin: (
-    businessId: string,
-    pin: string,
-    staffId?: string
-  ) => Promise<{ success: true; session: StaffSession } | { success: false; reason: string }>;
   logout:    () => void;
   /** Legacy compat — true if role has any read access to the module */
   canAccess: (module: string) => boolean;
@@ -103,6 +99,9 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
     sessionStorage.getItem("nexus_owner_session") === "1"
   );
 
+  // True while we're waiting for the DB check to resolve after login/refresh
+  const [staffLoading, setStaffLoading] = useState(true);
+
   const setOwnerAccess = useCallback(() => {
     sessionStorage.setItem("nexus_owner_session", "1");
     setOwnerBypass(true);
@@ -123,11 +122,18 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [staff?.id, staff?.role, staff?.customRoleId, ownerBypass]);
 
-  // Re-validate staff role from DB on every page load/refresh for Supabase-linked staff.
-  // SECURITY: We intentionally do NOT skip this when `staff` is already set from
-  // sessionStorage. This prevents privilege escalation by tampering with stored session data.
+  // On every auth state change (login / refresh):
+  // 1. Check if logged-in user is the business owner → auto-bypass, no click needed
+  // 2. Check if logged-in user is a staff member → set staff session from DB (tamper-proof)
+  // 3. If neither → clear any stale session
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setStaffLoading(false);
+      return;
+    }
+
+    setStaffLoading(true);
+
     supabase
       .from("staff_members")
       .select("id, name, role, custom_role_id, business_id, businesses(owner_id)")
@@ -137,74 +143,36 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
       .maybeSingle()
       .then(({ data, error }) => {
         if (error || !data) {
-          // No linked staff record — clear any stale sessionStorage staff session
-          // (could be from a different account or a deleted staff record)
-          const saved = sessionStorage.getItem("nexus_staff_session");
-          if (saved) {
-            const parsed = JSON.parse(saved) as StaffSession;
-            // Only clear if the saved session was Supabase-linked (has a user.id match expected)
-            // We clear it if there's no DB record for this user as a staff member
-            setStaff(null);
-            setPermissions(EMPTY_PERMISSIONS);
-            sessionStorage.removeItem("nexus_staff_session");
-          }
+          // No staff record for this user — clear any stale session
+          setStaff(null);
+          setPermissions(EMPTY_PERMISSIONS);
+          sessionStorage.removeItem("nexus_staff_session");
+          setStaffLoading(false);
           return;
         }
+
         const biz = data.businesses as any;
-        // Don't create a staff session for the business owner
-        if (biz?.owner_id === user.id) return;
+
+        // Business owner — grant full bypass automatically (no button click needed)
+        if (biz?.owner_id === user.id) {
+          setOwnerAccess();
+          setStaffLoading(false);
+          return;
+        }
+
+        // Regular staff — always pull role from DB (prevents session tampering)
         const freshSession: StaffSession = {
           id:           data.id,
           name:         data.name,
-          role:         data.role,          // Always use DB role, not sessionStorage role
+          role:         data.role,
           customRoleId: (data as any).custom_role_id ?? null,
         };
         setStaff(freshSession);
         sessionStorage.setItem("nexus_staff_session", JSON.stringify(freshSession));
+        setStaffLoading(false);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
-
-  const loginWithPin = useCallback(async (
-    businessId: string,
-    pin: string,
-    staffId?: string
-  ): Promise<{ success: true; session: StaffSession } | { success: false; reason: string }> => {
-    const { data, error } = await supabase.rpc("verify_staff_pin", {
-      _business_id:   businessId,
-      _pin:           pin,
-      _staff_id_text: staffId ?? null,  // text staff_id e.g. "kwame.mensah"
-    });
-
-    if (error || !data || data.length === 0) {
-      return { success: false, reason: "Invalid PIN or staff not found." };
-    }
-
-    const staffData = data[0];
-
-    // Time-based access check (Africa/Accra)
-    try {
-      const { data: timeCheck } = await supabase.rpc("check_time_access", {
-        _staff_id: staffData.id,
-      });
-      if (timeCheck && !(timeCheck as any).allowed) {
-        return { success: false, reason: (timeCheck as any).message ?? "Access restricted at this time." };
-      }
-    } catch {
-      // If the RPC doesn't exist yet (pre-migration), allow login
-    }
-
-    const session: StaffSession = {
-      id:           staffData.id,
-      name:         staffData.name,
-      role:         staffData.role,
-      customRoleId: staffData.custom_role_id ?? null,
-    };
-
-    setStaff(session);
-    sessionStorage.setItem("nexus_staff_session", JSON.stringify(session));
-    return { success: true, session };
-  }, []);
 
   const logout = useCallback(() => {
     if (staff) {
@@ -213,6 +181,7 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
     setStaff(null);
     setOwnerBypass(false);
     setPermissions(EMPTY_PERMISSIONS);
+    setStaffLoading(false);
     sessionStorage.removeItem("nexus_staff_session");
     sessionStorage.removeItem("nexus_owner_session");
   }, [staff]);
@@ -232,8 +201,8 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
     <StaffSessionContext.Provider
       value={{
         staff, permissions, isStaffLoggedIn: !!staff,
-        ownerBypass, setOwnerAccess,
-        loginWithPin, logout, canAccess, can,
+        ownerBypass, staffLoading, setOwnerAccess,
+        logout, canAccess, can,
       }}
     >
       {children}

@@ -194,12 +194,13 @@ export default function Login() {
                 </label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={staffId}
-                  onChange={(e) => setStaffId(e.target.value)}
-                  placeholder="Your staff ID"
+                  onChange={(e) => setStaffId(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  placeholder="8-digit ID (e.g. 10483726)"
                   required
                   autoComplete="username"
-                  className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all font-mono tracking-wider"
                   style={inputStyle}
                   onFocus={(e) => { e.target.style.borderColor = "var(--forest)"; }}
                   onBlur={(e)  => { e.target.style.borderColor = "hsl(var(--border))"; }}
@@ -233,7 +234,7 @@ export default function Login() {
                   </button>
                 </div>
                 <p className="text-xs mt-1.5" style={{ color: "var(--muted-foreground)" }}>
-                  Password set via email invite from your administrator.
+                  Password provided by your business owner or administrator.
                 </p>
               </div>
 
