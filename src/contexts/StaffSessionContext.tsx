@@ -99,8 +99,12 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
     sessionStorage.getItem("nexus_owner_session") === "1"
   );
 
-  // True while we're waiting for the DB check to resolve after login/refresh
-  const [staffLoading, setStaffLoading] = useState(true);
+  // Skip loading state if we already have a valid session stored — fast path for returning users
+  const [staffLoading, setStaffLoading] = useState(() => {
+    if (sessionStorage.getItem("nexus_owner_session") === "1") return false;
+    if (sessionStorage.getItem("nexus_staff_session")) return false;
+    return true;
+  });
 
   const setOwnerAccess = useCallback(() => {
     sessionStorage.setItem("nexus_owner_session", "1");
@@ -141,19 +145,33 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
       .eq("status", "active")
       .limit(1)
       .maybeSingle()
-      .then(({ data, error }) => {
-        if (error || !data) {
-          // No staff record for this user — clear any stale session
-          setStaff(null);
-          setPermissions(EMPTY_PERMISSIONS);
-          sessionStorage.removeItem("nexus_staff_session");
+      .then(async ({ data }) => {
+        if (!data) {
+          // No staff record — this user might be a business owner.
+          // Owners are NOT in staff_members, so we must check businesses directly.
+          const { data: ownedBiz } = await supabase
+            .from("businesses")
+            .select("id")
+            .eq("owner_id", user.id)
+            .limit(1)
+            .maybeSingle();
+
+          if (ownedBiz) {
+            // Confirmed owner — grant full access automatically
+            setOwnerAccess();
+          } else {
+            // Not an owner and not staff — clear any stale session data
+            setStaff(null);
+            setPermissions(EMPTY_PERMISSIONS);
+            sessionStorage.removeItem("nexus_staff_session");
+          }
           setStaffLoading(false);
           return;
         }
 
         const biz = data.businesses as any;
 
-        // Business owner — grant full bypass automatically (no button click needed)
+        // Edge case: owner also appears in staff_members
         if (biz?.owner_id === user.id) {
           setOwnerAccess();
           setStaffLoading(false);
