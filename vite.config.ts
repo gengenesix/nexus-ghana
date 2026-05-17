@@ -104,14 +104,32 @@ export default defineConfig(({ mode }) => ({
         // ── Runtime caching strategies ────────────────────────────────────
         runtimeCaching: [
           {
-            // Supabase REST/Auth/Storage — NetworkFirst: always prefer live data,
-            // serve cache only when offline (max 60 s stale).
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            // Supabase Auth + Realtime + Edge Functions — never cache.
+            // Auth tokens must always be fresh; realtime is websocket-based.
+            urlPattern: /^https:\/\/.*\.supabase\.co\/(auth|realtime|functions)\/.*/i,
+            handler: "NetworkOnly",
+          },
+          {
+            // Supabase Storage — user uploads, logos, attachments.
+            // Content-addressed, safe to cache for 30 days.
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "supabase-storage-v1",
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Supabase REST data — NetworkFirst: always try to fetch live data,
+            // but serve the cached response when offline (up to 24 h stale).
+            // This is what makes the app usable without a network connection.
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
             handler: "NetworkFirst",
             options: {
-              cacheName: "supabase-api-v2",
+              cacheName: "supabase-rest-v1",
               networkTimeoutSeconds: 6,
-              expiration: { maxEntries: 60, maxAgeSeconds: 60 },
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
