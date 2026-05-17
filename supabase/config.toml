@@ -1,6 +1,2 @@
 project_id = "pulzxffewihdsyogvmhx"
 
-[functions.send-notifications]
-# Daily email digest: overdue invoices + low-stock alerts
-# Runs at 08:00 UTC — after mark_overdue_invoices cron at 07:50 UTC
-schedule = "0 8 * * *"
