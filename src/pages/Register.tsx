@@ -27,7 +27,7 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+    if (password.length < 8) { toast.error("Password must be at least 8 characters"); return; }
     setLoading(true);
     try {
       await signUp(email, password, fullName);
@@ -209,9 +209,9 @@ export default function Register() {
                   type={showPw ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min. 6 characters"
+                  placeholder="Min. 8 characters"
                   required
-                  minLength={6}
+                  minLength={8}
                   className="w-full px-4 py-3 pr-16 rounded-2xl text-sm outline-none transition-all"
                   style={{
                     border: "2px solid hsl(var(--border))",

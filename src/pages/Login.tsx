@@ -240,7 +240,7 @@ export default function Login() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || staffId.length < 8}
                 className="w-full py-3.5 rounded-full font-bold text-base transition-all duration-150 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 mt-2"
                 style={{ backgroundColor: "var(--forest)", color: "white" }}
               >

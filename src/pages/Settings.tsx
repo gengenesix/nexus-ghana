@@ -46,8 +46,9 @@ export default function Settings() {
   }, [business]);
 
   const saveProfile = async () => {
+    if (!name.trim()) { toast.error("Business name cannot be empty"); return; }
     try {
-      await updateBusiness.mutateAsync({ name, phone, email, region, address });
+      await updateBusiness.mutateAsync({ name: name.trim(), phone, email, region, address });
       toast.success("Profile updated!");
     } catch (err: any) { toast.error(err.message); }
   };

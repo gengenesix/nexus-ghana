@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Building2, ArrowRight, LogOut } from "lucide-react";
+import { Loader2, ArrowRight, LogOut, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 
 export default function JoinBusiness() {
@@ -19,6 +19,32 @@ export default function JoinBusiness() {
   // Already has a business → go to dashboard
   if (!authLoading && status === "success" && business) {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  // Staff accounts (created by admin) must not self-join — they already have a business
+  const isStaffAccount = user?.user_metadata?.account_type === "staff";
+  if (!authLoading && isStaffAccount) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--cream)" }}>
+        <div className="w-full max-w-[400px] text-center px-6">
+          <ShieldAlert className="h-12 w-12 mx-auto mb-4" style={{ color: "var(--forest)" }} />
+          <h2 className="text-2xl font-extrabold mb-2" style={{ color: "var(--forest)" }}>
+            Access not available
+          </h2>
+          <p className="text-sm mb-6" style={{ color: "var(--muted-foreground)" }}>
+            Your account was created by an administrator. You cannot join a business using an access code. Please sign in with your provided credentials.
+          </p>
+          <button
+            onClick={() => signOut()}
+            className="flex items-center gap-2 text-sm font-medium mx-auto"
+            style={{ color: "var(--forest)" }}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const handleJoin = async (e: React.FormEvent) => {
