@@ -65,6 +65,9 @@ const HotelMgmt      = lazy(() => import("./pages/modules/HotelMgmt"));
 const Fleet          = lazy(() => import("./pages/modules/Fleet"));
 const Garage         = lazy(() => import("./pages/modules/Garage"));
 const FarmMgmt       = lazy(() => import("./pages/modules/FarmMgmt"));
+const Timesheets     = lazy(() => import("./pages/modules/Timesheets"));
+const Helpdesk       = lazy(() => import("./pages/modules/Helpdesk"));
+const Recruitment    = lazy(() => import("./pages/modules/Recruitment"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -173,6 +176,11 @@ const App = () => {
                   <Route path="/approvals"      element={<ErrorBoundary><Approvals /></ErrorBoundary>} />
                   <Route path="/audit-log"      element={<ErrorBoundary><AuditLog /></ErrorBoundary>} />
                   <Route path="/modules"        element={<ErrorBoundary><ModuleSettings /></ErrorBoundary>} />
+
+                  {/* Coming-soon modules — show preview page instead of 404 */}
+                  <Route path="/timesheets"  element={<ErrorBoundary><Timesheets /></ErrorBoundary>} />
+                  <Route path="/helpdesk"    element={<ErrorBoundary><Helpdesk /></ErrorBoundary>} />
+                  <Route path="/recruitment" element={<ErrorBoundary><Recruitment /></ErrorBoundary>} />
 
                   {/* /opportunities was a duplicate of /crm — redirect */}
                   <Route path="/opportunities" element={<Navigate to="/crm" replace />} />

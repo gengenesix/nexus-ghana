@@ -136,8 +136,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function ModuleSettings() {
   const navigate                            = useNavigate();
-  const { industry, industryModules }       = useIndustry();
-  const { canAccess, isComingSoon }         = useModules();
+  const { industry }                              = useIndustry();
+  const { canAccess, isComingSoon, industryModules } = useModules();
   const { canAccess: tierCanAccess }        = useLicenseTier();
 
   // industryModules already filtered to this industry (or all non-vertical for no-slug)
