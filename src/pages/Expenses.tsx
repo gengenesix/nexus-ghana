@@ -17,11 +17,8 @@ import { Plus, Search, Loader2, Trash2, Download, Calendar, Edit2, TrendingUp, T
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, Legend } from "recharts";
 import { toast } from "sonner";
 import { exportExpensesCsv } from "@/lib/export";
-import { useChartColors } from "@/hooks/useChartColors";
+import { useChartColors, useChartPalette } from "@/hooks/useChartColors";
 import { format, subMonths, startOfMonth, endOfMonth, differenceInDays } from "date-fns";
-
-
-const COLORS = ["hsl(140,28%,16%)", "hsl(86,68%,52%)", "hsl(142,60%,38%)", "hsl(210,70%,48%)", "hsl(0,72%,51%)", "hsl(280,50%,50%)", "hsl(38,92%,50%)", "hsl(170,55%,40%)", "hsl(330,70%,50%)"];
 
 const QUICK_RANGES = [
   { label: "This Month", from: () => format(startOfMonth(new Date()), "yyyy-MM-dd"), to: () => format(new Date(), "yyyy-MM-dd") },
@@ -49,6 +46,7 @@ export default function Expenses() {
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
 
   const { tooltipStyle } = useChartColors();
+  const COLORS = useChartPalette();
 
   const { data: expenses = [], isLoading } = useQuery({
     queryKey: ["expenses", business?.id],

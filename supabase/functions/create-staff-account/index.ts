@@ -34,13 +34,27 @@ serve(async (req) => {
     const { data: { user: callerUser }, error: authErr } = await caller.auth.getUser();
     if (authErr || !callerUser) return json({ error: "Unauthorized" }, 401);
 
-    // 2. Confirm caller owns a business
+    // 2. Confirm caller owns (or is an admin member of) a business
     const { data: business } = await admin
       .from("businesses")
       .select("id")
       .eq("owner_id", callerUser.id)
       .maybeSingle();
-    if (!business) return json({ error: "Only business owners can create staff accounts" }, 403);
+
+    // Also allow staff members with Administrator role to create accounts
+    let businessId = business?.id;
+    if (!businessId) {
+      const { data: adminStaff } = await admin
+        .from("staff_members")
+        .select("business_id, role")
+        .eq("supabase_user_id", callerUser.id)
+        .eq("status", "active")
+        .maybeSingle();
+      if (adminStaff?.role === "Administrator") {
+        businessId = adminStaff.business_id;
+      }
+    }
+    if (!businessId) return json({ error: "Only business owners or administrators can create staff accounts" }, 403);
 
     // 3. Parse body — no PIN required, Staff ID auto-generated
     const { email, initialPassword, name, role, phone } = await req.json();
@@ -73,7 +87,7 @@ serve(async (req) => {
     const { data: staffRow, error: insertErr } = await admin
       .from("staff_members")
       .insert({
-        business_id:      business.id,
+        business_id:      businessId,
         name:             name.trim(),
         role:             role ?? "Staff",
         phone:            phone || null,

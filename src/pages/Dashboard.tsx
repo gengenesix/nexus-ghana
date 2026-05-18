@@ -24,13 +24,8 @@ import { useNavigate } from "react-router-dom";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
-import { useChartColors } from "@/hooks/useChartColors";
+import { useChartColors, useChartPalette } from "@/hooks/useChartColors";
 import { toast } from "sonner";
-
-const PIE_COLORS = [
-  "#1a3a22", "#84cc16", "#4ade80",
-  "#166534", "#86efac",
-];
 
 export default function Dashboard() {
   const navigate     = useNavigate();
@@ -40,6 +35,7 @@ export default function Dashboard() {
   const { stats, kpiCards, quickActions, isLoading } = useIndustryDashboard();
   const queryClient  = useQueryClient();
   const { tooltipStyle, gridColor, axisColor, primaryColor, gradientStart } = useChartColors();
+  const chartPalette = useChartPalette();
 
   // ── Recent sales ───────────────────────────────────────────────────────────
   const { data: recentSales = [] } = useQuery({
@@ -456,7 +452,7 @@ export default function Dashboard() {
                       dataKey="value"
                     >
                       {paymentData.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                        <Cell key={i} fill={chartPalette[i % chartPalette.length]} />
                       ))}
                     </Pie>
                     <Tooltip
@@ -471,7 +467,7 @@ export default function Dashboard() {
                       <div className="flex items-center gap-2">
                         <div
                           className="h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
+                          style={{ backgroundColor: chartPalette[i % chartPalette.length] }}
                         />
                         <span className="capitalize">{d.name}</span>
                       </div>

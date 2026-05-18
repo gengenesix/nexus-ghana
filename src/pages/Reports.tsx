@@ -17,14 +17,10 @@ import {
   PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area,
 } from "recharts";
 import { Download, TrendingUp, TrendingDown, Award, Users, DollarSign } from "lucide-react";
-import { useChartColors } from "@/hooks/useChartColors";
+import { useChartColors, useChartPalette } from "@/hooks/useChartColors";
 import { toast } from "sonner";
 import { format, subMonths } from "date-fns";
 
-const COLORS = [
-  "hsl(140,28%,16%)", "hsl(86,68%,52%)", "hsl(142,60%,38%)",
-  "hsl(210,70%,48%)", "hsl(0,72%,51%)", "hsl(280,50%,50%)", "hsl(170,55%,40%)",
-];
 
 function ChartSkeleton() {
   return <Skeleton className="w-full h-[300px] rounded-xl" />;
@@ -43,6 +39,7 @@ function StatSkeleton() {
 export default function Reports() {
   const { business } = useBusiness();
   const { tooltipStyle, gridColor, axisColor } = useChartColors();
+  const COLORS = useChartPalette();
   const [dateFrom, setDateFrom] = useState(() => format(subMonths(new Date(), 11), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(() => format(new Date(), "yyyy-MM-dd"));
 

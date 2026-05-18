@@ -64,24 +64,49 @@ export default function POS() {
   const { data: products = [] } = useQuery({
     queryKey: ["products", business?.id, debouncedSearch],
     queryFn: async () => {
-      let q = supabase
+      const term = debouncedSearch.trim();
+
+      if (term) {
+        // Try name + sku + barcode; fall back to name + sku if barcode column missing
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("business_id", business!.id)
+          .gt("qty", 0)
+          .or(`name.ilike.%${term}%,sku.ilike.%${term}%,barcode.ilike.%${term}%`)
+          .order("name")
+          .limit(80);
+
+        if (error) {
+          // barcode column may not exist — retry without it
+          const { data: fallback, error: err2 } = await supabase
+            .from("products")
+            .select("*")
+            .eq("business_id", business!.id)
+            .gt("qty", 0)
+            .or(`name.ilike.%${term}%,sku.ilike.%${term}%`)
+            .order("name")
+            .limit(80);
+          if (err2) throw err2;
+          return fallback ?? [];
+        }
+        return data ?? [];
+      }
+
+      // No search — return all in-stock products
+      const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("business_id", business!.id)
         .gt("qty", 0)
         .order("name")
         .limit(80);
-
-      if (debouncedSearch.trim()) {
-        const term = debouncedSearch.trim();
-        q = q.or(`name.ilike.%${term}%,sku.ilike.%${term}%,barcode.ilike.%${term}%`);
-      }
-
-      const { data, error } = await q;
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
     enabled: !!business,
+    staleTime: 2 * 60 * 1000,   // 2 min — reduces constant refetching
+    gcTime: 10 * 60 * 1000,
   });
 
   const { data: customers = [] } = useQuery({
@@ -92,6 +117,8 @@ export default function POS() {
       return data;
     },
     enabled: !!business,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 
   // Live stock updates — if another cashier sells an item, this POS refreshes

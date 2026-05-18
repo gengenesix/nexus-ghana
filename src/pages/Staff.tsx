@@ -24,6 +24,7 @@ import { ALL_MODULES } from "@/lib/rbac";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
+import { useChartColors, useChartPalette } from "@/hooks/useChartColors";
 
 const DEFAULT_ROLES = ["Administrator", "Manager", "Supervisor", "Cashier", "Sales Rep", "Warehouse", "Accountant", "Staff"];
 
@@ -45,12 +46,12 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
   Staff: "POS and inventory access only",
 };
 
-const COLORS = ["hsl(140,28%,16%)", "hsl(86,68%,52%)", "hsl(142,60%,38%)", "hsl(210,70%,48%)", "hsl(0,72%,51%)", "hsl(280,50%,50%)"];
-const tooltipStyle = { background: "white", border: "1px solid hsl(45,15%,87%)", borderRadius: 8, color: "hsl(140,28%,16%)" };
 
 export default function Staff() {
   const { business } = useBusiness();
   const queryClient = useQueryClient();
+  const chartPalette = useChartPalette();
+  const { tooltipStyle, gridColor, axisColor } = useChartColors();
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -163,7 +164,15 @@ export default function Staff() {
           Authorization: `Bearer ${session?.access_token ?? ""}`,
         },
       });
-      if (res.error) throw new Error(res.error.message);
+      if (res.error) {
+        const msg = res.error.message ?? "";
+        if (msg.includes("non-2xx") || msg.includes("Failed to send") || msg.includes("not found")) {
+          throw new Error(
+            "Staff creation service is not deployed. Go to your Supabase dashboard → Edge Functions → deploy 'create-staff-account'."
+          );
+        }
+        throw new Error(msg);
+      }
       const result = res.data as any;
       if (result?.error) throw new Error(result.error);
       return result as { staffId: string };
@@ -505,12 +514,12 @@ export default function Staff() {
                 <CardContent>
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={roleDistribution}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(45,15%,87%)" />
-                      <XAxis dataKey="name" stroke="hsl(215, 15%, 55%)" fontSize={10} angle={-30} textAnchor="end" height={60} />
-                      <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} allowDecimals={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                      <XAxis dataKey="name" stroke={axisColor} fontSize={10} angle={-30} textAnchor="end" height={60} />
+                      <YAxis stroke={axisColor} fontSize={12} allowDecimals={false} />
                       <Tooltip contentStyle={tooltipStyle} />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]} name="Staff Count">
-                        {roleDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                        {roleDistribution.map((_, i) => <Cell key={i} fill={chartPalette[i % chartPalette.length]} />)}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
