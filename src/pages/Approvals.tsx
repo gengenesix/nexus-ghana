@@ -407,7 +407,8 @@ export default function Approvals() {
               {allPending.map((item) => (
                 <Card key={`${item.kind}-${item.id}`} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      {/* Info */}
                       <div className="flex items-start gap-3 min-w-0 flex-1">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted mt-0.5">
                           {kindIcon(item.kind)}
@@ -421,7 +422,7 @@ export default function Approvals() {
                           </div>
                           <p className="text-sm text-muted-foreground mt-0.5 truncate">{item.subtitle}</p>
                           {item.meta && (
-                            <p className="text-xs text-muted-foreground mt-0.5">{item.meta}</p>
+                            <p className="text-sm font-semibold text-foreground mt-0.5">{item.meta}</p>
                           )}
                           {item.payload && Object.keys(item.payload).length > 0 && (
                             <div className="mt-2 rounded-md bg-muted/60 px-2.5 py-1.5 text-xs font-mono text-muted-foreground">
@@ -432,13 +433,45 @@ export default function Approvals() {
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-2 shrink-0">
+
+                      {/* Action buttons — directly visible, no extra click needed */}
+                      <div className="flex items-center gap-2 shrink-0 pl-11 sm:pl-0">
                         <Button
                           size="sm"
-                          className="bg-lime-600 hover:bg-lime-700 text-white h-8 px-3"
+                          className="bg-green-600 hover:bg-green-700 text-white gap-1.5"
+                          disabled={acting}
+                          onClick={async () => {
+                            setActing(true);
+                            await approve.mutateAsync({ item, note: "" }).catch(() => {});
+                            setActing(false);
+                          }}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Approve
+                        </Button>
+                        {(item.kind === "leave" || item.kind === "workflow") && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="gap-1.5"
+                            disabled={acting}
+                            onClick={async () => {
+                              setActing(true);
+                              await reject.mutateAsync({ item, note: "" }).catch(() => {});
+                              setActing(false);
+                            }}
+                          >
+                            <XCircle className="h-3.5 w-3.5" />
+                            Reject
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5"
                           onClick={() => { setReviewTarget(item); setNote(""); }}
                         >
-                          Review
+                          Add Note
                         </Button>
                       </div>
                     </div>
@@ -498,8 +531,8 @@ export default function Approvals() {
       <Dialog open={!!reviewTarget} onOpenChange={() => { setReviewTarget(null); setNote(""); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display">Review: {reviewTarget?.title}</DialogTitle>
-            <DialogDescription>{reviewTarget?.subtitle}</DialogDescription>
+            <DialogTitle className="font-display">Review with Note: {reviewTarget?.title}</DialogTitle>
+            <DialogDescription>{reviewTarget?.subtitle} — add an optional note before approving or rejecting.</DialogDescription>
           </DialogHeader>
 
           {reviewTarget?.meta && (
