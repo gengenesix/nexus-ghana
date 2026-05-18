@@ -4,7 +4,10 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Users, Package, FileText, Truck, Target, Handshake, FolderKanban, Wallet, Search } from "lucide-react";
+import {
+  Users, Package, FileText, Truck, Target, Handshake, FolderKanban,
+  Wallet, Search, Wrench, Pill, BedDouble, ClipboardList,
+} from "lucide-react";
 
 interface SearchResult {
   id: string;
@@ -41,24 +44,48 @@ export function GlobalSearch() {
     const biz = business.id;
     const like = `%${q}%`;
 
-    const [customers, products, invoices, suppliers, leads, opportunities, projects] = await Promise.all([
+    const [
+      customers, products, invoices, suppliers,
+      leads, opportunities, projects,
+      jobCards, prescriptions, hotelBookings, fleetVehicles,
+    ] = await Promise.all([
       supabase.from("customers").select("id, name, phone").eq("business_id", biz).ilike("name", like).limit(5),
       supabase.from("products").select("id, name, sku, selling_price").eq("business_id", biz).ilike("name", like).limit(5),
       supabase.from("invoices").select("id, invoice_number, customer_name, total").eq("business_id", biz).ilike("invoice_number", like).limit(5),
       supabase.from("suppliers").select("id, name, phone").eq("business_id", biz).ilike("name", like).limit(5),
-      supabase.from("leads").select("id, name, company").eq("business_id", biz).ilike("name", like).limit(5),
-      supabase.from("opportunities").select("id, name, value, stage").eq("business_id", biz).ilike("name", like).limit(5),
-      supabase.from("projects").select("id, name, status").eq("business_id", biz).ilike("name", like).limit(5),
+      (supabase as any).from("leads").select("id, name, company").eq("business_id", biz).ilike("name", like).limit(5),
+      (supabase as any).from("opportunities").select("id, name, value, stage").eq("business_id", biz).ilike("name", like).limit(5),
+      (supabase as any).from("projects").select("id, name, status").eq("business_id", biz).ilike("name", like).limit(5),
+      (supabase as any).from("job_cards").select("id, job_number, customer_name, vehicle_reg, status").eq("business_id", biz).or(`job_number.ilike.${like},customer_name.ilike.${like},vehicle_reg.ilike.${like}`).limit(5),
+      (supabase as any).from("prescriptions").select("id, rx_number, patient_name, status").eq("business_id", biz).or(`rx_number.ilike.${like},patient_name.ilike.${like}`).limit(5),
+      (supabase as any).from("hotel_bookings").select("id, guest_name, guest_phone, status").eq("business_id", biz).ilike("guest_name", like).limit(5),
+      (supabase as any).from("fleet_vehicles").select("id, registration, make, model, status").eq("business_id", biz).or(`registration.ilike.${like},make.ilike.${like},model.ilike.${like}`).limit(5),
     ]);
 
     const r: SearchResult[] = [];
-    (customers.data || []).forEach((c) => r.push({ id: c.id, label: c.name, sublabel: c.phone || "", category: "Customers", icon: Users, url: "/customers" }));
-    (products.data || []).forEach((p) => r.push({ id: p.id, label: p.name, sublabel: `${p.sku || ""} · GHS ${Number(p.selling_price).toFixed(2)}`, category: "Products", icon: Package, url: "/inventory" }));
-    (invoices.data || []).forEach((i) => r.push({ id: i.id, label: i.invoice_number, sublabel: `${i.customer_name} · GHS ${Number(i.total).toFixed(2)}`, category: "Invoices", icon: FileText, url: "/invoices" }));
-    (suppliers.data || []).forEach((s) => r.push({ id: s.id, label: s.name, sublabel: s.phone || "", category: "Suppliers", icon: Truck, url: "/suppliers" }));
-    (leads.data || []).forEach((l) => r.push({ id: l.id, label: l.name, sublabel: l.company || "", category: "Leads", icon: Handshake, url: "/crm" }));
-    (opportunities.data || []).forEach((o) => r.push({ id: o.id, label: o.name, sublabel: `${o.stage} · GHS ${Number(o.value || 0).toLocaleString()}`, category: "Opportunities", icon: Target, url: "/opportunities" }));
-    (projects.data || []).forEach((p) => r.push({ id: p.id, label: p.name, sublabel: p.status, category: "Projects", icon: FolderKanban, url: "/projects" }));
+
+    (customers.data || []).forEach((c: any) =>
+      r.push({ id: c.id, label: c.name, sublabel: c.phone || "", category: "Customers", icon: Users, url: "/customers" }));
+    (products.data || []).forEach((p: any) =>
+      r.push({ id: p.id, label: p.name, sublabel: `${p.sku || ""} · GHS ${Number(p.selling_price).toFixed(2)}`, category: "Products", icon: Package, url: "/inventory" }));
+    (invoices.data || []).forEach((i: any) =>
+      r.push({ id: i.id, label: i.invoice_number, sublabel: `${i.customer_name} · GHS ${Number(i.total).toFixed(2)}`, category: "Invoices", icon: FileText, url: "/invoices" }));
+    (suppliers.data || []).forEach((s: any) =>
+      r.push({ id: s.id, label: s.name, sublabel: s.phone || "", category: "Suppliers", icon: Truck, url: "/suppliers" }));
+    (leads.data || []).forEach((l: any) =>
+      r.push({ id: l.id, label: l.name, sublabel: l.company || "", category: "Leads", icon: Handshake, url: "/crm" }));
+    (opportunities.data || []).forEach((o: any) =>
+      r.push({ id: o.id, label: o.name, sublabel: `${o.stage} · GHS ${Number(o.value || 0).toLocaleString()}`, category: "Opportunities", icon: Target, url: "/crm" }));
+    (projects.data || []).forEach((p: any) =>
+      r.push({ id: p.id, label: p.name, sublabel: p.status, category: "Projects", icon: FolderKanban, url: "/projects" }));
+    (jobCards.data || []).forEach((j: any) =>
+      r.push({ id: j.id, label: j.job_number, sublabel: `${j.customer_name} · ${j.vehicle_reg} · ${j.status}`, category: "Job Cards", icon: Wrench, url: "/garage" }));
+    (prescriptions.data || []).forEach((p: any) =>
+      r.push({ id: p.id, label: p.rx_number, sublabel: `${p.patient_name} · ${p.status}`, category: "Prescriptions", icon: Pill, url: "/pharmacy-rx" }));
+    (hotelBookings.data || []).forEach((b: any) =>
+      r.push({ id: b.id, label: b.guest_name, sublabel: `${b.guest_phone || ""} · ${b.status}`, category: "Hotel Bookings", icon: BedDouble, url: "/hotel-mgmt" }));
+    (fleetVehicles.data || []).forEach((v: any) =>
+      r.push({ id: v.id, label: v.registration, sublabel: `${v.make} ${v.model} · ${v.status}`, category: "Fleet", icon: ClipboardList, url: "/fleet" }));
 
     setResults(r);
     setLoading(false);
@@ -85,7 +112,7 @@ export function GlobalSearch() {
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search customers, products, invoices…" value={query} onValueChange={setQuery} />
+        <CommandInput placeholder="Search customers, products, job cards, Rx…" value={query} onValueChange={setQuery} />
         <CommandList>
           {loading && <div className="py-6 text-center text-sm text-muted-foreground">Searching…</div>}
           {!loading && debouncedQuery.length >= 2 && results.length === 0 && (

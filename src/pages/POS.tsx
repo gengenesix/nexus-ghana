@@ -213,12 +213,17 @@ export default function POS() {
     if (saleCustomerId) {
       // Deduct redeemed points
       if (saleRedeemPoints && salePointsToRedeem > 0) {
-        try { await supabase.rpc("decrement_loyalty_points", { p_customer_id: saleCustomerId, p_points: salePointsToRedeem }); } catch {}
+        const { error: deductErr } = await supabase.rpc("decrement_loyalty_points", { p_customer_id: saleCustomerId, p_points: salePointsToRedeem });
+        if (deductErr) {
+          console.error("Failed to deduct loyalty points:", deductErr);
+          toast.warning("Sale saved but loyalty points could not be deducted — contact support.");
+        }
       }
       // Award new points (1 point per GHS 10)
       const earned = Math.floor(saleTotal / 10);
       if (earned > 0) {
-        try { await supabase.rpc("increment_loyalty_points", { p_customer_id: saleCustomerId, p_points: earned }); } catch {}
+        const { error: earnErr } = await supabase.rpc("increment_loyalty_points", { p_customer_id: saleCustomerId, p_points: earned });
+        if (earnErr) console.error("Failed to award loyalty points:", earnErr);
       }
     }
   };
@@ -241,23 +246,30 @@ export default function POS() {
   // Flush offline queue when connectivity returns
   useEffect(() => {
     if (!isOnline || queue.length === 0) return;
+    const toFlush = [...queue]; // capture snapshot — avoid stale state
     (async () => {
-      for (const s of queue) {
+      let synced = 0;
+      for (const s of toFlush) {
         try {
           await submitSale(s.receiptNum, s.cart, s.total, s.subtotal, s.discountAmount, s.customerId, s.redeemPoints, s.pointsToRedeem);
           removeFromQueue(s.id);
-        } catch {}
+          synced++;
+        } catch (err) {
+          console.error("Failed to sync queued sale:", s.receiptNum, err);
+        }
       }
-      if (queue.length > 0) {
+      if (synced > 0) {
         queryClient.invalidateQueries({ queryKey: ["products"] });
-        toast.success(`${queue.length} queued sale(s) synced`);
+        toast.success(`${synced} queued sale(s) synced successfully`);
       }
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnline]);
 
   const completeSale = () => {
     if (cart.length === 0) { toast.error("Cart is empty"); return; }
-    const receiptNum = Date.now().toString().slice(-6);
+    // UUID-based receipt number: 8 hex chars — collision-resistant, readable
+    const receiptNum = crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
     setLastReceipt(receiptNum);
 
     // MoMo payments — show confirmation dialog first (online only)
@@ -291,6 +303,7 @@ export default function POS() {
     setSelectedCustomerId(null);
     setRedeemPoints(false);
     setSplits([]);
+    setPaymentMethod("cash");
     setShowReceipt(false);
   };
 

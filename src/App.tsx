@@ -48,8 +48,23 @@ const ServiceModule = lazy(() => import("./pages/modules/ServiceModule"));
 const HumanResources = lazy(() => import("./pages/modules/HumanResources"));
 const Banking = lazy(() => import("./pages/modules/Banking"));
 const Warehouses = lazy(() => import("./pages/modules/Warehouses"));
-const Approvals  = lazy(() => import("./pages/Approvals"));
-const AuditLog   = lazy(() => import("./pages/AuditLog"));
+const Approvals      = lazy(() => import("./pages/Approvals"));
+const AuditLog       = lazy(() => import("./pages/AuditLog"));
+const Welcome        = lazy(() => import("./pages/Welcome"));
+const ModuleSettings = lazy(() => import("./pages/ModuleSettings"));
+// Phase 3 modules
+const Payroll        = lazy(() => import("./pages/modules/Payroll"));
+const Attendance     = lazy(() => import("./pages/modules/Attendance"));
+const BudgetModule   = lazy(() => import("./pages/modules/Budget"));
+const Assets         = lazy(() => import("./pages/modules/Assets"));
+const PettyCash      = lazy(() => import("./pages/modules/PettyCash"));
+// Phase 4 industry packs
+const Restaurant     = lazy(() => import("./pages/modules/Restaurant"));
+const PharmacyRx     = lazy(() => import("./pages/modules/PharmacyRx"));
+const HotelMgmt      = lazy(() => import("./pages/modules/HotelMgmt"));
+const Fleet          = lazy(() => import("./pages/modules/Fleet"));
+const Garage         = lazy(() => import("./pages/modules/Garage"));
+const FarmMgmt       = lazy(() => import("./pages/modules/FarmMgmt"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -105,6 +120,8 @@ const App = () => {
                   <Route path="/user-guide" element={<UserGuide />} />
                   <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
                   <Route path="/join-business" element={<ProtectedRoute><JoinBusiness /></ProtectedRoute>} />
+                  {/* Post-onboarding welcome — needs BusinessGuard for industry data, no StaffPinGuard */}
+                  <Route path="/welcome" element={<ProtectedRoute><BusinessGuard><Welcome /></BusinessGuard></ProtectedRoute>} />
                 </Route>
                 <Route element={<ProtectedRoute><BusinessGuard><StaffPinGuard><AppLayout /></StaffPinGuard></BusinessGuard></ProtectedRoute>}>
                   {/* Core — available on all tiers */}
@@ -135,11 +152,27 @@ const App = () => {
                   <Route path="/production" element={<ErrorBoundary><TierGate module="production"><Production /></TierGate></ErrorBoundary>} />
                   <Route path="/mrp" element={<ErrorBoundary><TierGate module="mrp"><MRP /></TierGate></ErrorBoundary>} />
 
+                  {/* Phase 3 — HR & Finance modules */}
+                  <Route path="/payroll"    element={<ErrorBoundary><TierGate module="payroll"><Payroll /></TierGate></ErrorBoundary>} />
+                  <Route path="/attendance" element={<ErrorBoundary><TierGate module="attendance"><Attendance /></TierGate></ErrorBoundary>} />
+                  <Route path="/budget"     element={<ErrorBoundary><TierGate module="budget"><BudgetModule /></TierGate></ErrorBoundary>} />
+                  <Route path="/assets"     element={<ErrorBoundary><TierGate module="assets"><Assets /></TierGate></ErrorBoundary>} />
+                  <Route path="/petty-cash" element={<ErrorBoundary><TierGate module="petty-cash"><PettyCash /></TierGate></ErrorBoundary>} />
+
+                  {/* Phase 4 — Industry packs */}
+                  <Route path="/restaurant" element={<ErrorBoundary><TierGate module="restaurant"><Restaurant /></TierGate></ErrorBoundary>} />
+                  <Route path="/pharmacy-rx" element={<ErrorBoundary><TierGate module="pharmacy-rx"><PharmacyRx /></TierGate></ErrorBoundary>} />
+                  <Route path="/hotel-mgmt"  element={<ErrorBoundary><TierGate module="hotel-mgmt"><HotelMgmt /></TierGate></ErrorBoundary>} />
+                  <Route path="/fleet"       element={<ErrorBoundary><TierGate module="fleet"><Fleet /></TierGate></ErrorBoundary>} />
+                  <Route path="/garage"      element={<ErrorBoundary><TierGate module="garage"><Garage /></TierGate></ErrorBoundary>} />
+                  <Route path="/farm-mgmt"   element={<ErrorBoundary><TierGate module="farm-mgmt"><FarmMgmt /></TierGate></ErrorBoundary>} />
+
                   {/* Professional-only */}
                   <Route path="/hr" element={<ErrorBoundary><TierGate module="hr"><RoleGuard feature="hr"><HumanResources /></RoleGuard></TierGate></ErrorBoundary>} />
                   <Route path="/administration" element={<ErrorBoundary><TierGate module="administration"><RoleGuard feature="administration"><Administration /></RoleGuard></TierGate></ErrorBoundary>} />
                   <Route path="/approvals"      element={<ErrorBoundary><Approvals /></ErrorBoundary>} />
                   <Route path="/audit-log"      element={<ErrorBoundary><AuditLog /></ErrorBoundary>} />
+                  <Route path="/modules"        element={<ErrorBoundary><ModuleSettings /></ErrorBoundary>} />
 
                   {/* /opportunities was a duplicate of /crm — redirect */}
                   <Route path="/opportunities" element={<Navigate to="/crm" replace />} />

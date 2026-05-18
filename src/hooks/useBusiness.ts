@@ -21,6 +21,13 @@ export interface Business {
   receipt_footer: string;
   receipt_show_logo: boolean;
   access_code: string | null;
+  // Phase 0: Industry system
+  industry_vertical_slug: string | null;
+  onboarding_completed: boolean;
+  onboarding_step: number;
+  business_size: string | null; // 'solo' | 'small' | 'medium' | 'large'
+  // Phase 2: Welcome screen flag
+  welcome_shown: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -68,6 +75,8 @@ export function useBusiness() {
       email?: string;
       region?: string;
       address?: string;
+      industry_vertical_slug?: string;
+      business_size?: string;
     }) => {
       const { data, error } = await supabase
         .from("businesses")

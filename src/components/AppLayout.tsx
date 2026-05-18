@@ -11,6 +11,7 @@ import { ApprovalInbox } from "@/components/ApprovalInbox";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LowStockBanner } from "@/components/LowStockBanner";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { KeyboardShortcuts } from "@/components/KeyboardShortcuts";
 
 export function AppLayout() {
   const location = useLocation();
@@ -68,6 +69,7 @@ export function AppLayout() {
         </div>
 
         <MobileNav />
+        <KeyboardShortcuts />
       </div>
     </SidebarProvider>
   );

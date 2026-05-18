@@ -13,12 +13,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { GHANA_REGIONS } from "@/lib/ghana";
-import { Building2, Receipt, CreditCard, Download, Landmark, Loader2, FileJson } from "lucide-react";
+import { Building2, Receipt, CreditCard, Download, Landmark, Loader2, FileJson, Cpu, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useIndustry } from "@/hooks/useIndustry";
+import {
+  ShoppingBag, Utensils, Package2, Factory, Pill, Briefcase,
+  HardHat, Truck, BedDouble, Wrench, Leaf, Scissors,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+const INDUSTRY_ICON_MAP: Record<string, LucideIcon> = {
+  ShoppingBag, Utensils, Package2, Factory, Pill, Briefcase,
+  HardHat, Truck, BedDouble, Wrench, Leaf, Scissors, Landmark,
+};
 import { toast } from "sonner";
 import { exportSalesCsv, exportInventoryCsv, exportExpensesCsv, exportCustomersCsv, exportSuppliersCsv, exportInvoicesCsv } from "@/lib/export";
 
 export default function Settings() {
+  const navigate = useNavigate();
   const { business, updateBusiness } = useBusiness();
+  const { industry, slug, modules: industryModules } = useIndustry();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -120,6 +134,7 @@ export default function Settings() {
       <Tabs defaultValue="business">
         <TabsList>
           <TabsTrigger value="business">Business</TabsTrigger>
+          <TabsTrigger value="industry">Industry & Modules</TabsTrigger>
           <TabsTrigger value="taxes">Taxes</TabsTrigger>
           <TabsTrigger value="receipts">Receipts</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
@@ -148,6 +163,83 @@ export default function Settings() {
               <Button className="bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={saveProfile} disabled={updateBusiness.isPending}>
                 {updateBusiness.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
               </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="industry" className="space-y-4">
+          {/* Industry identity card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-display flex items-center gap-2">
+                <Cpu className="h-5 w-5 text-primary" /> Industry Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {industry ? (
+                <div className="flex items-center gap-4 p-4 rounded-2xl" style={{ backgroundColor: industry.accentHex }}>
+                  {(() => {
+                    const IIcon = INDUSTRY_ICON_MAP[industry.iconKey] ?? ShoppingBag;
+                    return (
+                      <div
+                        className="flex h-14 w-14 items-center justify-center rounded-2xl flex-shrink-0"
+                        style={{ backgroundColor: industry.colorHex, boxShadow: `0 4px 16px ${industry.colorHex}55` }}
+                      >
+                        <IIcon className="h-7 w-7 text-white" strokeWidth={1.8} />
+                      </div>
+                    );
+                  })()}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-bold" style={{ color: "var(--forest)" }}>{industry.name}</p>
+                    <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>{industry.tagline}</p>
+                  </div>
+                  <Badge className="shrink-0" style={{ backgroundColor: "var(--forest)", color: "white", border: "none" }}>
+                    Active Industry
+                  </Badge>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 rounded-2xl p-4 bg-muted/30">
+                  <Cpu className="h-5 w-5 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">No industry set — all modules available.</p>
+                </div>
+              )}
+
+              {/* Business size */}
+              {business?.business_size && (
+                <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
+                  <div>
+                    <p className="font-medium text-sm">Business Size</p>
+                    <p className="text-xs text-muted-foreground">Set during onboarding</p>
+                  </div>
+                  <Badge variant="outline" className="capitalize">{business.business_size}</Badge>
+                </div>
+              )}
+
+              {/* Module count */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
+                <div>
+                  <p className="font-medium text-sm">Active Modules</p>
+                  <p className="text-xs text-muted-foreground">
+                    {industryModules.filter(m => m.isAvailable).length} of {industryModules.length} modules available
+                  </p>
+                </div>
+                <Badge variant="outline">{slug ?? "universal"}</Badge>
+              </div>
+
+              {/* Link to full module settings */}
+              <button
+                onClick={() => navigate("/modules")}
+                className="flex w-full items-center justify-between rounded-2xl px-4 py-3 transition-all"
+                style={{
+                  backgroundColor: "var(--forest)",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <span className="text-sm font-semibold">View & Manage All Modules</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </CardContent>
           </Card>
         </TabsContent>
