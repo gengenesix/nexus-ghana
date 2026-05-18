@@ -12,7 +12,7 @@ import {
   Receipt, BarChart3, UserCog, Settings, Shield, Wallet, Handshake,
   ShoppingBag, Factory, Cpu, FolderKanban, Headphones, Users2,
   ArrowRightLeft, Landmark, ClipboardList, ClipboardCheck, FileSearch,
-  Banknote, Clock, UserPlus, LifeBuoy, PiggyBank, HardDrive,
+  Banknote, Clock, UserPlus, LifeBuoy, Target, HardDrive,
   ChefHat, Pill, BedDouble, Truck, Wrench, Leaf, Coins,
   ArrowRight, CheckCircle2, Lock, Timer,
 } from "lucide-react";
@@ -27,7 +27,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Receipt, BarChart3, UserCog, Settings, Shield, Wallet, Handshake,
   ShoppingBag, Factory, Cpu, FolderKanban, Headphones, Users2,
   ArrowRightLeft, Landmark, ClipboardList, ClipboardCheck, FileSearch,
-  Banknote, Clock, UserPlus, LifeBuoy, PiggyBank, HardDrive,
+  Banknote, Clock, UserPlus, LifeBuoy, Target, HardDrive,
   ChefHat, Pill, BedDouble, Truck, Wrench, Leaf, Coins, Timer,
 };
 

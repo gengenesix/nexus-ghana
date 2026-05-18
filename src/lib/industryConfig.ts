@@ -199,7 +199,7 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
   },
   {
     key: "budget",       name: "Budget",             description: "Budget planning, control & variance tracking",
-    category: "finance", isCore: false,             iconKey: "PiggyBank",
+    category: "finance", isCore: false,             iconKey: "Target",
     path: "/budget",     isAvailable: true,         minTier: "professional",
   },
   {

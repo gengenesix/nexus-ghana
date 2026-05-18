@@ -4,7 +4,7 @@ import {
   Receipt, BarChart3, UserCog, Settings, LogOut, Shield, Wallet,
   Handshake, ShoppingBag, Factory, Cpu, FolderKanban, Headphones,
   Users2, ArrowRightLeft, Landmark, ClipboardList, ClipboardCheck,
-  FileSearch, Banknote, Clock, UserPlus, LifeBuoy, Timer, PiggyBank,
+  FileSearch, Banknote, Clock, UserPlus, LifeBuoy, Timer, Target,
   HardDrive, ChefHat, Pill, BedDouble, Truck, Wrench, Leaf, Coins,
   Sparkles, MoreHorizontal,
 } from "lucide-react";
@@ -25,7 +25,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Receipt, BarChart3, UserCog, Settings, Shield, Wallet,
   Handshake, ShoppingBag, Factory, Cpu, FolderKanban, Headphones,
   Users2, ArrowRightLeft, Landmark, ClipboardList, ClipboardCheck,
-  FileSearch, Banknote, Clock, UserPlus, LifeBuoy, Timer, PiggyBank,
+  FileSearch, Banknote, Clock, UserPlus, LifeBuoy, Timer, Target,
   HardDrive, ChefHat, Pill, BedDouble, Truck, Wrench, Leaf, Coins,
   Sparkles,
 };
