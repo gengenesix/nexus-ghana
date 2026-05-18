@@ -34,7 +34,7 @@ export default function Dashboard() {
   const { industry, slug } = useIndustry();
   const { stats, kpiCards, quickActions, isLoading } = useIndustryDashboard();
   const queryClient  = useQueryClient();
-  const { tooltipStyle, gridColor, axisColor, primaryColor, gradientStart } = useChartColors();
+  const { tooltipStyle, labelStyle, itemStyle, gridColor, axisColor, primaryColor, gradientStart } = useChartColors();
   const chartPalette = useChartPalette();
 
   // ── Recent sales ───────────────────────────────────────────────────────────
@@ -239,7 +239,7 @@ export default function Dashboard() {
                 <XAxis dataKey="day" stroke={axisColor} fontSize={12} />
                 <YAxis stroke={axisColor} fontSize={12} />
                 <Tooltip
-                  contentStyle={tooltipStyle}
+                  contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle}
                   formatter={(v: number) => [formatGHS(v), "Sales"]}
                 />
                 <Area
@@ -456,7 +456,7 @@ export default function Dashboard() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={tooltipStyle}
+                      contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle}
                       formatter={(v: number) => formatGHS(v)}
                     />
                   </PieChart>

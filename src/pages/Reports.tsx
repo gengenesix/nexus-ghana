@@ -38,7 +38,7 @@ function StatSkeleton() {
 
 export default function Reports() {
   const { business } = useBusiness();
-  const { tooltipStyle, gridColor, axisColor } = useChartColors();
+  const { tooltipStyle, labelStyle, itemStyle, gridColor, axisColor } = useChartColors();
   const COLORS = useChartPalette();
   const [dateFrom, setDateFrom] = useState(() => format(subMonths(new Date(), 11), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(() => format(new Date(), "yyyy-MM-dd"));
@@ -408,7 +408,7 @@ export default function Reports() {
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                     <XAxis dataKey="month" stroke={axisColor} fontSize={12} />
                     <YAxis stroke={axisColor} fontSize={12} />
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                     <Legend />
                     <Line type="monotone" dataKey="revenue" stroke="hsl(140,28%,16%)" strokeWidth={2} dot={{ r: 4 }} name="Revenue" />
                     <Line type="monotone" dataKey="expenses" stroke="hsl(0, 72%, 51%)" strokeWidth={2} dot={{ r: 4 }} name="Expenses" />
@@ -542,7 +542,7 @@ export default function Reports() {
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                     <XAxis dataKey="month" stroke={axisColor} fontSize={12} />
                     <YAxis stroke={axisColor} fontSize={12} />
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                     <Legend />
                     <Area type="monotone" dataKey="inflow" stroke="hsl(142, 76%, 36%)" fill="url(#inflowGrad)" strokeWidth={2} name="Inflows" />
                     <Area type="monotone" dataKey="outflow" stroke="hsl(0, 72%, 51%)" fill="url(#outflowGrad)" strokeWidth={2} name="Outflows" />
@@ -577,7 +577,7 @@ export default function Reports() {
                   <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                   <XAxis dataKey="name" stroke={axisColor} fontSize={12} />
                   <YAxis stroke={axisColor} fontSize={12} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                  <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                   <Bar dataKey="value" radius={[6, 6, 0, 0]} name="Outstanding">
                     {agingData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Bar>
@@ -606,7 +606,7 @@ export default function Reports() {
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                     <XAxis type="number" stroke={axisColor} fontSize={11} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
                     <YAxis type="category" dataKey="name" width={120} stroke={axisColor} fontSize={11} />
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                     <Bar dataKey="revenue" fill="hsl(140,28%,16%)" radius={[0, 6, 6, 0]} name="Revenue" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -675,7 +675,7 @@ export default function Reports() {
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                     <XAxis dataKey="month" stroke={axisColor} />
                     <YAxis stroke={axisColor} />
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                     <Bar dataKey="revenue" fill="hsl(140,28%,16%)" radius={[6, 6, 0, 0]} name="Sales" />
                     <Bar dataKey="expenses" fill="hsl(0, 72%, 51%)" radius={[6, 6, 0, 0]} name="Expenses" />
                   </BarChart>
@@ -692,7 +692,7 @@ export default function Reports() {
                     <Pie data={paymentData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name}: ${formatGHS(value)}`}>
                       {paymentData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -738,7 +738,7 @@ export default function Reports() {
                           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                           <XAxis type="number" stroke={axisColor} fontSize={11} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
                           <YAxis type="category" dataKey="name" width={100} stroke={axisColor} fontSize={11} />
-                          <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                          <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                           <Bar dataKey="revenue" fill="hsl(140,28%,16%)" radius={[0, 6, 6, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
@@ -869,7 +869,7 @@ export default function Reports() {
                     <Pie data={expenseCatData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name}: ${formatGHS(value)}`}>
                       {expenseCatData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>

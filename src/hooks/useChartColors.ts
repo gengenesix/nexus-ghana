@@ -6,17 +6,22 @@ import { useDarkMode } from "./useDarkMode";
 export function useChartColors() {
   const isDark = useDarkMode();
 
+  const textColor = isDark ? "hsl(45, 25%, 90%)" : "hsl(140, 28%, 16%)";
+
   return {
     tooltipStyle: {
       background:   isDark ? "hsl(140, 20%, 13%)" : "white",
       border:       isDark ? "1px solid hsl(140, 15%, 25%)" : "1px solid hsl(45, 15%, 87%)",
       borderRadius: 12,
-      color:        isDark ? "hsl(45, 25%, 90%)" : "hsl(140, 28%, 16%)",
+      color:        textColor,
       fontSize:     13,
       fontFamily:   "'Plus Jakarta Sans', system-ui, sans-serif",
     } as React.CSSProperties,
+    // Recharts does NOT inherit contentStyle.color onto label/items — pass these explicitly
+    labelStyle: { color: textColor, fontWeight: 600 } as React.CSSProperties,
+    itemStyle:  { color: textColor } as React.CSSProperties,
     gridColor:    isDark ? "hsl(140, 12%, 22%)"  : "hsl(45, 15%, 87%)",
-    axisColor:    isDark ? "hsl(45, 20%, 72%)"   : "hsl(140, 10%, 44%)",  // much more visible in dark
+    axisColor:    isDark ? "hsl(45, 20%, 72%)"   : "hsl(140, 10%, 44%)",
     primaryColor: isDark ? "hsl(86, 65%, 60%)"   : "hsl(140, 28%, 16%)",
     gradientStart:isDark ? "hsl(86, 65%, 60%)"   : "hsl(140, 28%, 16%)",
   };

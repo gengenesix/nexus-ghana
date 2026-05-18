@@ -51,7 +51,7 @@ export default function Staff() {
   const { business } = useBusiness();
   const queryClient = useQueryClient();
   const chartPalette = useChartPalette();
-  const { tooltipStyle, gridColor, axisColor } = useChartColors();
+  const { tooltipStyle, labelStyle, itemStyle, gridColor, axisColor } = useChartColors();
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -517,7 +517,7 @@ export default function Staff() {
                       <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                       <XAxis dataKey="name" stroke={axisColor} fontSize={10} angle={-30} textAnchor="end" height={60} />
                       <YAxis stroke={axisColor} fontSize={12} allowDecimals={false} />
-                      <Tooltip contentStyle={tooltipStyle} />
+                      <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]} name="Staff Count">
                         {roleDistribution.map((_, i) => <Cell key={i} fill={chartPalette[i % chartPalette.length]} />)}
                       </Bar>

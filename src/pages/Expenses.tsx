@@ -45,7 +45,7 @@ export default function Expenses() {
   const [formReceiptFile, setFormReceiptFile] = useState<File | null>(null);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
 
-  const { tooltipStyle } = useChartColors();
+  const { tooltipStyle, labelStyle, itemStyle } = useChartColors();
   const COLORS = useChartPalette();
 
   const { data: expenses = [], isLoading } = useQuery({
@@ -291,7 +291,7 @@ export default function Expenses() {
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(45,15%,87%)" />
                       <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" fontSize={12} />
                       <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
-                      <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [formatGHS(v), "Expenses"]} />
+                      <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => [formatGHS(v), "Expenses"]} />
                       <Line type="monotone" dataKey="amount" stroke="hsl(0, 72%, 51%)" strokeWidth={2} dot={{ fill: "hsl(0, 72%, 51%)" }} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -308,7 +308,7 @@ export default function Expenses() {
                       <Pie data={catData} cx="50%" cy="50%" innerRadius={35} outerRadius={65} paddingAngle={4} dataKey="value">
                         {catData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                       </Pie>
-                      <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                      <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="space-y-1 mt-1">
@@ -439,7 +439,7 @@ export default function Expenses() {
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(45,15%,87%)" />
                     <XAxis dataKey="month" stroke="hsl(215, 15%, 55%)" fontSize={12} />
                     <YAxis stroke="hsl(215, 15%, 55%)" fontSize={12} />
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [formatGHS(v), "Expenses"]} />
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => [formatGHS(v), "Expenses"]} />
                     <Bar dataKey="amount" fill="hsl(0, 72%, 51%)" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -455,7 +455,7 @@ export default function Expenses() {
                     <Pie data={payMethodData} cx="50%" cy="50%" innerRadius={35} outerRadius={70} paddingAngle={4} dataKey="value">
                       {payMethodData.map((_, i) => <Cell key={i} fill={COLORS[(i + 3) % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatGHS(v)} />
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} itemStyle={itemStyle} formatter={(v: number) => formatGHS(v)} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="space-y-1.5 mt-2">
