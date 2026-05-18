@@ -173,7 +173,7 @@ export default function MRP() {
               <CardTitle>Run MRP Wizard</CardTitle>
               <CardDescription>Analyze stock levels vs demand forecasts to generate procurement recommendations</CardDescription>
             </div>
-            <Button onClick={runMRP} disabled={isRunning || products.length === 0} className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
+            <Button onClick={runMRP} disabled={isRunning || products.length === 0} className="bg-primary text-primary-foreground hover:bg-primary/90">
               {isRunning ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
               {isRunning ? "Running..." : "Run MRP"}
             </Button>

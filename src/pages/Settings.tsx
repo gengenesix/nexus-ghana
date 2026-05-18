@@ -160,7 +160,7 @@ export default function Settings() {
                 </div>
               </div>
               <div className="space-y-2"><Label>Address</Label><Textarea value={address} onChange={e => setAddress(e.target.value)} /></div>
-              <Button className="bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={saveProfile} disabled={updateBusiness.isPending}>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={saveProfile} disabled={updateBusiness.isPending}>
                 {updateBusiness.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
               </Button>
             </CardContent>
@@ -177,23 +177,20 @@ export default function Settings() {
             </CardHeader>
             <CardContent className="space-y-4">
               {industry ? (
-                <div className="flex items-center gap-4 p-4 rounded-2xl" style={{ backgroundColor: industry.accentHex }}>
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-primary/8 border border-primary/20">
                   {(() => {
                     const IIcon = INDUSTRY_ICON_MAP[industry.iconKey] ?? ShoppingBag;
                     return (
-                      <div
-                        className="flex h-14 w-14 items-center justify-center rounded-2xl flex-shrink-0"
-                        style={{ backgroundColor: industry.colorHex, boxShadow: `0 4px 16px ${industry.colorHex}55` }}
-                      >
-                        <IIcon className="h-7 w-7 text-white" strokeWidth={1.8} />
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl flex-shrink-0 bg-primary">
+                        <IIcon className="h-7 w-7 text-primary-foreground" strokeWidth={1.8} />
                       </div>
                     );
                   })()}
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-bold" style={{ color: "var(--forest)" }}>{industry.name}</p>
-                    <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>{industry.tagline}</p>
+                    <p className="text-base font-bold text-foreground">{industry.name}</p>
+                    <p className="text-sm text-muted-foreground">{industry.tagline}</p>
                   </div>
-                  <Badge className="shrink-0" style={{ backgroundColor: "var(--forest)", color: "white", border: "none" }}>
+                  <Badge className="shrink-0 bg-primary text-primary-foreground border-0">
                     Active Industry
                   </Badge>
                 </div>
@@ -260,7 +257,7 @@ export default function Settings() {
                 <div><p className="font-medium">GETFL (1%)</p><p className="text-sm text-muted-foreground">GETFund Levy</p></div>
                 <Switch checked={taxGetfl} onCheckedChange={setTaxGetfl} />
               </div>
-              <Button className="bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={saveTaxes} disabled={updateBusiness.isPending}>Save Tax Settings</Button>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={saveTaxes} disabled={updateBusiness.isPending}>Save Tax Settings</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -275,7 +272,7 @@ export default function Settings() {
                 <Label>Show Business Logo on Receipt</Label>
                 <Switch checked={receiptShowLogo} onCheckedChange={setReceiptShowLogo} />
               </div>
-              <Button className="bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={saveReceipts} disabled={updateBusiness.isPending}>Save</Button>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={saveReceipts} disabled={updateBusiness.isPending}>Save</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -287,7 +284,7 @@ export default function Settings() {
               <div className="space-y-2"><Label>MTN MoMo Merchant Number</Label><Input value={momoMtn} onChange={e => setMomoMtn(e.target.value)} placeholder="e.g. 024XXXXXXX" /></div>
               <div className="space-y-2"><Label>Telecel Cash Number</Label><Input value={momoTelecel} onChange={e => setMomoTelecel(e.target.value)} placeholder="e.g. 020XXXXXXX" /></div>
               <div className="space-y-2"><Label>AirtelTigo Money Number</Label><Input value={momoAirteltigo} onChange={e => setMomoAirteltigo(e.target.value)} placeholder="e.g. 027XXXXXXX" /></div>
-              <Button className="bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={savePayments} disabled={updateBusiness.isPending}>Save Payment Settings</Button>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={savePayments} disabled={updateBusiness.isPending}>Save Payment Settings</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -297,7 +294,7 @@ export default function Settings() {
             <CardHeader><CardTitle className="font-display flex items-center gap-2"><Download className="h-5 w-5 text-primary" /> Data & Backup</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">Export your business data for backup or migration.</p>
-              <Button onClick={exportAllData} disabled={exporting} className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
+              <Button onClick={exportAllData} disabled={exporting} className="bg-primary text-primary-foreground hover:bg-primary/90">
                 {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileJson className="h-4 w-4 mr-1" />}
                 {exporting ? "Exporting..." : "Export Full Backup (JSON)"}
               </Button>
@@ -315,7 +312,7 @@ export default function Settings() {
           <Card>
             <CardHeader><CardTitle className="font-display flex items-center gap-2"><Landmark className="h-5 w-5 text-primary" /> Subscription</CardTitle></CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between p-4 rounded-lg bg-[#1a3a22] text-white hover:bg-[#152e1a]">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-primary text-primary-foreground">
                 <div>
                   <p className="font-bold text-lg">Nexis Pro</p>
                   <p className="text-sm opacity-90">Unlimited features · Priority support</p>

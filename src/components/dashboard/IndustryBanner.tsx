@@ -1,7 +1,6 @@
 /**
- * IndustryBanner — clean, brand-consistent dashboard header.
- * No per-industry colour bubbles. Forest green + cream = Nexus brand.
- * Feels like Google Workspace: typography-first, minimal chrome.
+ * IndustryBanner — theme-safe dashboard header.
+ * Uses CSS classes + Tailwind vars throughout — works in both light and dark.
  */
 import { useMemo } from "react";
 import { motion } from "framer-motion";
@@ -17,8 +16,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
   ShoppingBag, Utensils, Package2, Factory, Pill, Briefcase,
   HardHat, Truck, BedDouble, Wrench, Leaf, Scissors, Landmark,
 };
-
-const FOREST = "#1a3a22";
 
 interface IndustryBannerProps {
   industry: IndustryVertical | null;
@@ -45,20 +42,17 @@ export function IndustryBanner({ industry, businessName, staffName }: IndustryBa
       transition={{ duration: 0.35 }}
     >
       <div className="flex items-center gap-3.5">
-        {/* Industry icon — forest green always, not per-industry color */}
+        {/* Industry icon — always uses CSS primary color */}
         {Icon && (
-          <div
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-            style={{ backgroundColor: FOREST }}
-          >
-            <Icon className="h-5 w-5 text-white" strokeWidth={1.8} />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary">
+            <Icon className="h-5 w-5 text-primary-foreground" strokeWidth={1.8} />
           </div>
         )}
 
         <div>
           <h1
-            className="font-display font-bold leading-tight tracking-tight"
-            style={{ fontSize: "clamp(1.15rem, 2.2vw, 1.5rem)", color: FOREST }}
+            className="font-display font-bold leading-tight tracking-tight text-foreground"
+            style={{ fontSize: "clamp(1.15rem, 2.2vw, 1.5rem)" }}
           >
             {greeting}{staffName ? `, ${staffName.split(" ")[0]}` : ""}
           </h1>
@@ -69,14 +63,8 @@ export function IndustryBanner({ industry, businessName, staffName }: IndustryBa
             {industry && (
               <>
                 <span className="text-muted-foreground/30 text-xs">·</span>
-                <span
-                  className="text-xs font-medium px-2 py-0.5 rounded-full border"
-                  style={{
-                    color: FOREST,
-                    backgroundColor: "rgba(26,58,34,0.06)",
-                    borderColor: "rgba(26,58,34,0.15)",
-                  }}
-                >
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full border border-primary/20 bg-primary/8 text-primary"
+                  style={{ backgroundColor: "hsl(var(--primary) / 0.08)" }}>
                   {industry.name}
                 </span>
               </>

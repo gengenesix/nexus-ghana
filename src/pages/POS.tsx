@@ -467,7 +467,7 @@ export default function POS() {
                   <Button variant="outline" className="flex-1" onClick={holdSale}>
                     <PauseCircle className="h-4 w-4 mr-1" /> Hold
                   </Button>
-                  <Button className="flex-[2] bg-[#1a3a22] text-white font-semibold hover:bg-[#152e1a]" onClick={completeSale} disabled={saleMutation.isPending}>
+                  <Button className="flex-[2] bg-primary text-primary-foreground font-semibold hover:bg-primary/90" onClick={completeSale} disabled={saleMutation.isPending}>
                     <CreditCard className="h-4 w-4 mr-2" /> {saleMutation.isPending ? "Processing..." : "Complete Sale"}
                   </Button>
                 </div>

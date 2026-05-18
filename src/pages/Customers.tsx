@@ -165,7 +165,7 @@ export default function Customers() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
           <Button variant="outline" size="sm" onClick={() => { if (customers.length > 0) exportCustomersCsv(customers); else toast.error("No customers to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
-          <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
+          <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-1" /> Add Customer
           </Button>
         </div>
@@ -247,7 +247,7 @@ export default function Customers() {
               </Select>
             </div>
             <div className="space-y-2"><Label>Notes</Label><Textarea placeholder="Additional notes..." value={formNotes} onChange={e => setFormNotes(e.target.value)} /></div>
-            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => saveMutation.mutate()} disabled={!formName.trim() || saveMutation.isPending}>
+            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => saveMutation.mutate()} disabled={!formName.trim() || saveMutation.isPending}>
               {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : editingCustomer ? "Update Customer" : "Add Customer"}
             </Button>
           </div>

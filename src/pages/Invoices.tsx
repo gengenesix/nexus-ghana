@@ -309,7 +309,7 @@ export default function Invoices() {
           <Button variant="outline" size="sm" onClick={() => { if (invoices.length > 0) exportInvoicesCsv(invoices); else toast.error("No invoices"); }}>
             <Download className="h-4 w-4 mr-1" /> Export
           </Button>
-          <Button onClick={() => setShowCreate(true)} size="sm" className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
+          <Button onClick={() => setShowCreate(true)} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-1" /> New Invoice
           </Button>
         </div>
@@ -565,7 +565,7 @@ export default function Invoices() {
                     <Download className="h-4 w-4 mr-1" /> PDF
                   </Button>
                   {["sent", "partial", "overdue"].includes(selectedInvoice.status) && (
-                    <Button className="flex-1 bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => { setPaymentAmount(String(balanceDue > 0 ? balanceDue : Number(selectedInvoice.total))); setShowPayment(true); }}>
+                    <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => { setPaymentAmount(String(balanceDue > 0 ? balanceDue : Number(selectedInvoice.total))); setShowPayment(true); }}>
                       <CreditCard className="h-4 w-4 mr-1" /> Record Payment
                     </Button>
                   )}
@@ -623,7 +623,7 @@ export default function Invoices() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => recordPayment.mutate()} disabled={!paymentAmount || recordPayment.isPending}>
+              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => recordPayment.mutate()} disabled={!paymentAmount || recordPayment.isPending}>
                 {recordPayment.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CreditCard className="h-4 w-4 mr-2" /> Record Payment</>}
               </Button>
             </div>
@@ -783,7 +783,7 @@ export default function Invoices() {
             </div>
 
             <Button
-              className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={invoiceForm.handleSubmit((values) => createMutation.mutate(values))}
               disabled={createMutation.isPending}
             >

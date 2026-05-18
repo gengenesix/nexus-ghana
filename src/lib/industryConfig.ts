@@ -544,13 +544,19 @@ export function getIndustry(slug: string | null | undefined): IndustryVertical {
  * If slug is null/undefined (legacy business), returns ALL available modules
  * to preserve existing behavior.
  */
+// Modules that only make sense for a specific industry vertical.
+// Hidden when no industry is explicitly selected.
+const VERTICAL_ONLY_KEYS = new Set([
+  "restaurant", "pharmacy-rx", "hotel-mgmt", "fleet", "garage", "farm-mgmt",
+]);
+
 export function getIndustryModules(slug: string | null | undefined): ModuleDefinition[] {
   if (!slug) {
-    // Legacy business — no industry set — return all available modules
-    return MODULE_REGISTRY.filter((m) => m.isAvailable);
+    // No industry selected — return all available modules EXCEPT vertical-specific packs
+    return MODULE_REGISTRY.filter((m) => m.isAvailable && !VERTICAL_ONLY_KEYS.has(m.key));
   }
   const industry = INDUSTRY_MAP[slug];
-  if (!industry) return MODULE_REGISTRY.filter((m) => m.isAvailable);
+  if (!industry) return MODULE_REGISTRY.filter((m) => m.isAvailable && !VERTICAL_ONLY_KEYS.has(m.key));
   const keySet = new Set(industry.defaultModules);
   return MODULE_REGISTRY.filter((m) => keySet.has(m.key));
 }

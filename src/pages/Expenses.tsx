@@ -209,7 +209,7 @@ export default function Expenses() {
           <Button variant="outline" size="sm" onClick={() => { exportExpensesCsv(filtered); toast.success("Exported!"); }}>
             <Download className="h-4 w-4 mr-1" /> Export
           </Button>
-          <Button onClick={() => { resetForm(); setShowAdd(true); }} size="sm" className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
+          <Button onClick={() => { resetForm(); setShowAdd(true); }} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-1" /> Log Expense
           </Button>
         </div>
@@ -555,7 +555,7 @@ export default function Expenses() {
                 )}
               </div>
             </div>
-            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => saveMutation.mutate()} disabled={!formCategory || !formAmount || saveMutation.isPending || uploadingReceipt}>
+            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => saveMutation.mutate()} disabled={!formCategory || !formAmount || saveMutation.isPending || uploadingReceipt}>
               {saveMutation.isPending || uploadingReceipt ? <Loader2 className="h-4 w-4 animate-spin" /> : editingExpense ? "Update Expense" : "Log Expense"}
             </Button>
           </div>

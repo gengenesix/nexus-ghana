@@ -281,7 +281,7 @@ export default function Staff() {
             {staffMembers.length} members · {activeCount} active · <span className="text-green-500">{onlineCount} online</span>
           </p>
         </div>
-        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-[#1a3a22] text-white hover:bg-[#152e1a]">
+        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-1" /> Add Staff
         </Button>
       </div>
@@ -732,7 +732,7 @@ export default function Staff() {
               </Select>
             </div>
             <Button
-              className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => addMutation.mutate()}
               disabled={!formName.trim() || !formEmail.trim() || formInitialPassword.length < 8 || addMutation.isPending}
             >
@@ -774,7 +774,7 @@ export default function Staff() {
               Staff log in at the login page → Staff tab → enter these 3 credentials.
             </p>
             <Button
-              className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => {
                 navigator.clipboard.writeText(
                   `Business Access Code: ${business?.access_code}\nStaff ID: ${generatedStaffId}\nPassword: (the one you set)`
@@ -818,7 +818,7 @@ export default function Staff() {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full bg-[#1a3a22] text-white hover:bg-[#152e1a]" onClick={() => editMutation.mutate()} disabled={!formName.trim() || editMutation.isPending}>
+            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => editMutation.mutate()} disabled={!formName.trim() || editMutation.isPending}>
               {editMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
             </Button>
           </div>
