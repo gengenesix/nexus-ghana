@@ -28,8 +28,8 @@ import { useChartColors } from "@/hooks/useChartColors";
 import { toast } from "sonner";
 
 const PIE_COLORS = [
-  "hsl(86,68%,52%)", "hsl(140,38%,36%)", "hsl(142,60%,50%)",
-  "hsl(210,70%,55%)", "hsl(0,72%,55%)",
+  "#1a3a22", "#84cc16", "#4ade80",
+  "#166534", "#86efac",
 ];
 
 export default function Dashboard() {

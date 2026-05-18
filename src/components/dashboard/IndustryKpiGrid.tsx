@@ -1,16 +1,15 @@
 /**
- * IndustryKpiGrid
- * ───────────────
- * 6-card grid of industry-specific KPIs.
- * Each card has a left-colour accent border keyed to the industry colour.
- * Cards are Framer Motion stagger-animated on mount.
+ * IndustryKpiGrid — brand-aligned KPI cards.
+ * Design: clean white cards, forest-green accent, no left-border rainbow.
+ * Feels like Google Workspace or Notion — consistent, not per-industry colours.
  */
 import { motion } from "framer-motion";
 import {
   ShoppingCart, FileText, AlertTriangle, Users, TrendingUp, Landmark,
   ShoppingBag, ChefHat, Package, Truck, Factory, Briefcase,
-  FolderKanban, Handshake, Receipt, Wrench, UserPlus, Sparkles,
-  ClipboardCheck, BarChart3, Timer, Clock, HardHat,
+  FolderKanban, Handshake, Receipt, Wrench, UserPlus,
+  ClipboardCheck, BarChart3, Clock, HardHat, Pill, BedDouble,
+  Leaf, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -19,153 +18,133 @@ import type { KpiCardDef, KpiFormat } from "@/lib/kpiMapping";
 import type { DashboardStats } from "@/hooks/useIndustryDashboard";
 import type { IndustryVertical } from "@/lib/industryConfig";
 
-// ── Icon map ─────────────────────────────────────────────────────────────────
 const ICON_MAP: Record<string, LucideIcon> = {
   ShoppingCart, FileText, AlertTriangle, Users, TrendingUp, Landmark,
   ShoppingBag, ChefHat, Package, Truck, Factory, Briefcase,
-  FolderKanban, Handshake, Receipt, Wrench, UserPlus, Sparkles,
-  ClipboardCheck, BarChart3, Timer, Clock, HardHat,
+  FolderKanban, Handshake, Receipt, Wrench, UserPlus,
+  ClipboardCheck, BarChart3, Clock, HardHat, Pill, BedDouble, Leaf,
 };
 
 function getIcon(key: string): LucideIcon {
   return ICON_MAP[key] ?? ShoppingCart;
 }
 
-// ── Value formatter ───────────────────────────────────────────────────────────
 function formatValue(value: number, format: KpiFormat): string {
   switch (format) {
     case "ghs":     return formatGHS(value);
     case "percent": return `${value.toFixed(1)}%`;
     case "decimal": return value.toFixed(2);
-    default:        return String(Math.round(value));
+    default:        return value >= 1000
+      ? value >= 1_000_000
+        ? `${(value / 1_000_000).toFixed(1)}M`
+        : `${(value / 1000).toFixed(1)}k`
+      : String(Math.round(value));
   }
 }
 
-// ── Single KPI Card ───────────────────────────────────────────────────────────
 interface KpiCardProps {
   def: KpiCardDef;
   value: number;
-  accentColor: string;
   index: number;
 }
 
-function KpiCard({ def, value, accentColor, index }: KpiCardProps) {
+function KpiCard({ def, value, index }: KpiCardProps) {
   const navigate  = useNavigate();
   const Icon      = getIcon(def.iconKey);
   const formatted = formatValue(value, def.format);
 
   const isAlert =
     def.alertThreshold !== undefined &&
-    (def.alertAbove ? value >= def.alertThreshold : def.alertBelow ? value < def.alertThreshold : false);
+    (def.alertAbove
+      ? value >= def.alertThreshold
+      : def.alertBelow
+      ? value < def.alertThreshold
+      : false);
 
-  const alertColor = "hsl(var(--destructive))";
-  const borderColor = isAlert ? alertColor : accentColor;
+  const FOREST  = "#1a3a22";
+  const LIME    = "#84cc16";
+  const DANGER  = "hsl(var(--destructive))";
+
+  const accentColor = isAlert ? DANGER : FOREST;
+  const iconBg      = isAlert ? "rgba(239,68,68,0.08)" : "rgba(26,58,34,0.08)";
+  const valueColor  = isAlert ? DANGER : FOREST;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 18 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.1 + index * 0.06, ease: "easeOut" }}
+      transition={{ duration: 0.28, delay: 0.08 + index * 0.05, ease: "easeOut" }}
       onClick={def.path ? () => navigate(def.path!) : undefined}
+      className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all duration-200"
       style={{
-        backgroundColor: "white",
-        borderRadius: 16,
-        border: "1px solid hsl(var(--border))",
-        borderLeft: `3.5px solid ${borderColor}`,
-        padding: "16px 18px",
         cursor: def.path ? "pointer" : "default",
-        transition: "box-shadow 0.18s, transform 0.18s",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04)",
       }}
-      whileHover={def.path ? { y: -2, boxShadow: "0 6px 18px rgba(0,0,0,0.09)" } : {}}
+      whileHover={def.path ? {
+        y: -3,
+        boxShadow: "0 8px 24px rgba(26,58,34,0.10)",
+      } : {}}
     >
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: "var(--muted-foreground)",
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-              marginBottom: 6,
-            }}
-          >
+      {/* Alert top stripe */}
+      {isAlert && (
+        <div
+          className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
+          style={{ backgroundColor: DANGER }}
+        />
+      )}
+
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground mb-2">
             {def.label}
           </p>
           <p
+            className="font-display font-bold leading-none tracking-tight mb-1.5"
             style={{
-              fontSize: "clamp(1.25rem, 2vw, 1.6rem)",
-              fontWeight: 800,
-              color: isAlert ? alertColor : "var(--forest)",
-              letterSpacing: "-0.025em",
-              lineHeight: 1.1,
-              marginBottom: 4,
+              fontSize: "clamp(1.3rem, 2.2vw, 1.65rem)",
+              color: valueColor,
             }}
           >
             {formatted}
           </p>
-          <p style={{ fontSize: 11, color: "var(--muted-foreground)" }}>{def.description}</p>
+          <p className="text-[12px] text-muted-foreground leading-tight">
+            {def.description}
+          </p>
         </div>
 
         {/* Icon chip */}
         <div
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 10,
-            backgroundColor: isAlert ? `${alertColor}18` : `${accentColor}22`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors duration-200"
+          style={{ backgroundColor: iconBg }}
         >
-          <Icon
-            style={{
-              width: 18,
-              height: 18,
-              color: isAlert ? alertColor : accentColor,
-            }}
-            strokeWidth={2}
-          />
+          <Icon style={{ width: 18, height: 18, color: accentColor }} strokeWidth={2} />
         </div>
       </div>
+
+      {/* Clickable arrow hint */}
+      {def.path && (
+        <ArrowUpRight
+          className="absolute bottom-4 right-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-40 transition-opacity"
+          style={{ color: FOREST }}
+        />
+      )}
     </motion.div>
   );
 }
 
-// ── Grid ──────────────────────────────────────────────────────────────────────
 interface IndustryKpiGridProps {
   kpiCards: KpiCardDef[];
   stats: DashboardStats;
   industry: IndustryVertical | null;
 }
 
-export function IndustryKpiGrid({ kpiCards, stats, industry }: IndustryKpiGridProps) {
-  const accentColor = industry?.colorHex ?? "var(--forest)";
-
+export function IndustryKpiGrid({ kpiCards, stats }: IndustryKpiGridProps) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-        gap: 14,
-      }}
-    >
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
       {kpiCards.map((def, i) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const raw = (stats as any)[def.valueKey];
+        const raw   = (stats as any)[def.valueKey];
         const value = typeof raw === "number" ? raw : Number(raw ?? 0);
-        return (
-          <KpiCard
-            key={def.label}
-            def={def}
-            value={value}
-            accentColor={accentColor}
-            index={i}
-          />
-        );
+        return <KpiCard key={def.label} def={def} value={value} index={i} />;
       })}
     </div>
   );

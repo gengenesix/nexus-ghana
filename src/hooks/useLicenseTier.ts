@@ -7,8 +7,20 @@ export type LicenseTier =
   | "limited_logistics"
   | "limited_sales_crm";
 
-// Modules available per tier. "professional" gets everything.
-const TIER_MODULES: Record<LicenseTier, string[]> = {
+// ── Industry-specific modules (gated by INDUSTRY, not tier) ───────────────────
+// These modules appear only for businesses whose industry needs them.
+// They must not be tier-blocked — grant to all tiers.
+const INDUSTRY_MODULES = [
+  // Phase 3 operational modules
+  "payroll", "attendance", "budget", "assets", "petty-cash",
+  // Phase 4 vertical-specific modules
+  "restaurant", "pharmacy-rx", "hotel-mgmt", "fleet", "garage", "farm-mgmt",
+  // Always-on utility modules
+  "approvals", "audit-log",
+];
+
+// ── Core modules per billing tier ─────────────────────────────────────────────
+const CORE_MODULES: Record<LicenseTier, string[]> = {
   starter: [
     "dashboard", "pos", "inventory", "invoices",
     "customers", "suppliers", "expenses", "reports",
@@ -43,7 +55,14 @@ const TIER_MODULES: Record<LicenseTier, string[]> = {
   ],
 };
 
-// Human-readable tier labels for upgrade prompts
+// Build final TIER_MODULES by merging core + industry modules for every tier
+const TIER_MODULES: Record<LicenseTier, string[]> = Object.fromEntries(
+  Object.entries(CORE_MODULES).map(([tier, mods]) => [
+    tier,
+    [...mods, ...INDUSTRY_MODULES],
+  ])
+) as Record<LicenseTier, string[]>;
+
 export const TIER_LABELS: Record<LicenseTier, string> = {
   starter: "Starter",
   limited_financial: "Finance",
@@ -52,7 +71,6 @@ export const TIER_LABELS: Record<LicenseTier, string> = {
   professional: "Professional",
 };
 
-// Which tier unlocks a given module (used for upgrade messaging)
 export const MODULE_REQUIRED_TIER: Record<string, LicenseTier> = {
   financials: "limited_financial",
   banking: "limited_financial",

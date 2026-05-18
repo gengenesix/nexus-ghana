@@ -1,8 +1,6 @@
 /**
  * useIndustry — returns the current business's industry vertical config
  * useModules  — returns industry + tier filtered module access
- *
- * These are the primary hooks for industry-aware UI throughout the app.
  */
 import { useMemo } from "react";
 import { useBusiness } from "./useBusiness";
@@ -17,8 +15,14 @@ import {
   type NavGroup,
 } from "@/lib/industryConfig";
 
-// ─── useIndustry ──────────────────────────────────────────────────────────────
+// Modules that only make sense when an industry is explicitly selected.
+// Never show these in the sidebar for businesses without an industry slug.
+const INDUSTRY_VERTICAL_ONLY = new Set([
+  "restaurant", "pharmacy-rx", "hotel-mgmt",
+  "fleet", "garage", "farm-mgmt",
+]);
 
+// ─── useIndustry ──────────────────────────────────────────────────────────────
 export interface UseIndustryResult {
   industry: IndustryVertical;
   slug: string | null;
@@ -33,52 +37,39 @@ export function useIndustry(): UseIndustryResult {
   const industry = useMemo(() => getIndustry(slug), [slug]);
   const modules  = useMemo(() => getIndustryModules(slug), [slug]);
 
-  return {
-    industry,
-    slug,
-    modules,
-    hasIndustry: !!slug,
-  };
+  return { industry, slug, modules, hasIndustry: !!slug };
 }
 
 // ─── useModules ───────────────────────────────────────────────────────────────
-
 export interface UseModulesResult {
-  /**
-   * Returns true if the module is both:
-   *   1. In the current industry's default module set (or no industry set → all)
-   *   2. Accessible by the business's license tier
-   */
-  canAccess: (moduleKey: string) => boolean;
-
-  /**
-   * Returns true if a module is in the industry set but NOT yet built
-   * (used to render "Coming Soon" badge in module settings).
-   */
-  isComingSoon: (moduleKey: string) => boolean;
-
-  /** All modules visible to this industry (regardless of tier). */
-  industryModules: ModuleDefinition[];
-
-  /** Nav groups pre-filtered by industry + tier for building the sidebar. */
-  navGroups: Array<NavGroup & { visibleModules: ModuleDefinition[] }>;
+  canAccess:        (moduleKey: string) => boolean;
+  isComingSoon:     (moduleKey: string) => boolean;
+  industryModules:  ModuleDefinition[];
+  navGroups:        Array<NavGroup & { visibleModules: ModuleDefinition[] }>;
 }
 
 export function useModules(): UseModulesResult {
   const { modules: industryModules, slug } = useIndustry();
-  const { canAccess: tierCanAccess } = useLicenseTier();
+  const { canAccess: tierCanAccess }       = useLicenseTier();
 
   const industryKeySet = useMemo(
     () => new Set(industryModules.map((m) => m.key)),
-    [industryModules]
+    [industryModules],
   );
 
   const canAccess = (moduleKey: string): boolean => {
-    // Legacy businesses (no industry) get all available modules
-    const inIndustry = !slug || industryKeySet.has(moduleKey);
-    const inTier     = tierCanAccess(moduleKey);
-    const module     = MODULE_MAP[moduleKey];
-    const built      = module?.isAvailable ?? false;
+    const inTier  = tierCanAccess(moduleKey);
+    const module  = MODULE_MAP[moduleKey];
+    const built   = module?.isAvailable ?? false;
+
+    if (!slug) {
+      // No industry selected — hide vertical-specific modules entirely
+      if (INDUSTRY_VERTICAL_ONLY.has(moduleKey)) return false;
+      return inTier && built;
+    }
+
+    // Industry selected — show only modules in this industry's set
+    const inIndustry = industryKeySet.has(moduleKey);
     return inIndustry && inTier && built;
   };
 
@@ -93,8 +84,9 @@ export function useModules(): UseModulesResult {
         .map((key) => MODULE_MAP[key])
         .filter((mod): mod is ModuleDefinition => {
           if (!mod) return false;
+          if (!slug && INDUSTRY_VERTICAL_ONLY.has(mod.key)) return false;
           const inIndustry = !slug || industryKeySet.has(mod.key);
-          return inIndustry; // include even coming-soon; sidebar will badge them
+          return inIndustry;
         });
       return { ...group, visibleModules };
     }).filter((g) => g.visibleModules.length > 0);
