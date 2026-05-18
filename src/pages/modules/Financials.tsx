@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useBusiness } from "@/hooks/useBusiness";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, FileText, TrendingUp, Wallet, Calculator, Plus, Loader2, Pencil } from "lucide-react";
+import { BookOpen, FileText, TrendingUp, Wallet, ListOrdered, Plus, Loader2, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import AccountDialog from "@/components/financials/AccountDialog";
 import JournalEntryDialog from "@/components/financials/JournalEntryDialog";
@@ -52,7 +52,7 @@ export default function Financials() {
   });
 
   const totalAssets = accounts.filter((a: any) => a.account_type === "asset").reduce((s: number, a: any) => s + Number(a.balance), 0);
-  const totalRevenue = accounts.filter((a: any) => a.account_type === "income").reduce((s: number, a: any) => s + Number(a.balance), 0);
+  const totalRevenue = accounts.filter((a: any) => a.account_type === "revenue").reduce((s: number, a: any) => s + Number(a.balance), 0);
   const totalExpenses = accounts.filter((a: any) => a.account_type === "expense").reduce((s: number, a: any) => s + Number(a.balance), 0);
 
   return (
@@ -82,7 +82,7 @@ export default function Financials() {
           <div className="flex justify-between items-center">
             <h3 className="font-semibold">Chart of Accounts</h3>
             <div className="flex gap-2">
-              {accounts.length === 0 && <SeedChartOfAccounts />}
+              <SeedChartOfAccounts />
               <Button size="sm" onClick={() => setAccountDialog({ open: true })}><Plus className="h-4 w-4 mr-1" />Add Account</Button>
             </div>
           </div>

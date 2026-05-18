@@ -164,17 +164,18 @@ export default function Staff() {
           Authorization: `Bearer ${session?.access_token ?? ""}`,
         },
       });
+      // Check structured error from deployed function first
+      const result = res.data as any;
+      if (result?.error) throw new Error(result.error);
       if (res.error) {
         const msg = res.error.message ?? "";
-        if (msg.includes("non-2xx") || msg.includes("Failed to send") || msg.includes("not found")) {
+        if (msg.includes("non-2xx") || msg.includes("Failed to send") || msg.includes("not found") || msg.includes("Function not found")) {
           throw new Error(
             "Staff creation service is not deployed. Go to your Supabase dashboard → Edge Functions → deploy 'create-staff-account'."
           );
         }
         throw new Error(msg);
       }
-      const result = res.data as any;
-      if (result?.error) throw new Error(result.error);
       return result as { staffId: string };
     },
     onSuccess: (result) => {

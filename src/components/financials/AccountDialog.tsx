@@ -11,7 +11,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-const ACCOUNT_TYPES = ["asset", "liability", "equity", "income", "expense"];
+// Must match DB check constraint: account_type IN ('asset','liability','equity','revenue','expense','cost_of_sales')
+const ACCOUNT_TYPES = [
+  { value: "asset",        label: "Asset" },
+  { value: "liability",    label: "Liability" },
+  { value: "equity",       label: "Equity" },
+  { value: "revenue",      label: "Revenue" },
+  { value: "expense",      label: "Expense" },
+  { value: "cost_of_sales",label: "Cost of Sales" },
+];
 
 interface AccountDialogProps {
   open: boolean;
@@ -68,7 +76,7 @@ export default function AccountDialog({ open, onOpenChange, account }: AccountDi
             <div className="space-y-1.5"><Label>Type *</Label>
               <Select value={form.account_type} onValueChange={v => setForm(f => ({ ...f, account_type: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{ACCOUNT_TYPES.map(t => <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>)}</SelectContent>
+                <SelectContent>{ACCOUNT_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
