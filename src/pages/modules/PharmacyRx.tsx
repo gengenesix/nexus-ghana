@@ -62,10 +62,9 @@ function expiryAlert(dateStr: string | null): { days: number; level: "ok" | "war
   return { days, level: "ok" };
 }
 
-function nextRxNumber(count: number): string {
-  const yr = new Date().getFullYear();
-  return `RX-${yr}-${String(count + 1).padStart(4, "0")}`;
-}
+// Rx number is generated server-side via the generate_rx_number() RPC which
+// counts ALL prescriptions for the business (unfiltered by status) so the
+// displayed filter (pending / dispensed / etc.) never causes collisions.
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
@@ -131,7 +130,10 @@ export default function PharmacyRx() {
   const createRx = useMutation({
     mutationFn: async () => {
       if (!businessId || !patient) throw new Error("Patient name required");
-      const rxNumber = nextRxNumber(rxList.length);
+      // Get a collision-safe Rx number from the DB (counts all Rx, not just filtered)
+      const { data: rxNumber, error: numErr } = await (supabase as any)
+        .rpc("generate_rx_number", { p_business_id: businessId });
+      if (numErr) throw numErr;
       const { error } = await (supabase as any)
         .from("prescriptions")
         .insert({

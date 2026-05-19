@@ -5,10 +5,22 @@
 export type RbacAction = 'create' | 'read' | 'update' | 'delete' | 'approve';
 
 export const ALL_MODULES = [
+  // Core
   'dashboard', 'pos', 'inventory', 'invoices', 'customers',
   'suppliers', 'expenses', 'reports', 'staff', 'settings',
-  'crm', 'sales', 'purchasing', 'projects', 'banking',
-  'financials', 'hr', 'production',
+  // Finance
+  'financials', 'banking', 'budget', 'assets', 'petty-cash',
+  // Sales & CRM
+  'crm', 'sales-orders',
+  // Operations
+  'purchasing', 'warehouses', 'production', 'mrp',
+  'projects', 'service', 'timesheets', 'helpdesk',
+  // HR & People
+  'hr', 'payroll', 'attendance', 'recruitment',
+  // System
+  'administration', 'approvals', 'audit-log',
+  // Industry packs
+  'restaurant', 'pharmacy-rx', 'hotel-mgmt', 'fleet', 'garage', 'farm-mgmt',
 ] as const;
 
 export type RbacModule = typeof ALL_MODULES[number];

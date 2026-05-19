@@ -208,49 +208,58 @@ export default function POS() {
     toast.success(`Recalled: ${held.label}`);
   };
 
-  const submitSale = async (receiptNum: string, saleCart: CartItem[], saleTotal: number, saleSubtotal: number, saleDiscountAmount: number, saleCustomerId: string | null, saleRedeemPoints: boolean, salePointsToRedeem: number, saleSplits: PaymentSplit[] = []) => {
-    const { data: sale, error: saleError } = await supabase
-      .from("sales")
-      .insert({
-        business_id: business!.id,
-        subtotal: saleSubtotal,
-        discount_percent: discount,
-        discount_amount: saleDiscountAmount,
-        total: saleTotal,
-        payment_method: saleSplits.length > 0 ? "split" : paymentMethod,
-        payment_splits: saleSplits.length > 0 ? saleSplits : null,
-        receipt_number: receiptNum,
-        staff_id: staff?.id || null,
-        customer_id: saleCustomerId,
-      })
-      .select()
-      .single();
-    if (saleError) throw saleError;
-
+  // Atomic sale submission via DB RPC — validates stock, inserts sale + items,
+  // and decrements inventory all within a single Postgres transaction.
+  // If any step fails (e.g. stock went to zero between cart load and checkout)
+  // the entire transaction rolls back cleanly — no orphaned sales, no bad stock.
+  const submitSale = async (
+    receiptNum: string,
+    saleCart: CartItem[],
+    saleTotal: number,
+    saleSubtotal: number,
+    saleDiscountAmount: number,
+    saleCustomerId: string | null,
+    saleRedeemPoints: boolean,
+    salePointsToRedeem: number,
+    saleSplits: PaymentSplit[] = [],
+  ) => {
     const items = saleCart.map(c => ({
-      sale_id: sale.id,
-      product_id: c.id,
+      product_id:   c.id,
       product_name: c.name,
-      qty: c.qty,
-      unit_price: c.price,
+      qty:          c.qty,
+      unit_price:   c.price,
     }));
-    const { error: itemsError } = await supabase.from("sale_items").insert(items);
-    if (itemsError) throw itemsError;
 
+    const { error } = await supabase.rpc("submit_sale" as any, {
+      p_business_id:     business!.id,
+      p_receipt_number:  receiptNum,
+      p_subtotal:        saleSubtotal,
+      p_discount_pct:    discount,
+      p_discount_amount: saleDiscountAmount,
+      p_total:           saleTotal,
+      p_payment_method:  saleSplits.length > 0 ? "split" : paymentMethod,
+      p_payment_splits:  saleSplits.length > 0 ? saleSplits : null,
+      p_staff_id:        staff?.id ?? null,
+      p_customer_id:     saleCustomerId,
+      p_items:           items,
+    });
+    if (error) throw error;
+
+    // Loyalty points are non-critical — failure here does not roll back the sale
     if (saleCustomerId) {
-      // Deduct redeemed points
       if (saleRedeemPoints && salePointsToRedeem > 0) {
-        const { error: deductErr } = await supabase.rpc("decrement_loyalty_points", { p_customer_id: saleCustomerId, p_points: salePointsToRedeem });
-        if (deductErr) {
-          console.error("Failed to deduct loyalty points:", deductErr);
-          toast.warning("Sale saved but loyalty points could not be deducted — contact support.");
-        }
+        const { error: deductErr } = await supabase.rpc("decrement_loyalty_points", {
+          p_customer_id: saleCustomerId,
+          p_points: salePointsToRedeem,
+        });
+        if (deductErr) toast.warning("Sale saved — loyalty points could not be deducted.");
       }
-      // Award new points (1 point per GHS 10)
       const earned = Math.floor(saleTotal / 10);
       if (earned > 0) {
-        const { error: earnErr } = await supabase.rpc("increment_loyalty_points", { p_customer_id: saleCustomerId, p_points: earned });
-        if (earnErr) console.error("Failed to award loyalty points:", earnErr);
+        await supabase.rpc("increment_loyalty_points", {
+          p_customer_id: saleCustomerId,
+          p_points: earned,
+        });
       }
     }
   };
