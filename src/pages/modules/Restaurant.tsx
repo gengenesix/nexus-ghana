@@ -92,7 +92,7 @@ export default function Restaurant() {
     queryKey: ["restaurant-tables", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("restaurant_tables")
         .select("*")
         .eq("business_id", businessId)
@@ -106,7 +106,7 @@ export default function Restaurant() {
     queryKey: ["open-order", selectedTable?.id],
     enabled: !!selectedTable,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("restaurant_orders")
         .select("*")
         .eq("table_id", selectedTable!.id)
@@ -121,7 +121,7 @@ export default function Restaurant() {
     queryKey: ["order-items", openOrder?.id],
     enabled: !!openOrder,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("restaurant_order_items")
         .select("*")
         .eq("order_id", openOrder!.id)
@@ -135,7 +135,7 @@ export default function Restaurant() {
     queryKey: ["recent-orders", businessId],
     enabled: !!businessId && view === "orders",
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("restaurant_orders")
         .select("*, restaurant_tables(table_number)")
         .eq("business_id", businessId)
@@ -154,7 +154,7 @@ export default function Restaurant() {
   const addTable = useMutation({
     mutationFn: async () => {
       if (!businessId || !tNum) throw new Error("Table number required");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("restaurant_tables")
         .insert({ business_id: businessId, table_number: tNum, name: tName || null, capacity: parseInt(tCap) || 4, section: tSec });
       if (error) throw error;
@@ -171,7 +171,7 @@ export default function Restaurant() {
   const openOrderMut = useMutation({
     mutationFn: async () => {
       if (!businessId || !selectedTable) throw new Error("No table selected");
-      const { data: order, error } = await (supabase as any)
+      const { data: order, error } = await supabase
         .from("restaurant_orders")
         .insert({
           business_id: businessId,
@@ -182,7 +182,7 @@ export default function Restaurant() {
         .select().single();
       if (error) throw error;
       // Mark table occupied
-      await (supabase as any)
+      await supabase
         .from("restaurant_tables")
         .update({ status: "occupied" })
         .eq("id", selectedTable.id);
@@ -203,7 +203,7 @@ export default function Restaurant() {
       if (!openOrder || !itemName || !itemPrice) throw new Error("Fill all fields");
       const qty   = parseFloat(itemQty)   || 1;
       const price = parseFloat(itemPrice) || 0;
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("restaurant_order_items")
         .insert({
           order_id:     openOrder.id,
@@ -216,7 +216,7 @@ export default function Restaurant() {
       if (error) throw error;
       // Update order total
       const newTotal = orderItems.reduce((s, i) => s + i.quantity * i.unit_price, 0) + qty * price;
-      await (supabase as any)
+      await supabase
         .from("restaurant_orders")
         .update({ total_amount: Math.round(newTotal * 100) / 100 })
         .eq("id", openOrder.id);
@@ -234,11 +234,11 @@ export default function Restaurant() {
   const removeItem = useMutation({
     mutationFn: async (itemId: string) => {
       const item = orderItems.find(i => i.id === itemId);
-      const { error } = await (supabase as any).from("restaurant_order_items").delete().eq("id", itemId);
+      const { error } = await supabase.from("restaurant_order_items").delete().eq("id", itemId);
       if (error) throw error;
       if (item && openOrder) {
         const newTotal = orderItems.filter(i => i.id !== itemId).reduce((s, i) => s + i.quantity * i.unit_price, 0);
-        await (supabase as any).from("restaurant_orders").update({ total_amount: Math.round(newTotal * 100) / 100 }).eq("id", openOrder.id);
+        await supabase.from("restaurant_orders").update({ total_amount: Math.round(newTotal * 100) / 100 }).eq("id", openOrder.id);
       }
     },
     onSuccess: () => {
@@ -251,11 +251,11 @@ export default function Restaurant() {
   const settleOrder = useMutation({
     mutationFn: async () => {
       if (!openOrder || !selectedTable) throw new Error("No open order");
-      await (supabase as any)
+      await supabase
         .from("restaurant_orders")
         .update({ status: "settled", closed_at: new Date().toISOString() })
         .eq("id", openOrder.id);
-      await (supabase as any)
+      await supabase
         .from("restaurant_tables")
         .update({ status: "available" })
         .eq("id", selectedTable.id);
@@ -272,7 +272,7 @@ export default function Restaurant() {
 
   const updateTableStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: TableStatus }) => {
-      const { error } = await (supabase as any).from("restaurant_tables").update({ status }).eq("id", id);
+      const { error } = await supabase.from("restaurant_tables").update({ status }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

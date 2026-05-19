@@ -110,7 +110,7 @@ export default function Attendance() {
     queryKey: ["attendance", businessId, year, month],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("attendance_records")
         .select("*")
         .eq("business_id", businessId)
@@ -126,7 +126,7 @@ export default function Attendance() {
     queryKey: ["attendance-day", businessId, selectedDate],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("attendance_records")
         .select("*")
         .eq("business_id", businessId)
@@ -161,7 +161,7 @@ export default function Attendance() {
         notes:           notes || null,
       };
 
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("attendance_records")
         .upsert(payload, {
           onConflict: "business_id,staff_member_id,attendance_date",

@@ -131,7 +131,7 @@ export default function PettyCash() {
     queryKey: ["petty-funds", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("petty_cash_funds")
         .select("*")
         .eq("business_id", businessId)
@@ -145,7 +145,7 @@ export default function PettyCash() {
     queryKey: ["petty-txns", selectedFund?.id],
     enabled: !!selectedFund,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("petty_cash_transactions")
         .select("*")
         .eq("fund_id", selectedFund!.id)
@@ -161,7 +161,7 @@ export default function PettyCash() {
     mutationFn: async () => {
       if (!businessId || !fName || !fFloat) throw new Error("Fill required fields");
       const floatAmt = parseFloat(fFloat);
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("petty_cash_funds")
         .insert({
           business_id:     businessId,
@@ -188,7 +188,7 @@ export default function PettyCash() {
       if (isNaN(amount) || amount <= 0) throw new Error("Enter a valid amount");
 
       // Insert transaction
-      const { error: txnError } = await (supabase as any)
+      const { error: txnError } = await supabase
         .from("petty_cash_transactions")
         .insert({
           business_id: businessId,
@@ -209,7 +209,7 @@ export default function PettyCash() {
       if (tType === "adjustment") balanceDelta = amount; // can be positive or negative
 
       const newBalance = selectedFund.current_balance + balanceDelta;
-      const { error: fundError } = await (supabase as any)
+      const { error: fundError } = await supabase
         .from("petty_cash_funds")
         .update({ current_balance: newBalance, updated_at: new Date().toISOString() })
         .eq("id", selectedFund.id);

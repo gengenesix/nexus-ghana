@@ -118,7 +118,7 @@ export default function FarmMgmt() {
     queryKey: ["farm-plots", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("farm_plots").select("*").eq("business_id", businessId).order("name");
       if (error) throw error;
       return data ?? [];
@@ -129,7 +129,7 @@ export default function FarmMgmt() {
     queryKey: ["farm-seasons", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("farm_seasons").select("*").eq("business_id", businessId).order("start_date", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -140,7 +140,7 @@ export default function FarmMgmt() {
     queryKey: ["farm-activities", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("farm_activities")
         .select("*, farm_plots(name), farm_seasons(name)")
         .eq("business_id", businessId)
@@ -160,7 +160,7 @@ export default function FarmMgmt() {
   const addPlot = useMutation({
     mutationFn: async () => {
       if (!businessId || !pName) throw new Error("Plot name required");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("farm_plots")
         .insert({ business_id: businessId, name: pName, size_hectares: pSize ? parseFloat(pSize) : null, location: pLoc || null, crop_type: pCrop || null });
       if (error) throw error;
@@ -177,7 +177,7 @@ export default function FarmMgmt() {
   const addSeason = useMutation({
     mutationFn: async () => {
       if (!businessId || !sName || !sEnd) throw new Error("Name and end date required");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("farm_seasons")
         .insert({ business_id: businessId, name: sName, start_date: sStart, end_date: sEnd });
       if (error) throw error;
@@ -193,7 +193,7 @@ export default function FarmMgmt() {
 
   const activateSeason = useMutation({
     mutationFn: async (id: string) => {
-      await (supabase as any).from("farm_seasons").update({ status: "active" }).eq("id", id);
+      await supabase.from("farm_seasons").update({ status: "active" }).eq("id", id);
     },
     onSuccess: () => {
       toast.success("Season activated");
@@ -204,7 +204,7 @@ export default function FarmMgmt() {
 
   const updatePlotStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: PlotStatus }) => {
-      const { error } = await (supabase as any).from("farm_plots").update({ status }).eq("id", id);
+      const { error } = await supabase.from("farm_plots").update({ status }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -217,7 +217,7 @@ export default function FarmMgmt() {
   const addActivity = useMutation({
     mutationFn: async () => {
       if (!businessId || !aDesc) throw new Error("Description required");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("farm_activities")
         .insert({
           business_id:   businessId,
@@ -376,7 +376,7 @@ export default function FarmMgmt() {
                   )}
                   {season.status === "active" && (
                     <Button size="sm" variant="outline"
-                      onClick={() => (supabase as any).from("farm_seasons").update({ status: "completed" }).eq("id", season.id).then(() => qc.invalidateQueries({ queryKey: ["farm-seasons"] }))}>
+                      onClick={() => supabase.from("farm_seasons").update({ status: "completed" }).eq("id", season.id).then(() => qc.invalidateQueries({ queryKey: ["farm-seasons"] }))}>
                       Complete
                     </Button>
                   )}

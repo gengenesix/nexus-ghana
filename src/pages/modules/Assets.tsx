@@ -151,7 +151,7 @@ export default function Assets() {
     queryKey: ["assets", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("assets")
         .select("*")
         .eq("business_id", businessId)
@@ -166,7 +166,7 @@ export default function Assets() {
   const createAsset = useMutation({
     mutationFn: async () => {
       if (!businessId || !fName || !fCost) throw new Error("Fill required fields");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("assets")
         .insert({
           business_id:         businessId,
@@ -195,7 +195,7 @@ export default function Assets() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: AssetStatus }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("assets")
         .update({ status, updated_at: new Date().toISOString() })
         .eq("id", id);
@@ -211,7 +211,7 @@ export default function Assets() {
 
   const deleteAsset = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as any).from("assets").delete().eq("id", id);
+      const { error } = await supabase.from("assets").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

@@ -43,53 +43,86 @@ export default function Reports() {
   const [dateFrom, setDateFrom] = useState(() => format(subMonths(new Date(), 11), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(() => format(new Date(), "yyyy-MM-dd"));
 
-  // All queries are bounded by dateFrom/dateTo and include them in queryKeys
-  const { data: sales = [], isLoading: salesLoading } = useQuery({
-    queryKey: ["report-sales", business?.id, dateFrom, dateTo],
+  // ── Primary report data: single server-side CTE aggregation (replaces 17k row downloads) ──
+  const { data: reportSummary, isLoading: summaryLoading } = useQuery({
+    queryKey: ["report-summary", business?.id, dateFrom, dateTo],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_report_summary", {
+        p_business_id: business!.id,
+        p_date_from:   dateFrom,
+        p_date_to:     dateTo,
+      });
+      if (error) throw error;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const d = data as any ?? {};
+      return {
+        totalRevenue:      Number(d.total_revenue      ?? 0),
+        totalDiscounts:    Number(d.total_discounts    ?? 0),
+        saleCount:         Number(d.sale_count         ?? 0),
+        avgSaleValue:      Number(d.avg_sale_value     ?? 0),
+        totalExpenses:     Number(d.total_expenses     ?? 0),
+        netProfit:         Number(d.net_profit         ?? 0),
+        profitMarginPct:   Number(d.profit_margin_pct  ?? 0),
+        paymentBreakdown:  (d.payment_breakdown   ?? []) as { method: string; amount: number; count: number }[],
+        monthlyRevenue:    (d.monthly_revenue     ?? []) as { label: string; revenue: number }[],
+        topProducts:       (d.top_products        ?? []) as { name: string; units_sold: number; revenue: number }[],
+        expenseByCategory: (d.expense_by_category ?? []) as { category: string; amount: number }[],
+        invoicesPaid:      Number(d.invoices_paid        ?? 0),
+        invoicesOverdue:   Number(d.invoices_overdue     ?? 0),
+        invoicesOutstanding: Number(d.invoices_outstanding ?? 0),
+        overdueAmount:     Number(d.overdue_amount       ?? 0),
+        outstandingAmount: Number(d.outstanding_amount   ?? 0),
+      };
+    },
+    enabled: !!business,
+    staleTime: 60_000,
+  });
+
+  // Lightweight sales query — only staff_id + total needed for staff performance
+  const { data: staffSales = [] } = useQuery({
+    queryKey: ["report-staff-sales", business?.id, dateFrom, dateTo],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sales")
-        .select("id, total, payment_method, staff_id, created_at")
+        .select("id, total, staff_id")
         .eq("business_id", business!.id)
         .gte("created_at", dateFrom)
-        .lte("created_at", dateTo + "T23:59:59")
-        .order("created_at", { ascending: false })
-        .limit(5000);
+        .lte("created_at", dateTo + "T23:59:59");
       if (error) throw error;
       return data;
     },
     enabled: !!business,
   });
 
-  const { data: saleItems = [], isLoading: itemsLoading } = useQuery({
-    queryKey: ["report-sale-items", business?.id, dateFrom, dateTo],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sale_items")
-        .select("product_name, qty, unit_price, sale_id, sales!inner(business_id, created_at)")
-        .eq("sales.business_id", business!.id)
-        .gte("sales.created_at", dateFrom)
-        .lte("sales.created_at", dateTo + "T23:59:59")
-        .limit(10000);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!business,
-  });
-
+  // Lightweight expenses for monthly trend chart + CSV export
   const { data: expenses = [], isLoading: expensesLoading } = useQuery({
     queryKey: ["report-expenses", business?.id, dateFrom, dateTo],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("expenses")
-        .select("*")
+        .select("id, date, amount, category, description")
         .eq("business_id", business!.id)
         .gte("date", dateFrom)
         .lte("date", dateTo)
-        .order("date", { ascending: false })
-        .limit(2000);
+        .order("date", { ascending: false });
       if (error) throw error;
       return data;
+    },
+    enabled: !!business,
+  });
+
+  // Sold product names — minimal query for dead-stock computation
+  const { data: soldProductNames = [] } = useQuery({
+    queryKey: ["report-sold-names", business?.id, dateFrom, dateTo],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sale_items")
+        .select("product_name, sales!inner(business_id, created_at)")
+        .eq("sales.business_id", business!.id)
+        .gte("sales.created_at", dateFrom)
+        .lte("sales.created_at", dateTo + "T23:59:59");
+      if (error) throw error;
+      return [...new Set((data ?? []).map((r: any) => r.product_name as string))];
     },
     enabled: !!business,
   });
@@ -169,19 +202,27 @@ export default function Reports() {
     enabled: !!business,
   });
 
-  const isLoading = salesLoading || expensesLoading;
+  const isLoading = summaryLoading || expensesLoading;
+  const itemsLoading = summaryLoading;
 
   // ── Derived computations ──────────────────────────────────────────────────
 
-  const totalRevenue = useMemo(
-    () => sales.reduce((s: number, r: any) => s + Number(r.total), 0),
-    [sales],
+  // Totals come from server-side RPC (no 17k row download)
+  const totalRevenue    = reportSummary?.totalRevenue    ?? 0;
+  const totalExpensesAmt = reportSummary?.totalExpenses  ?? 0;
+  const netProfit       = reportSummary?.netProfit       ?? 0;
+  const topProducts     = useMemo(() =>
+    (reportSummary?.topProducts ?? []).map(p => ({ name: p.name, qty: p.units_sold, revenue: p.revenue })),
+    [reportSummary],
   );
-  const totalExpensesAmt = useMemo(
-    () => expenses.reduce((s: number, r: any) => s + Number(r.amount), 0),
-    [expenses],
+  const paymentData     = useMemo(() =>
+    (reportSummary?.paymentBreakdown ?? []).map(p => ({ name: p.method, value: p.amount })),
+    [reportSummary],
   );
-  const netProfit = totalRevenue - totalExpensesAmt;
+  const expenseCatData  = useMemo(() =>
+    (reportSummary?.expenseByCategory ?? []).map(e => ({ name: e.category, value: e.amount })),
+    [reportSummary],
+  );
 
   const totalInventoryValue = useMemo(
     () => products.reduce((s: number, p: any) => s + Number(p.selling_price) * p.qty, 0),
@@ -193,13 +234,15 @@ export default function Reports() {
   );
   const grossMargin = totalRevenue > 0 ? ((totalRevenue - totalCostValue) / totalRevenue * 100) : 0;
 
-  // Monthly P&L
+  // Monthly P&L — merge RPC monthly revenue with local expense totals
   const monthlyData = useMemo(() => {
     const map: Record<string, { revenue: number; expenses: number }> = {};
-    sales.forEach((s: any) => {
-      const key = s.created_at.slice(0, 7);
+    (reportSummary?.monthlyRevenue ?? []).forEach(r => {
+      // label is "Mon YYYY" — convert to "YYYY-MM" key
+      const d = new Date(r.label);
+      const key = isNaN(d.getTime()) ? r.label : d.toISOString().slice(0, 7);
       if (!map[key]) map[key] = { revenue: 0, expenses: 0 };
-      map[key].revenue += Number(s.total);
+      map[key].revenue = r.revenue;
     });
     expenses.forEach((e: any) => {
       const key = (e.date as string).slice(0, 7);
@@ -215,23 +258,11 @@ export default function Reports() {
         profit: map[key].revenue - map[key].expenses,
       };
     });
-  }, [sales, expenses]);
+  }, [reportSummary, expenses]);
 
-  // Top products
-  const topProducts = useMemo(() => {
-    const map: Record<string, { name: string; qty: number; revenue: number }> = {};
-    saleItems.forEach((item: any) => {
-      const name = item.product_name;
-      if (!map[name]) map[name] = { name, qty: 0, revenue: 0 };
-      map[name].qty += item.qty;
-      map[name].revenue += item.qty * Number(item.unit_price);
-    });
-    return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
-  }, [saleItems]);
-
-  // Dead stock & bottom sellers (derived from topProducts + products)
+  // Dead stock & bottom sellers
   const { deadStock, bottomSellers, skuMargins } = useMemo(() => {
-    const soldNames = new Set(topProducts.map(p => p.name));
+    const soldNames = new Set(soldProductNames);
     const dead = (products as any[]).filter(p => !soldNames.has(p.name) && p.qty > 0);
     const bottom = topProducts.length >= 5 ? [...topProducts].sort((a, b) => a.revenue - b.revenue).slice(0, 5) : [];
     const margins = topProducts.map(tp => {
@@ -242,21 +273,7 @@ export default function Reports() {
       return { ...tp, marginPct: pct, cost, sell };
     }).sort((a, b) => b.marginPct - a.marginPct);
     return { deadStock: dead, bottomSellers: bottom, skuMargins: margins };
-  }, [topProducts, products]);
-
-  // Payment method breakdown
-  const paymentData = useMemo(() => {
-    const map: Record<string, number> = {};
-    sales.forEach((s: any) => { map[s.payment_method] = (map[s.payment_method] || 0) + Number(s.total); });
-    return Object.entries(map).map(([name, value]) => ({ name, value }));
-  }, [sales]);
-
-  // Expense category breakdown
-  const expenseCatData = useMemo(() => {
-    const map: Record<string, number> = {};
-    expenses.forEach((e: any) => { map[e.category] = (map[e.category] || 0) + Number(e.amount); });
-    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-  }, [expenses]);
+  }, [topProducts, products, soldProductNames]);
 
   // Financial statement helpers
   const groupAccountsByType = (type: string) => accounts.filter((a: any) => a.account_type === type);
@@ -307,11 +324,11 @@ export default function Reports() {
     ];
   }, [invoices]);
 
-  // Staff performance
+  // Staff performance (uses lightweight staffSales — only id, total, staff_id)
   const staffPerformance = useMemo(() => {
     const map: Record<string, { name: string; role: string; txCount: number; revenue: number }> = {};
     staffMembers.forEach((s: any) => { map[s.id] = { name: s.name, role: s.role, txCount: 0, revenue: 0 }; });
-    sales.forEach((s: any) => {
+    staffSales.forEach((s: any) => {
       if (s.staff_id && map[s.staff_id]) {
         map[s.staff_id].txCount += 1;
         map[s.staff_id].revenue += Number(s.total);
@@ -320,7 +337,7 @@ export default function Reports() {
     return Object.values(map)
       .map((s) => ({ ...s, avgOrder: s.txCount > 0 ? s.revenue / s.txCount : 0 }))
       .sort((a, b) => b.revenue - a.revenue);
-  }, [staffMembers, sales]);
+  }, [staffMembers, staffSales]);
 
   // Cash flow
   const { cashFlowData, totalInflow, totalOutflow } = useMemo(() => {
@@ -655,15 +672,19 @@ export default function Reports() {
         <TabsContent value="sales" className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <DateFilter />
-            <Button variant="outline" size="sm" onClick={() => { exportSalesCsv(sales); toast.success("Sales exported!"); }}>
+            <Button variant="outline" size="sm" onClick={async () => {
+              const { data } = await supabase.from("sales").select("*").eq("business_id", business!.id).gte("created_at", dateFrom).lte("created_at", dateTo + "T23:59:59").limit(5000);
+              exportSalesCsv(data ?? []);
+              toast.success("Sales exported!");
+            }}>
               <Download className="h-4 w-4 mr-1" /> Export CSV
             </Button>
           </div>
           {isLoading ? <StatSkeleton /> : (
             <div className="grid sm:grid-cols-3 gap-4">
               <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Total Revenue</p><p className="text-2xl font-display font-bold text-primary">{formatGHS(totalRevenue)}</p></CardContent></Card>
-              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Avg. Order Value</p><p className="text-2xl font-display font-bold">{formatGHS(sales.length > 0 ? totalRevenue / sales.length : 0)}</p></CardContent></Card>
-              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Transactions</p><p className="text-2xl font-display font-bold">{sales.length}</p></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Avg. Order Value</p><p className="text-2xl font-display font-bold">{formatGHS(reportSummary?.avgSaleValue ?? 0)}</p></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><p className="text-sm text-muted-foreground">Transactions</p><p className="text-2xl font-display font-bold">{reportSummary?.saleCount ?? 0}</p></CardContent></Card>
             </div>
           )}
           {isLoading ? <ChartSkeleton /> : monthlyData.length > 0 && (
@@ -849,7 +870,7 @@ export default function Reports() {
         <TabsContent value="expenses" className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <DateFilter />
-            <Button variant="outline" size="sm" onClick={() => { exportExpensesCsv(expenses); toast.success("Expenses exported!"); }}>
+            <Button variant="outline" size="sm" onClick={() => { exportExpensesCsv(expenses as any[]); toast.success("Expenses exported!"); }}>
               <Download className="h-4 w-4 mr-1" /> Export CSV
             </Button>
           </div>

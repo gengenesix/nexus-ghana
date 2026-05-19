@@ -102,7 +102,7 @@ export default function Garage() {
     queryKey: ["job-cards", businessId, filterStatus],
     enabled: !!businessId,
     queryFn: async () => {
-      let q = (supabase as any)
+      let q = supabase
         .from("job_cards")
         .select("*")
         .eq("business_id", businessId)
@@ -122,7 +122,7 @@ export default function Garage() {
     queryKey: ["job-items", selected?.id],
     enabled: !!selected,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("job_card_items")
         .select("*")
         .eq("job_card_id", selected!.id)
@@ -139,7 +139,7 @@ export default function Garage() {
       if (!businessId || !jCustomer || !jVehicleReg || !jComplaint)
         throw new Error("Customer, vehicle registration, and complaint required");
       const jobNumber = nextJobNumber(jobs.length);
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("job_cards")
         .insert({
           business_id:       businessId,
@@ -172,7 +172,7 @@ export default function Garage() {
       if (!selected || !iDesc) throw new Error("Description required");
       const qty   = parseFloat(iQty)   || 1;
       const price = parseFloat(iPrice) || 0;
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("job_card_items")
         .insert({
           job_card_id:  selected.id,
@@ -185,7 +185,7 @@ export default function Garage() {
       if (error) throw error;
       // Update actual cost
       const newTotal = items.reduce((s, i) => s + i.quantity * i.unit_price, 0) + qty * price;
-      await (supabase as any)
+      await supabase
         .from("job_cards")
         .update({ actual_cost: Math.round(newTotal * 100) / 100, updated_at: new Date().toISOString() })
         .eq("id", selected.id);
@@ -203,10 +203,10 @@ export default function Garage() {
   const removeItem = useMutation({
     mutationFn: async (itemId: string) => {
       const item = items.find(i => i.id === itemId);
-      await (supabase as any).from("job_card_items").delete().eq("id", itemId);
+      await supabase.from("job_card_items").delete().eq("id", itemId);
       if (item && selected) {
         const newTotal = items.filter(i => i.id !== itemId).reduce((s, i) => s + i.quantity * i.unit_price, 0);
-        await (supabase as any).from("job_cards").update({ actual_cost: Math.round(newTotal * 100) / 100 }).eq("id", selected.id);
+        await supabase.from("job_cards").update({ actual_cost: Math.round(newTotal * 100) / 100 }).eq("id", selected.id);
       }
     },
     onSuccess: () => {
@@ -221,7 +221,7 @@ export default function Garage() {
       if (!selected) return;
       const updates: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
       if (status === "delivered") updates.completed_date = format(new Date(), "yyyy-MM-dd");
-      const { error } = await (supabase as any).from("job_cards").update(updates).eq("id", selected.id);
+      const { error } = await supabase.from("job_cards").update(updates).eq("id", selected.id);
       if (error) throw error;
     },
     onSuccess: (_, status) => {

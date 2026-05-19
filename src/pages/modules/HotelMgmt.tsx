@@ -101,7 +101,7 @@ export default function HotelMgmt() {
     queryKey: ["hotel-rooms", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("hotel_rooms")
         .select("*")
         .eq("business_id", businessId)
@@ -115,7 +115,7 @@ export default function HotelMgmt() {
     queryKey: ["hotel-bookings", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("hotel_bookings")
         .select("*, hotel_rooms(room_number)")
         .eq("business_id", businessId)
@@ -131,7 +131,7 @@ export default function HotelMgmt() {
   const addRoom = useMutation({
     mutationFn: async () => {
       if (!businessId || !rNum || !rRate) throw new Error("Room number and rate required");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("hotel_rooms")
         .insert({
           business_id:    businessId,
@@ -160,7 +160,7 @@ export default function HotelMgmt() {
       if (nights <= 0) throw new Error("Check-out must be after check-in");
       const total = selectedRoom.rate_per_night * nights;
 
-      const { error: bErr } = await (supabase as any)
+      const { error: bErr } = await supabase
         .from("hotel_bookings")
         .insert({
           business_id:    businessId,
@@ -178,7 +178,7 @@ export default function HotelMgmt() {
         });
       if (bErr) throw bErr;
       // Mark room reserved
-      await (supabase as any).from("hotel_rooms").update({ status: "reserved" }).eq("id", selectedRoom.id);
+      await supabase.from("hotel_rooms").update({ status: "reserved" }).eq("id", selectedRoom.id);
     },
     onSuccess: () => {
       toast.success("Booking created");
@@ -193,13 +193,13 @@ export default function HotelMgmt() {
 
   const updateBookingStatus = useMutation({
     mutationFn: async ({ bookingId, status, roomId }: { bookingId: string; status: BookingStatus; roomId: string | null }) => {
-      await (supabase as any).from("hotel_bookings").update({ status, updated_at: new Date().toISOString() }).eq("id", bookingId);
+      await supabase.from("hotel_bookings").update({ status, updated_at: new Date().toISOString() }).eq("id", bookingId);
       if (roomId) {
         const roomStatus: RoomStatus =
           status === "checked-in"  ? "occupied"  :
           status === "checked-out" ? "cleaning"  :
           status === "cancelled"   ? "available" : "reserved";
-        await (supabase as any).from("hotel_rooms").update({ status: roomStatus }).eq("id", roomId);
+        await supabase.from("hotel_rooms").update({ status: roomStatus }).eq("id", roomId);
       }
     },
     onSuccess: () => {

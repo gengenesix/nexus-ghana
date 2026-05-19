@@ -59,6 +59,18 @@ export default function Settings() {
     }
   }, [business]);
 
+  // Seed industry-specific Chart of Accounts when industry is set (idempotent — DB checks first)
+  useEffect(() => {
+    if (business?.id && slug) {
+      supabase.rpc("seed_industry_coa", {
+        p_business_id:   business.id,
+        p_industry_slug: slug,
+      }).then(({ error }) => {
+        if (error) console.warn("seed_industry_coa:", error.message);
+      });
+    }
+  }, [business?.id, slug]);
+
   const saveProfile = async () => {
     if (!name.trim()) { toast.error("Business name cannot be empty"); return; }
     try {

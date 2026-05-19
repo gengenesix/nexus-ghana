@@ -132,7 +132,7 @@ export default function Budget() {
     queryKey: ["budgets", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("budgets")
         .select("*")
         .eq("business_id", businessId)
@@ -146,7 +146,7 @@ export default function Budget() {
     queryKey: ["budget-lines", selectedBudget?.id],
     enabled: !!selectedBudget,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("budget_lines")
         .select("*")
         .eq("budget_id", selectedBudget!.id)
@@ -161,7 +161,7 @@ export default function Budget() {
   const createBudget = useMutation({
     mutationFn: async () => {
       if (!businessId || !bName) throw new Error("Name required");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("budgets")
         .insert({ business_id: businessId, name: bName, period_start: bStart, period_end: bEnd, notes: bNotes || null });
       if (error) throw error;
@@ -177,7 +177,7 @@ export default function Budget() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: BudgetStatus }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("budgets")
         .update({ status, updated_at: new Date().toISOString() })
         .eq("id", id);
@@ -196,7 +196,7 @@ export default function Budget() {
       if (!businessId || !selectedBudget || !lBudgeted) throw new Error("Fill required fields");
       const budgeted = parseFloat(lBudgeted);
       const actual   = parseFloat(lActual)   || 0;
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("budget_lines")
         .insert({
           business_id: businessId,
@@ -210,7 +210,7 @@ export default function Budget() {
       if (error) throw error;
       // Update budget total
       const newTotal = lines.reduce((s, l) => s + l.budgeted, 0) + budgeted;
-      await (supabase as any)
+      await supabase
         .from("budgets")
         .update({ total_budget: newTotal, updated_at: new Date().toISOString() })
         .eq("id", selectedBudget.id);
@@ -228,7 +228,7 @@ export default function Budget() {
   const updateLine = useMutation({
     mutationFn: async () => {
       if (!editingLine) return;
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("budget_lines")
         .update({ actual: editingLine.actual })
         .eq("id", editingLine.id);
@@ -244,7 +244,7 @@ export default function Budget() {
 
   const deleteLine = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as any).from("budget_lines").delete().eq("id", id);
+      const { error } = await supabase.from("budget_lines").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

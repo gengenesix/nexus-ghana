@@ -103,7 +103,7 @@ function AddEmployeeForm({ periodId, businessId, onAdded }: {
     setSaving(true);
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from("payroll_entries").insert({
+      const { error } = await supabase.from("payroll_entries").insert({
         business_id:         businessId,
         period_id:           periodId,
         employee_name:       name.trim(),
@@ -199,7 +199,7 @@ function PeriodDetail({ period, onBack }: { period: PayrollPeriod; onBack: () =>
     queryKey: ["payroll-entries", period.id],
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).from("payroll_entries")
+      const { data, error } = await supabase.from("payroll_entries")
         .select("*")
         .eq("period_id", period.id)
         .order("employee_name");
@@ -219,7 +219,7 @@ function PeriodDetail({ period, onBack }: { period: PayrollPeriod; onBack: () =>
   const approveMutation = useMutation({
     mutationFn: async (status: "approved" | "paid") => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from("payroll_periods").update({
+      const { error } = await supabase.from("payroll_periods").update({
         status,
         total_gross: totals.gross,
         total_paye: totals.paye,
@@ -238,7 +238,7 @@ function PeriodDetail({ period, onBack }: { period: PayrollPeriod; onBack: () =>
 
   const deleteEntry = async (id: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).from("payroll_entries").delete().eq("id", id);
+    await supabase.from("payroll_entries").delete().eq("id", id);
     refetch();
   };
 
@@ -348,7 +348,7 @@ export default function Payroll() {
     queryKey: ["payroll-periods", business?.id],
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).from("payroll_periods")
+      const { data, error } = await supabase.from("payroll_periods")
         .select("*")
         .eq("business_id", business!.id)
         .order("period_start", { ascending: false });
@@ -362,7 +362,7 @@ export default function Payroll() {
     mutationFn: async () => {
       if (!newName || !newStart || !newEnd) throw new Error("All fields required");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from("payroll_periods").insert({
+      const { error } = await supabase.from("payroll_periods").insert({
         business_id: business!.id,
         name: newName,
         period_start: newStart,

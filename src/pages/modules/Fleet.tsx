@@ -107,7 +107,7 @@ export default function Fleet() {
     queryKey: ["fleet-vehicles", businessId, filterStatus],
     enabled: !!businessId,
     queryFn: async () => {
-      let q = (supabase as any)
+      let q = supabase
         .from("fleet_vehicles")
         .select("*")
         .eq("business_id", businessId)
@@ -123,7 +123,7 @@ export default function Fleet() {
     queryKey: ["fleet-logs", selected?.id],
     enabled: !!selected,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("fleet_logs")
         .select("*")
         .eq("vehicle_id", selected!.id)
@@ -139,7 +139,7 @@ export default function Fleet() {
   const addVehicle = useMutation({
     mutationFn: async () => {
       if (!businessId || !vReg || !vMake || !vModel) throw new Error("Registration, make and model required");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("fleet_vehicles")
         .insert({
           business_id:     businessId,
@@ -166,7 +166,7 @@ export default function Fleet() {
   const addLog = useMutation({
     mutationFn: async () => {
       if (!selected || !lDesc) throw new Error("Description required");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("fleet_logs")
         .insert({
           business_id:  businessId,

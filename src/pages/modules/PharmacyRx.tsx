@@ -99,7 +99,7 @@ export default function PharmacyRx() {
     queryKey: ["prescriptions", businessId, filterStatus],
     enabled: !!businessId,
     queryFn: async () => {
-      let q = (supabase as any)
+      let q = supabase
         .from("prescriptions")
         .select("*")
         .eq("business_id", businessId)
@@ -115,7 +115,7 @@ export default function PharmacyRx() {
     queryKey: ["rx-items", selected?.id],
     enabled: !!selected,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("prescription_items")
         .select("*")
         .eq("prescription_id", selected!.id)
@@ -131,10 +131,10 @@ export default function PharmacyRx() {
     mutationFn: async () => {
       if (!businessId || !patient) throw new Error("Patient name required");
       // Get a collision-safe Rx number from the DB (counts all Rx, not just filtered)
-      const { data: rxNumber, error: numErr } = await (supabase as any)
+      const { data: rxNumber, error: numErr } = await supabase
         .rpc("generate_rx_number", { p_business_id: businessId });
       if (numErr) throw numErr;
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("prescriptions")
         .insert({
           business_id:     businessId,
@@ -159,7 +159,7 @@ export default function PharmacyRx() {
   const addItem = useMutation({
     mutationFn: async () => {
       if (!selected || !iDrug) throw new Error("Drug name required");
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("prescription_items")
         .insert({
           prescription_id:     selected.id,
@@ -185,7 +185,7 @@ export default function PharmacyRx() {
 
   const dispenseItem = useMutation({
     mutationFn: async (item: RxItem) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("prescription_items")
         .update({ quantity_dispensed: item.quantity_prescribed })
         .eq("id", item.id);
@@ -197,7 +197,7 @@ export default function PharmacyRx() {
       const refreshed: RxItem[] = qc.getQueryData(["rx-items", selected?.id]) ?? [];
       const allDone = refreshed.every(i => i.quantity_dispensed >= i.quantity_prescribed);
       if (selected && allDone) {
-        await (supabase as any).from("prescriptions").update({ status: "dispensed" }).eq("id", selected.id);
+        await supabase.from("prescriptions").update({ status: "dispensed" }).eq("id", selected.id);
         qc.invalidateQueries({ queryKey: ["prescriptions"] });
         setSelected(prev => prev ? { ...prev, status: "dispensed" } : null);
       }
@@ -209,7 +209,7 @@ export default function PharmacyRx() {
   const updateRxStatus = useMutation({
     mutationFn: async (status: RxStatus) => {
       if (!selected) return;
-      const { error } = await (supabase as any).from("prescriptions").update({ status }).eq("id", selected.id);
+      const { error } = await supabase.from("prescriptions").update({ status }).eq("id", selected.id);
       if (error) throw error;
     },
     onSuccess: (_, status) => {

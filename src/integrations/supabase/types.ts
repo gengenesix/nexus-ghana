@@ -3001,22 +3001,626 @@ export type Database = {
           },
         ]
       }
+      // ── Phase 3 tables ──────────────────────────────────────────────────────
+      payroll_periods: {
+        Row: {
+          id: string; business_id: string; name: string
+          period_start: string; period_end: string
+          status: string; total_gross: number; total_paye: number
+          total_ssnit_employee: number; total_ssnit_employer: number
+          total_net: number; notes: string | null
+          created_at: string; updated_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; name: string
+          period_start: string; period_end: string
+          status?: string; total_gross?: number; total_paye?: number
+          total_ssnit_employee?: number; total_ssnit_employer?: number
+          total_net?: number; notes?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; name?: string
+          period_start?: string; period_end?: string
+          status?: string; total_gross?: number; total_paye?: number
+          total_ssnit_employee?: number; total_ssnit_employer?: number
+          total_net?: number; notes?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Relationships: []
+      }
+      payroll_entries: {
+        Row: {
+          id: string; business_id: string; period_id: string
+          employee_name: string; staff_member_id: string | null
+          basic_salary: number; housing_allowance: number
+          transport_allowance: number; other_allowances: number
+          gross_salary: number; ssnit_employee: number
+          ssnit_employer: number; taxable_income: number
+          paye: number; other_deductions: number; net_pay: number
+          created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; period_id: string
+          employee_name: string; staff_member_id?: string | null
+          basic_salary?: number; housing_allowance?: number
+          transport_allowance?: number; other_allowances?: number
+          gross_salary?: number; ssnit_employee?: number
+          ssnit_employer?: number; taxable_income?: number
+          paye?: number; other_deductions?: number; net_pay?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; period_id?: string
+          employee_name?: string; staff_member_id?: string | null
+          basic_salary?: number; housing_allowance?: number
+          transport_allowance?: number; other_allowances?: number
+          gross_salary?: number; ssnit_employee?: number
+          ssnit_employer?: number; taxable_income?: number
+          paye?: number; other_deductions?: number; net_pay?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      attendance_records: {
+        Row: {
+          id: string; business_id: string; staff_member_id: string | null
+          employee_name: string; attendance_date: string
+          clock_in: string | null; clock_out: string | null
+          hours_worked: number | null
+          status: string; notes: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; staff_member_id?: string | null
+          employee_name: string; attendance_date: string
+          clock_in?: string | null; clock_out?: string | null
+          hours_worked?: number | null
+          status?: string; notes?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; staff_member_id?: string | null
+          employee_name?: string; attendance_date?: string
+          clock_in?: string | null; clock_out?: string | null
+          hours_worked?: number | null
+          status?: string; notes?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
+      budgets: {
+        Row: {
+          id: string; business_id: string; name: string
+          period_start: string; period_end: string
+          status: string; total_budget: number; notes: string | null
+          created_at: string; updated_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; name: string
+          period_start: string; period_end: string
+          status?: string; total_budget?: number; notes?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; name?: string
+          period_start?: string; period_end?: string
+          status?: string; total_budget?: number; notes?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Relationships: []
+      }
+      budget_lines: {
+        Row: {
+          id: string; business_id: string; budget_id: string
+          category: string; description: string | null
+          budgeted: number; actual: number; variance: number
+          sort_order: number; created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; budget_id: string
+          category: string; description?: string | null
+          budgeted?: number; actual?: number
+          sort_order?: number; created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; budget_id?: string
+          category?: string; description?: string | null
+          budgeted?: number; actual?: number
+          sort_order?: number; created_at?: string
+        }
+        Relationships: []
+      }
+      assets: {
+        Row: {
+          id: string; business_id: string; name: string
+          asset_code: string | null; category: string
+          purchase_date: string; purchase_cost: number
+          salvage_value: number; useful_life_years: number
+          depreciation_method: string; current_value: number | null
+          location: string | null; status: string
+          disposal_date: string | null; disposal_value: number | null
+          notes: string | null; created_at: string; updated_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; name: string
+          asset_code?: string | null; category?: string
+          purchase_date: string; purchase_cost?: number
+          salvage_value?: number; useful_life_years?: number
+          depreciation_method?: string; current_value?: number | null
+          location?: string | null; status?: string
+          disposal_date?: string | null; disposal_value?: number | null
+          notes?: string | null; created_at?: string; updated_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; name?: string
+          asset_code?: string | null; category?: string
+          purchase_date?: string; purchase_cost?: number
+          salvage_value?: number; useful_life_years?: number
+          depreciation_method?: string; current_value?: number | null
+          location?: string | null; status?: string
+          disposal_date?: string | null; disposal_value?: number | null
+          notes?: string | null; created_at?: string; updated_at?: string
+        }
+        Relationships: []
+      }
+      petty_cash_funds: {
+        Row: {
+          id: string; business_id: string; name: string
+          custodian: string | null; opening_float: number
+          current_balance: number; created_at: string; updated_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; name: string
+          custodian?: string | null; opening_float?: number
+          current_balance?: number; created_at?: string; updated_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; name?: string
+          custodian?: string | null; opening_float?: number
+          current_balance?: number; created_at?: string; updated_at?: string
+        }
+        Relationships: []
+      }
+      petty_cash_transactions: {
+        Row: {
+          id: string; business_id: string; fund_id: string
+          txn_date: string; description: string; category: string
+          amount: number; txn_type: string; receipt_ref: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; fund_id: string
+          txn_date?: string; description: string; category?: string
+          amount: number; txn_type?: string; receipt_ref?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; fund_id?: string
+          txn_date?: string; description?: string; category?: string
+          amount?: number; txn_type?: string; receipt_ref?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      // ── Phase 4 tables ──────────────────────────────────────────────────────
+      restaurant_tables: {
+        Row: {
+          id: string; business_id: string; table_number: string
+          name: string | null; capacity: number; section: string
+          status: string; created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; table_number: string
+          name?: string | null; capacity?: number; section?: string
+          status?: string; created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; table_number?: string
+          name?: string | null; capacity?: number; section?: string
+          status?: string; created_at?: string
+        }
+        Relationships: []
+      }
+      restaurant_orders: {
+        Row: {
+          id: string; business_id: string; table_id: string | null
+          covers: number; opened_at: string; closed_at: string | null
+          status: string; total_amount: number; notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; table_id?: string | null
+          covers?: number; opened_at?: string; closed_at?: string | null
+          status?: string; total_amount?: number; notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; table_id?: string | null
+          covers?: number; opened_at?: string; closed_at?: string | null
+          status?: string; total_amount?: number; notes?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      restaurant_order_items: {
+        Row: {
+          id: string; order_id: string; business_id: string
+          product_name: string; quantity: number
+          unit_price: number; notes: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; order_id: string; business_id: string
+          product_name: string; quantity?: number
+          unit_price?: number; notes?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; order_id?: string; business_id?: string
+          product_name?: string; quantity?: number
+          unit_price?: number; notes?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
+      prescriptions: {
+        Row: {
+          id: string; business_id: string; rx_number: string
+          patient_name: string; patient_phone: string | null
+          prescriber_name: string | null; rx_date: string
+          status: string; notes: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; rx_number: string
+          patient_name: string; patient_phone?: string | null
+          prescriber_name?: string | null; rx_date?: string
+          status?: string; notes?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; rx_number?: string
+          patient_name?: string; patient_phone?: string | null
+          prescriber_name?: string | null; rx_date?: string
+          status?: string; notes?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
+      prescription_items: {
+        Row: {
+          id: string; prescription_id: string; business_id: string
+          drug_name: string; dosage_instructions: string | null
+          quantity_prescribed: number; quantity_dispensed: number
+          batch_number: string | null; expiry_date: string | null
+          unit_price: number; notes: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; prescription_id: string; business_id: string
+          drug_name: string; dosage_instructions?: string | null
+          quantity_prescribed?: number; quantity_dispensed?: number
+          batch_number?: string | null; expiry_date?: string | null
+          unit_price?: number; notes?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; prescription_id?: string; business_id?: string
+          drug_name?: string; dosage_instructions?: string | null
+          quantity_prescribed?: number; quantity_dispensed?: number
+          batch_number?: string | null; expiry_date?: string | null
+          unit_price?: number; notes?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
+      hotel_rooms: {
+        Row: {
+          id: string; business_id: string; room_number: string
+          room_type: string; floor: string | null; capacity: number
+          rate_per_night: number; status: string
+          amenities: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; room_number: string
+          room_type?: string; floor?: string | null; capacity?: number
+          rate_per_night?: number; status?: string
+          amenities?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; room_number?: string
+          room_type?: string; floor?: string | null; capacity?: number
+          rate_per_night?: number; status?: string
+          amenities?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
+      hotel_bookings: {
+        Row: {
+          id: string; business_id: string; room_id: string | null
+          guest_name: string; guest_phone: string | null
+          guest_email: string | null
+          check_in_date: string; check_out_date: string
+          adults: number; children: number; status: string
+          total_amount: number; paid_amount: number
+          payment_method: string | null; notes: string | null
+          created_at: string; updated_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; room_id?: string | null
+          guest_name: string; guest_phone?: string | null
+          guest_email?: string | null
+          check_in_date: string; check_out_date: string
+          adults?: number; children?: number; status?: string
+          total_amount?: number; paid_amount?: number
+          payment_method?: string | null; notes?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; room_id?: string | null
+          guest_name?: string; guest_phone?: string | null
+          guest_email?: string | null
+          check_in_date?: string; check_out_date?: string
+          adults?: number; children?: number; status?: string
+          total_amount?: number; paid_amount?: number
+          payment_method?: string | null; notes?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Relationships: []
+      }
+      hotel_charges: {
+        Row: {
+          id: string; business_id: string; booking_id: string
+          charge_date: string; description: string; category: string
+          amount: number; created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; booking_id: string
+          charge_date?: string; description: string; category?: string
+          amount: number; created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; booking_id?: string
+          charge_date?: string; description?: string; category?: string
+          amount?: number; created_at?: string
+        }
+        Relationships: []
+      }
+      fleet_vehicles: {
+        Row: {
+          id: string; business_id: string; registration: string
+          make: string; model: string; year: number | null
+          vehicle_type: string; status: string
+          assigned_driver: string | null; fuel_type: string | null
+          odometer_km: number | null; notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; registration: string
+          make: string; model: string; year?: number | null
+          vehicle_type?: string; status?: string
+          assigned_driver?: string | null; fuel_type?: string | null
+          odometer_km?: number | null; notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; registration?: string
+          make?: string; model?: string; year?: number | null
+          vehicle_type?: string; status?: string
+          assigned_driver?: string | null; fuel_type?: string | null
+          odometer_km?: number | null; notes?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      fleet_logs: {
+        Row: {
+          id: string; business_id: string; vehicle_id: string
+          log_date: string; log_type: string; description: string
+          driver: string | null; origin: string | null
+          destination: string | null; distance_km: number | null
+          fuel_litres: number | null; cost: number
+          odometer_end: number | null; notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; vehicle_id: string
+          log_date?: string; log_type?: string; description: string
+          driver?: string | null; origin?: string | null
+          destination?: string | null; distance_km?: number | null
+          fuel_litres?: number | null; cost?: number
+          odometer_end?: number | null; notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; vehicle_id?: string
+          log_date?: string; log_type?: string; description?: string
+          driver?: string | null; origin?: string | null
+          destination?: string | null; distance_km?: number | null
+          fuel_litres?: number | null; cost?: number
+          odometer_end?: number | null; notes?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      job_cards: {
+        Row: {
+          id: string; business_id: string; job_number: string
+          customer_name: string; customer_phone: string | null
+          vehicle_reg: string; vehicle_make: string | null
+          vehicle_model: string | null; vehicle_year: number | null
+          complaint: string; diagnosis: string | null; status: string
+          assigned_mechanic: string | null; estimated_cost: number
+          actual_cost: number; received_date: string
+          completed_date: string | null; notes: string | null
+          created_at: string; updated_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; job_number: string
+          customer_name: string; customer_phone?: string | null
+          vehicle_reg: string; vehicle_make?: string | null
+          vehicle_model?: string | null; vehicle_year?: number | null
+          complaint: string; diagnosis?: string | null; status?: string
+          assigned_mechanic?: string | null; estimated_cost?: number
+          actual_cost?: number; received_date?: string
+          completed_date?: string | null; notes?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; job_number?: string
+          customer_name?: string; customer_phone?: string | null
+          vehicle_reg?: string; vehicle_make?: string | null
+          vehicle_model?: string | null; vehicle_year?: number | null
+          complaint?: string; diagnosis?: string | null; status?: string
+          assigned_mechanic?: string | null; estimated_cost?: number
+          actual_cost?: number; received_date?: string
+          completed_date?: string | null; notes?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Relationships: []
+      }
+      job_card_items: {
+        Row: {
+          id: string; job_card_id: string; business_id: string
+          item_type: string; description: string
+          quantity: number; unit_price: number; created_at: string
+        }
+        Insert: {
+          id?: string; job_card_id: string; business_id: string
+          item_type?: string; description: string
+          quantity?: number; unit_price?: number; created_at?: string
+        }
+        Update: {
+          id?: string; job_card_id?: string; business_id?: string
+          item_type?: string; description?: string
+          quantity?: number; unit_price?: number; created_at?: string
+        }
+        Relationships: []
+      }
+      farm_plots: {
+        Row: {
+          id: string; business_id: string; name: string
+          size_hectares: number | null; location: string | null
+          crop_type: string | null; status: string
+          notes: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; name: string
+          size_hectares?: number | null; location?: string | null
+          crop_type?: string | null; status?: string
+          notes?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; name?: string
+          size_hectares?: number | null; location?: string | null
+          crop_type?: string | null; status?: string
+          notes?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
+      farm_seasons: {
+        Row: {
+          id: string; business_id: string; name: string
+          start_date: string; end_date: string
+          status: string; notes: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; name: string
+          start_date: string; end_date: string
+          status?: string; notes?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; name?: string
+          start_date?: string; end_date?: string
+          status?: string; notes?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
+      farm_activities: {
+        Row: {
+          id: string; business_id: string; plot_id: string | null
+          season_id: string | null; activity_date: string
+          activity_type: string; description: string
+          cost: number | null; quantity: number | null; unit: string | null
+          notes: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; business_id: string; plot_id?: string | null
+          season_id?: string | null; activity_date?: string
+          activity_type?: string; description: string
+          cost?: number | null; quantity?: number | null; unit?: string | null
+          notes?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; business_id?: string; plot_id?: string | null
+          season_id?: string | null; activity_date?: string
+          activity_type?: string; description?: string
+          cost?: number | null; quantity?: number | null; unit?: string | null
+          notes?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      decrement_loyalty_points: {
+        Args: { p_customer_id: string; p_points: number }
+        Returns: undefined
+      }
       generate_invoice_number: { Args: never; Returns: string }
+      generate_rx_number: {
+        Args: { p_business_id: string }
+        Returns: string
+      }
       get_business_id: { Args: never; Returns: string }
+      get_industry_kpis: {
+        Args: { p_business_id: string }
+        Returns: Json
+      }
+      increment_loyalty_points: {
+        Args: { p_customer_id: string; p_points: number }
+        Returns: undefined
+      }
+      receive_purchase_order: {
+        Args: { p_po_id: string; p_business_id: string }
+        Returns: undefined
+      }
+      resolve_staff_login: {
+        Args: { p_access_code: string; p_staff_id: string }
+        Returns: string
+      }
       staff_logout: { Args: { _staff_id: string }; Returns: undefined }
+      submit_sale: {
+        Args: {
+          p_business_id: string; p_receipt_number: string
+          p_subtotal: number; p_discount_pct: number
+          p_discount_amount: number; p_total: number
+          p_payment_method: string; p_payment_splits: Json | null
+          p_staff_id: string | null; p_customer_id: string | null
+          p_items: Json
+        }
+        Returns: string
+      }
       verify_staff_pin: {
         Args: { _business_id: string; _pin: string }
         Returns: {
-          id: string
-          name: string
-          role: string
-          status: string
+          id: string; name: string; role: string; status: string
         }[]
+      }
+      void_sale: {
+        Args: { p_sale_id: string; p_business_id: string; p_staff_id: string }
+        Returns: undefined
+      }
+      get_industry_dashboard_kpis: {
+        Args: { p_business_id: string; p_industry_slug?: string | null }
+        Returns: Json
+      }
+      get_report_summary: {
+        Args: { p_business_id: string; p_date_from: string; p_date_to: string }
+        Returns: Json
+      }
+      get_cashflow_summary: {
+        Args: { p_business_id: string; p_date_from: string; p_date_to: string }
+        Returns: Json
+      }
+      seed_industry_coa: {
+        Args: { p_business_id: string; p_industry_slug: string }
+        Returns: undefined
+      }
+      get_dashboard_stats: {
+        Args: { p_business_id: string }
+        Returns: Json
       }
     }
     Enums: {
