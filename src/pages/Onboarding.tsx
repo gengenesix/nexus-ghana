@@ -25,6 +25,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
 import { IndustryPicker } from "@/components/onboarding/IndustryPicker";
 
 // ── Icon map ──────────────────────────────────────────────────────────────────
@@ -318,10 +319,13 @@ export default function Onboarding() {
 
   const { business, isLoading, isFetching, createBusiness } = useBusiness();
   const { user, loading: authLoading } = useAuth();
+  const { setOwnerAccess } = useStaffSession();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Already has a business → go to dashboard
-  if (!authLoading && !isLoading && !(isFetching && !business) && business) {
+  // Guard: don't redirect mid-submission (business lands in TQ cache before navigate("/welcome") fires)
+  if (!authLoading && !isLoading && !(isFetching && !business) && business && !isSubmitting) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -347,6 +351,7 @@ export default function Onboarding() {
     if (adminPin !== confirmPin) { toast.error("PINs do not match"); return; }
     if (business)                { navigate("/dashboard"); return; }
 
+    setIsSubmitting(true);
     try {
       const biz = await createBusiness.mutateAsync({
         name: name.trim(),
@@ -357,6 +362,12 @@ export default function Onboarding() {
         industry_vertical_slug: industrySlug || undefined,
         business_size: businessSize,
       });
+
+      // Grant owner access immediately — StaffSessionContext ran its initial check
+      // BEFORE this business existed, so ownerBypass is still false.
+      // Calling setOwnerAccess() here sets sessionStorage + ownerBypass synchronously
+      // so StaffPinGuard won't redirect to /login when we navigate to /welcome.
+      setOwnerAccess();
 
       const fullName = user?.user_metadata?.full_name || user?.email || "Admin";
       const { error } = await supabase.from("staff_members").insert({
@@ -379,6 +390,7 @@ export default function Onboarding() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to create business";
       toast.error(msg);
+      setIsSubmitting(false);
     }
   };
 
