@@ -18,14 +18,18 @@ import { GHANA_REGIONS, formatGHS } from "@/lib/ghana";
 import { exportCustomersCsv } from "@/lib/export";
 import { generateCustomerStatement } from "@/lib/pdf";
 import CsvImportDialog from "@/components/CsvImportDialog";
-import { Search, Plus, Loader2, Trash2, ChevronLeft, ChevronRight, Download, Upload, Edit, Eye, Star, FileText } from "lucide-react";
+import { Search, Plus, Loader2, Trash2, ChevronLeft, ChevronRight, Download, Upload, Edit, Eye, Star, FileText, Users } from "lucide-react";
 import { TableSkeleton } from "@/components/TableSkeleton";
+import { EmptyState } from "@/components/EmptyState";
+import { MobileFab } from "@/components/MobileFab";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 25;
 
 export default function Customers() {
   const { business } = useBusiness();
+  const { can } = useStaffSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 350);
@@ -163,11 +167,15 @@ export default function Customers() {
           <p className="text-muted-foreground text-sm">{totalCount} customers</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
+          {can("customers", "create") && (
+            <Button variant="outline" size="sm" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
+          )}
           <Button variant="outline" size="sm" onClick={() => { if (customers.length > 0) exportCustomersCsv(customers); else toast.error("No customers to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
-          <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Plus className="h-4 w-4 mr-1" /> Add Customer
-          </Button>
+          {can("customers", "create") && (
+            <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90 hidden md:inline-flex">
+              <Plus className="h-4 w-4 mr-1" /> Add Customer
+            </Button>
+          )}
         </div>
       </div>
 
@@ -194,7 +202,19 @@ export default function Customers() {
             ) : (
             <TableBody>
               {customers.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No customers found.</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={5} className="p-0 border-0">
+                    <EmptyState
+                      icon={Users}
+                      title={debouncedSearch ? "No customers found" : "No customers yet"}
+                      description={debouncedSearch ? `No customers match "${debouncedSearch}".` : "Build your customer base — add your first customer to track purchases, loyalty points, and invoices."}
+                      actionLabel={!debouncedSearch ? "Add Customer" : undefined}
+                      onAction={!debouncedSearch ? () => { resetForm(); setShowAdd(true); } : undefined}
+                      canAct={can("customers", "create")}
+                      size="sm"
+                    />
+                  </TableCell>
+                </TableRow>
               ) : customers.map((customer: any) => (
                 <TableRow key={customer.id}>
                   <TableCell className="font-medium">{customer.name}</TableCell>
@@ -206,8 +226,8 @@ export default function Customers() {
                   <TableCell>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setViewCustomer(customer)} title="View"><Eye className="h-3.5 w-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(customer)} title="Edit"><Edit className="h-3.5 w-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(customer.id)} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>
+                      {can("customers", "update") && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(customer)} title="Edit"><Edit className="h-3.5 w-3.5" /></Button>}
+                      {can("customers", "delete") && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(customer.id)} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -334,6 +354,13 @@ export default function Customers() {
       </Dialog>
 
       <CsvImportDialog open={showImport} onOpenChange={setShowImport} type="customers" />
+
+      <MobileFab
+        icon={Plus}
+        label="Add Customer"
+        onClick={() => { resetForm(); setShowAdd(true); }}
+        hidden={!can("customers", "create")}
+      />
     </div>
   );
 }

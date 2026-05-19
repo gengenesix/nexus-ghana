@@ -11,7 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search, Plus, Trash2, Loader2, Download, Upload, Edit2, Eye, Package, FileText, Phone, MapPin, User } from "lucide-react";
+import { Search, Plus, Trash2, Loader2, Download, Upload, Edit2, Eye, Package, FileText, Phone, MapPin, User, Building2 } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
+import { MobileFab } from "@/components/MobileFab";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
 import { toast } from "sonner";
 import { exportSuppliersCsv } from "@/lib/export";
 import { formatGHS } from "@/lib/ghana";
@@ -21,6 +24,7 @@ import { format } from "date-fns";
 
 export default function Suppliers() {
   const { business } = useBusiness();
+  const { can } = useStaffSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -157,9 +161,11 @@ export default function Suppliers() {
           <Button variant="outline" size="sm" onClick={() => { exportSuppliersCsv(suppliers); toast.success("Exported!"); }}>
             <Download className="h-4 w-4 mr-1" /> Export
           </Button>
-          <Button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90" size="sm">
-            <Plus className="h-4 w-4 mr-1" /> Add Supplier
-          </Button>
+          {can("suppliers", "create") && (
+            <Button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90 hidden md:inline-flex" size="sm">
+              <Plus className="h-4 w-4 mr-1" /> Add Supplier
+            </Button>
+          )}
         </div>
       </div>
 
@@ -184,7 +190,19 @@ export default function Suppliers() {
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{isLoading ? "Loading..." : "No suppliers yet."}</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={6} className="p-0 border-0">
+                    <EmptyState
+                      icon={Building2}
+                      title={isLoading ? "Loading…" : "No suppliers yet"}
+                      description={isLoading ? "" : "Add your suppliers to track purchasing, manage POs, and monitor spend."}
+                      actionLabel={!isLoading ? "Add Supplier" : undefined}
+                      onAction={!isLoading ? () => { resetForm(); setShowAdd(true); } : undefined}
+                      canAct={can("suppliers", "create")}
+                      size="sm"
+                    />
+                  </TableCell>
+                </TableRow>
               ) : paginatedData.map((supplier: any) => {
                 const m = supplierMetrics[supplier.id];
                 return (
@@ -345,6 +363,13 @@ export default function Suppliers() {
       </Dialog>
 
       <CsvImportDialog open={showImport} onOpenChange={setShowImport} type="suppliers" />
+
+      <MobileFab
+        icon={Plus}
+        label="Add Supplier"
+        onClick={() => { resetForm(); setShowAdd(true); }}
+        hidden={!can("suppliers", "create")}
+      />
     </div>
   );
 }

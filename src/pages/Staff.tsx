@@ -16,6 +16,8 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatGHS } from "@/lib/ghana";
 import { Search, Plus, Trash2, Loader2, Pencil, Shield, UserCog, Users, Circle, BarChart3, Award, Copy, Share2, MoreVertical, ChevronRight, UserCheck, UserX, ShieldCheck } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
+import { MobileFab } from "@/components/MobileFab";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStaffSession } from "@/contexts/StaffSessionContext";
@@ -410,8 +412,15 @@ export default function Staff() {
                       if (rows.length === 0) {
                         return (
                           <TableRow>
-                            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                              {isLoading ? "Loading..." : "No staff members found."}
+                            <TableCell colSpan={8} className="p-0 border-0">
+                              <EmptyState
+                                icon={Users}
+                                title={isLoading ? "Loading…" : "No staff members yet"}
+                                description={isLoading ? "" : "Add your team members to assign roles, track activity, and control access."}
+                                actionLabel={!isLoading ? "Add Staff" : undefined}
+                                onAction={!isLoading ? () => { resetForm(); setShowAdd(true); } : undefined}
+                                size="sm"
+                              />
                             </TableCell>
                           </TableRow>
                         );
@@ -1187,6 +1196,12 @@ function CustomRolesTab({ businessId }: { businessId: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MobileFab
+        icon={Plus}
+        label="Add Staff"
+        onClick={() => { resetForm(); setShowAdd(true); }}
+      />
     </div>
   );
 }

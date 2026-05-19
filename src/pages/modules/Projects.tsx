@@ -9,6 +9,7 @@ import { useBusiness } from "@/hooks/useBusiness";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FolderKanban, ListTodo, Clock, Plus, Pencil, Trash2 } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import ProjectDialog from "@/components/projects/ProjectDialog";
@@ -105,7 +106,7 @@ export default function Projects() {
               ))}
             </div>
           ) : (
-            <Card><CardContent className="text-center py-12 text-muted-foreground"><FolderKanban className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No projects yet. Create one to start tracking work.</p></CardContent></Card>
+            <Card><CardContent className="p-0"><EmptyState icon={FolderKanban} title="No projects yet" description="Create your first project to start tracking tasks, time, and progress." size="sm" /></CardContent></Card>
           )}
         </TabsContent>
 
@@ -142,7 +143,7 @@ export default function Projects() {
               </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground"><ListTodo className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>{selectedProject ? "No tasks for this project." : "No tasks yet."}</p></div>
+              <EmptyState icon={ListTodo} title={selectedProject ? "No tasks for this project" : "No tasks yet"} description={selectedProject ? "Add tasks to break down the project into manageable steps." : "Select a project above or create one to start adding tasks."} size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>

@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ShoppingCart, Truck, Package, FileCheck, Plus, PackageCheck, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { EmptyState } from "@/components/EmptyState";
 import { toast } from "sonner";
 import PurchaseOrderDialog from "@/components/purchasing/PurchaseOrderDialog";
 
@@ -105,14 +106,14 @@ export default function Purchasing() {
               </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground"><ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No purchase orders yet.</p></div>
+              <EmptyState icon={ShoppingCart} title="No purchase orders yet" description="Create your first PO to order stock from suppliers." size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>
 
-        <TabsContent value="receipts"><Card><CardContent className="text-center py-12 text-muted-foreground"><Package className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Goods receipt tracking. Create a PO first.</p></CardContent></Card></TabsContent>
-        <TabsContent value="invoices"><Card><CardContent className="text-center py-12 text-muted-foreground"><FileCheck className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Accounts payable invoices.</p></CardContent></Card></TabsContent>
-        <TabsContent value="returns"><Card><CardContent className="text-center py-12 text-muted-foreground"><Truck className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>Vendor returns & debit memos.</p></CardContent></Card></TabsContent>
+        <TabsContent value="receipts"><Card><CardContent className="p-0"><EmptyState icon={Package} title="Goods Receipts" description="Receive stock against purchase orders. Create a PO first to get started." size="sm" /></CardContent></Card></TabsContent>
+        <TabsContent value="invoices"><Card><CardContent className="p-0"><EmptyState icon={FileCheck} title="Accounts Payable" description="Supplier invoices will appear here once linked to purchase orders." size="sm" /></CardContent></Card></TabsContent>
+        <TabsContent value="returns"><Card><CardContent className="p-0"><EmptyState icon={Truck} title="Vendor Returns" description="Log stock returns and debit memos for supplier credit." size="sm" /></CardContent></Card></TabsContent>
       </Tabs>
 
       <PurchaseOrderDialog open={poOpen} onOpenChange={setPoOpen} />

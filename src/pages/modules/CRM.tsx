@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users, Target, Activity, Mail, Plus, Search, Loader2, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { EmptyState } from "@/components/EmptyState";
 import { toast } from "sonner";
 import LeadDialog from "@/components/crm/LeadDialog";
 import OpportunityDialog from "@/components/crm/OpportunityDialog";
@@ -138,11 +139,7 @@ export default function CRM() {
               </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <h3 className="font-semibold text-lg">No Leads Yet</h3>
-                <p className="text-sm">Start capturing leads to build your sales pipeline.</p>
-              </div>
+              <EmptyState icon={Users} title="No Leads Yet" description="Start capturing leads to build your sales pipeline." size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>
@@ -174,11 +171,7 @@ export default function CRM() {
               ))}
             </div>
           ) : (
-            <Card><CardContent className="text-center py-12 text-muted-foreground">
-              <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <h3 className="font-semibold text-lg">No Opportunities</h3>
-              <p className="text-sm">Create opportunities to track your sales pipeline.</p>
-            </CardContent></Card>
+            <Card><CardContent className="p-0"><EmptyState icon={Target} title="No Opportunities" description="Create opportunities to track deals and close more sales." size="sm" /></CardContent></Card>
           )}
         </TabsContent>
 
@@ -206,20 +199,13 @@ export default function CRM() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No activities logged yet.</p>
-              </div>
+              <EmptyState icon={Activity} title="No activities yet" description="Log calls, meetings, emails, and tasks to track your customer interactions." size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>
 
         <TabsContent value="campaigns">
-          <Card><CardContent className="text-center py-12 text-muted-foreground">
-            <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="font-semibold text-lg">Marketing Campaigns</h3>
-            <p className="text-sm">Create and track marketing campaigns. Coming soon.</p>
-          </CardContent></Card>
+          <Card><CardContent className="p-0"><EmptyState icon={Mail} title="Marketing Campaigns" description="Create and track email campaigns and outreach. Coming soon." size="sm" /></CardContent></Card>
         </TabsContent>
       </Tabs>
 

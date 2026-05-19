@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FileText, ShoppingBag, Truck, RotateCcw, Plus, ArrowRight, Loader2, PackageCheck } from "lucide-react";
 import { format } from "date-fns";
+import { EmptyState } from "@/components/EmptyState";
 import { toast } from "sonner";
 import QuotationDialog from "@/components/sales/QuotationDialog";
 import { PriceListsTab } from "@/components/sales/PriceListsTab";
@@ -235,7 +236,7 @@ export default function SalesOrders() {
               </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground"><FileText className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No quotations yet. Create one to start the sales process.</p></div>
+              <EmptyState icon={FileText} title="No quotations yet" description="Create your first quotation to start the sales process." size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>
@@ -280,7 +281,7 @@ export default function SalesOrders() {
               </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground"><ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No sales orders yet.</p></div>
+              <EmptyState icon={ShoppingBag} title="No sales orders yet" description="Convert a quotation or create a direct sales order to start fulfilling orders." size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>
@@ -320,7 +321,7 @@ export default function SalesOrders() {
               </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground"><Truck className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No delivery notes yet. Create a sales order and click "Deliver" to generate one.</p></div>
+              <EmptyState icon={Truck} title="No deliveries yet" description="Create a sales order and click Deliver to generate delivery notes." size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>
@@ -353,7 +354,7 @@ export default function SalesOrders() {
               </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground"><RotateCcw className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No credit notes yet. Create one from the Invoices module to process a return.</p></div>
+              <EmptyState icon={RotateCcw} title="No credit notes yet" description="Create a credit note to process a customer return or refund." size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>

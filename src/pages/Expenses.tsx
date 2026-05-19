@@ -13,8 +13,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatGHS, EXPENSE_CATEGORIES } from "@/lib/ghana";
-import { Plus, Search, Loader2, Trash2, Download, Calendar, Edit2, TrendingUp, TrendingDown, DollarSign, AlertTriangle, Paperclip, ExternalLink } from "lucide-react";
+import { Plus, Search, Loader2, Trash2, Download, Calendar, Edit2, TrendingUp, TrendingDown, DollarSign, AlertTriangle, Paperclip, ExternalLink, Receipt } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, Legend } from "recharts";
+import { EmptyState } from "@/components/EmptyState";
+import { MobileFab } from "@/components/MobileFab";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
 import { toast } from "sonner";
 import { exportExpensesCsv } from "@/lib/export";
 import { useChartColors, useChartPalette } from "@/hooks/useChartColors";
@@ -29,6 +32,7 @@ const QUICK_RANGES = [
 
 export default function Expenses() {
   const { business } = useBusiness();
+  const { can } = useStaffSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -207,9 +211,11 @@ export default function Expenses() {
           <Button variant="outline" size="sm" onClick={() => { exportExpensesCsv(filtered); toast.success("Exported!"); }}>
             <Download className="h-4 w-4 mr-1" /> Export
           </Button>
-          <Button onClick={() => { resetForm(); setShowAdd(true); }} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Plus className="h-4 w-4 mr-1" /> Log Expense
-          </Button>
+          {can("expenses", "create") && (
+            <Button onClick={() => { resetForm(); setShowAdd(true); }} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 hidden md:inline-flex">
+              <Plus className="h-4 w-4 mr-1" /> Log Expense
+            </Button>
+          )}
         </div>
       </div>
 
@@ -395,7 +401,19 @@ export default function Expenses() {
                 </TableHeader>
                 <TableBody>
                   {paginatedData.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{isLoading ? "Loading..." : "No expenses match filters."}</TableCell></TableRow>
+                    <TableRow>
+                      <TableCell colSpan={6} className="p-0 border-0">
+                        <EmptyState
+                          icon={Receipt}
+                          title={isLoading ? "Loading expenses…" : "No expenses found"}
+                          description={isLoading ? "" : "Log your first expense to track business spending and analyze costs."}
+                          actionLabel={!isLoading ? "Log Expense" : undefined}
+                          onAction={!isLoading ? () => { resetForm(); setShowAdd(true); } : undefined}
+                          canAct={can("expenses", "create")}
+                          size="sm"
+                        />
+                      </TableCell>
+                    </TableRow>
                   ) : paginatedData.map((expense: any) => (
                     <TableRow key={expense.id}>
                       <TableCell className="text-muted-foreground">{expense.date}</TableCell>
@@ -405,8 +423,8 @@ export default function Expenses() {
                       <TableCell className="text-right font-medium text-destructive">{formatGHS(Number(expense.amount))}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(expense)}><Edit2 className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(expense.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          {can("expenses", "update") && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(expense)}><Edit2 className="h-3.5 w-3.5" /></Button>}
+                          {can("expenses", "delete") && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(expense.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -559,6 +577,13 @@ export default function Expenses() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <MobileFab
+        icon={Plus}
+        label="Log Expense"
+        onClick={() => { resetForm(); setShowAdd(true); }}
+        hidden={!can("expenses", "create")}
+      />
     </div>
   );
 }

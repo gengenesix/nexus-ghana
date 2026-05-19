@@ -8,6 +8,7 @@ import { useBusiness } from "@/hooks/useBusiness";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Factory, Layers, ClipboardList, Calendar, Plus } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import { format } from "date-fns";
 import ProductionOrderDialog from "@/components/production/ProductionOrderDialog";
 import { ProductionScheduler } from "@/components/production/ProductionScheduler";
@@ -74,7 +75,7 @@ export default function Production() {
               </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground"><Layers className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No bills of material yet. Define components needed to produce finished goods.</p></div>
+              <EmptyState icon={Layers} title="No bills of material yet" description="Define the components and quantities needed to produce each finished good." size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>
@@ -97,7 +98,7 @@ export default function Production() {
               </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground"><ClipboardList className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No production orders yet.</p></div>
+              <EmptyState icon={ClipboardList} title="No production orders yet" description="Create a production order to schedule manufacturing runs from your BOM." size="sm" />
             )}
           </CardContent></Card>
         </TabsContent>

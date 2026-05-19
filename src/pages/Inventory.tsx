@@ -17,8 +17,11 @@ import { formatGHS } from "@/lib/ghana";
 import { exportInventoryCsv } from "@/lib/export";
 import CsvImportDialog from "@/components/CsvImportDialog";
 import SerialBatchTab from "@/components/inventory/SerialBatchTab";
-import { Search, Plus, Edit, Trash2, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Download, Upload, PackagePlus, PackageMinus } from "lucide-react";
+import { Search, Plus, Edit, Trash2, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Download, Upload, PackagePlus, PackageMinus, Package } from "lucide-react";
 import { TableSkeleton } from "@/components/TableSkeleton";
+import { EmptyState } from "@/components/EmptyState";
+import { MobileFab } from "@/components/MobileFab";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,6 +42,7 @@ type ProductForm = z.infer<typeof productSchema>;
 
 export default function Inventory() {
   const { business } = useBusiness();
+  const { can } = useStaffSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 350);
@@ -201,11 +205,15 @@ export default function Inventory() {
           <p className="text-muted-foreground text-sm">{totalCount} products · {lowStockCount} low stock</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
+          {can("inventory", "create") && (
+            <Button variant="outline" size="sm" onClick={() => setShowImport(true)}><Upload className="h-4 w-4 mr-1" /> Import</Button>
+          )}
           <Button variant="outline" size="sm" onClick={() => { if (products.length > 0) exportInventoryCsv(products); else toast.error("No products to export"); }}><Download className="h-4 w-4 mr-1" /> Export</Button>
-          <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Plus className="h-4 w-4 mr-1" /> Add Product
-          </Button>
+          {can("inventory", "create") && (
+            <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90 hidden md:inline-flex">
+              <Plus className="h-4 w-4 mr-1" /> Add Product
+            </Button>
+          )}
         </div>
       </div>
 
@@ -272,7 +280,19 @@ export default function Inventory() {
             ) : (
             <TableBody>
               {products.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No products found.</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={7} className="p-0 border-0">
+                    <EmptyState
+                      icon={Package}
+                      title={debouncedSearch ? "No products found" : "No products yet"}
+                      description={debouncedSearch ? `No products match "${debouncedSearch}". Try a different search term.` : "Add your first product to start tracking inventory and making sales."}
+                      actionLabel={!debouncedSearch ? "Add Product" : undefined}
+                      onAction={!debouncedSearch ? () => { resetForm(); setShowAdd(true); } : undefined}
+                      canAct={can("inventory", "create")}
+                      size="sm"
+                    />
+                  </TableCell>
+                </TableRow>
               ) : products.map((product: any) => {
                 const margin = Number(product.selling_price) > 0
                   ? ((Number(product.selling_price) - Number(product.cost_price)) / Number(product.selling_price) * 100).toFixed(0)
@@ -293,10 +313,10 @@ export default function Inventory() {
                     <TableCell className="hidden md:table-cell text-right text-success">{margin}%</TableCell>
                     <TableCell>
                       <div className="flex gap-0.5">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openAdjust(product, "add")} title="Add stock"><PackagePlus className="h-3.5 w-3.5 text-green-500" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openAdjust(product, "remove")} title="Remove stock"><PackageMinus className="h-3.5 w-3.5 text-orange-500" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(product)} title="Edit"><Edit className="h-3.5 w-3.5" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteMutation.mutate(product.id)} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>
+                        {can("inventory", "update") && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openAdjust(product, "add")} title="Add stock"><PackagePlus className="h-3.5 w-3.5 text-green-500" /></Button>}
+                        {can("inventory", "update") && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openAdjust(product, "remove")} title="Remove stock"><PackageMinus className="h-3.5 w-3.5 text-orange-500" /></Button>}
+                        {can("inventory", "update") && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(product)} title="Edit"><Edit className="h-3.5 w-3.5" /></Button>}
+                        {can("inventory", "delete") && <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteMutation.mutate(product.id)} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -423,6 +443,13 @@ export default function Inventory() {
       <CsvImportDialog open={showImport} onOpenChange={setShowImport} type="products" />
       </TabsContent>
       </Tabs>
+
+      <MobileFab
+        icon={Plus}
+        label="Add Product"
+        onClick={() => { resetForm(); setShowAdd(true); }}
+        hidden={!can("inventory", "create")}
+      />
     </div>
   );
 }

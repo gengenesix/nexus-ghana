@@ -19,6 +19,9 @@ import { generateInvoicePDF } from "@/lib/pdf";
 import { exportInvoicesCsv } from "@/lib/export";
 import { Search, Plus, Eye, Send, Loader2, Download, RotateCcw, FileText, Clock, DollarSign, AlertTriangle, CreditCard, Trash2, MessageSquare } from "lucide-react";
 import { TableSkeleton } from "@/components/TableSkeleton";
+import { EmptyState } from "@/components/EmptyState";
+import { MobileFab } from "@/components/MobileFab";
+import { useStaffSession } from "@/contexts/StaffSessionContext";
 import { toast } from "sonner";
 import { differenceInDays, format } from "date-fns";
 import RecurringInvoicesTab from "@/components/invoices/RecurringInvoicesTab";
@@ -57,6 +60,7 @@ const statusColors: Record<string, string> = {
 
 export default function Invoices() {
   const { business } = useBusiness();
+  const { can } = useStaffSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [activeMainTab, setActiveMainTab] = useState("invoices");
@@ -309,9 +313,11 @@ export default function Invoices() {
           <Button variant="outline" size="sm" onClick={() => { if (invoices.length > 0) exportInvoicesCsv(invoices); else toast.error("No invoices"); }}>
             <Download className="h-4 w-4 mr-1" /> Export
           </Button>
-          <Button onClick={() => setShowCreate(true)} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Plus className="h-4 w-4 mr-1" /> New Invoice
-          </Button>
+          {can("invoices", "create") && (
+            <Button onClick={() => setShowCreate(true)} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 hidden md:inline-flex">
+              <Plus className="h-4 w-4 mr-1" /> New Invoice
+            </Button>
+          )}
         </div>
       </div>
 
@@ -413,7 +419,19 @@ export default function Invoices() {
             ) : (
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No invoices yet.</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={7} className="p-0 border-0">
+                    <EmptyState
+                      icon={FileText}
+                      title={search ? "No invoices found" : "No invoices yet"}
+                      description={search ? `No invoices match your search.` : "Create your first invoice to start billing customers and tracking payments."}
+                      actionLabel={!search ? "New Invoice" : undefined}
+                      onAction={!search ? () => setShowCreate(true) : undefined}
+                      canAct={can("invoices", "create")}
+                      size="sm"
+                    />
+                  </TableCell>
+                </TableRow>
               ) : filtered.map((invoice: any) => {
                 const isOverdue = invoice.status !== "paid" && invoice.due_date < new Date().toISOString().split("T")[0];
                 return (
@@ -794,6 +812,13 @@ export default function Invoices() {
       </Dialog>
       </TabsContent>
       </Tabs>
+
+      <MobileFab
+        icon={Plus}
+        label="New Invoice"
+        onClick={() => setShowCreate(true)}
+        hidden={!can("invoices", "create")}
+      />
     </div>
   );
 }
