@@ -38,6 +38,14 @@ export interface ModuleDefinition {
   minTier: LicenseTier;
 }
 
+// Nav group structure — controls sidebar organization.
+// Groups are only rendered if they have at least one visible module.
+export interface NavGroup {
+  label: string;
+  moduleKeys: string[];
+  defaultOpen: boolean;
+}
+
 export interface IndustryVertical {
   slug: string;
   name: string;
@@ -48,14 +56,9 @@ export interface IndustryVertical {
   accentHex: string;      // Light tint for selected card background
   sortOrder: number;
   defaultModules: string[]; // module keys enabled by default for this industry
-}
-
-// Nav group structure — controls sidebar organization.
-// Groups are only rendered if they have at least one visible module.
-export interface NavGroup {
-  label: string;
-  moduleKeys: string[];
-  defaultOpen: boolean;
+  // Phase 6: Per-industry sidebar structure and terminology
+  navGroups: NavGroup[];                 // sidebar sections unique to this industry
+  moduleAliases: Record<string, string>; // moduleKey → industry-specific display name
 }
 
 // ─── Module Registry ──────────────────────────────────────────────────────────
@@ -228,7 +231,7 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     category: "operations",isCore: false,           iconKey: "Timer",
     path: "/timesheets", isAvailable: false,        minTier: "professional",
   },
-  // ── Phase 4: Industry-specific (not yet built) ────────────────
+  // ── Phase 4: Industry-specific ────────────────────────────────
   {
     key: "restaurant",   name: "Restaurant",         description: "Tables, order tabs & covers tracking",
     category: "industry",isCore: false,             iconKey: "ChefHat",
@@ -268,6 +271,7 @@ export const MODULE_MAP = Object.fromEntries(
 // ─── Industry Verticals ────────────────────────────────────────────────────────
 
 export const INDUSTRIES: IndustryVertical[] = [
+  // ── 1. Retail & General Trade ─────────────────────────────────────────────
   {
     slug: "retail",
     name: "Retail & General Trade",
@@ -283,7 +287,18 @@ export const INDUSTRIES: IndustryVertical[] = [
       "banking","hr","payroll","attendance","budget","assets","petty-cash",
       "reports","staff","settings","approvals","administration","audit-log",
     ],
+    moduleAliases: {},
+    navGroups: [
+      { label: "Main",              moduleKeys: ["dashboard", "pos"],                                          defaultOpen: true  },
+      { label: "Selling",           moduleKeys: ["customers", "crm", "sales-orders", "invoices"],              defaultOpen: true  },
+      { label: "Stock & Purchasing",moduleKeys: ["inventory", "suppliers", "purchasing", "warehouses"],        defaultOpen: true  },
+      { label: "Finance",           moduleKeys: ["financials", "banking", "expenses", "budget", "assets", "petty-cash"], defaultOpen: true },
+      { label: "HR & People",       moduleKeys: ["hr", "payroll", "attendance", "recruitment"],                defaultOpen: false },
+      { label: "System",            moduleKeys: ["reports", "approvals", "audit-log", "administration", "staff", "settings"], defaultOpen: true },
+    ],
   },
+
+  // ── 2. Food & Beverage ────────────────────────────────────────────────────
   {
     slug: "food-beverage",
     name: "Food & Beverage",
@@ -298,7 +313,25 @@ export const INDUSTRIES: IndustryVertical[] = [
       "purchasing","expenses","hr","payroll","attendance","petty-cash","crm","reports","staff","settings",
       "restaurant","approvals","financials","banking","administration",
     ],
+    moduleAliases: {
+      "restaurant": "Tables & Orders",
+      "pos":        "Cashier / Till",
+      "inventory":  "Kitchen Stock",
+      "customers":  "Regulars",
+      "invoices":   "Bills & Receipts",
+      "purchasing": "Supplier Orders",
+    },
+    navGroups: [
+      { label: "Front of House",  moduleKeys: ["dashboard", "restaurant", "pos"],                              defaultOpen: true  },
+      { label: "Kitchen & Stock", moduleKeys: ["inventory", "suppliers", "purchasing"],                        defaultOpen: true  },
+      { label: "Guests & Revenue",moduleKeys: ["customers", "crm", "invoices"],                                defaultOpen: true  },
+      { label: "Finance",         moduleKeys: ["financials", "banking", "expenses", "petty-cash"],             defaultOpen: true  },
+      { label: "Team",            moduleKeys: ["hr", "payroll", "attendance"],                                 defaultOpen: false },
+      { label: "System",          moduleKeys: ["reports", "approvals", "administration", "staff", "settings"], defaultOpen: true  },
+    ],
   },
+
+  // ── 3. Wholesale & Distribution ───────────────────────────────────────────
   {
     slug: "wholesale",
     name: "Wholesale & Distribution",
@@ -314,7 +347,24 @@ export const INDUSTRIES: IndustryVertical[] = [
       "banking","hr","payroll","attendance","budget","assets","petty-cash",
       "reports","staff","settings","approvals","administration","audit-log",
     ],
+    moduleAliases: {
+      "customers":   "Trade Customers",
+      "crm":         "Trade Relations",
+      "sales-orders":"Trade Orders",
+      "purchasing":  "Procurement",
+      "warehouses":  "Distribution Centres",
+    },
+    navGroups: [
+      { label: "Main",               moduleKeys: ["dashboard", "pos"],                                                    defaultOpen: true  },
+      { label: "Trade Selling",      moduleKeys: ["customers", "crm", "sales-orders", "invoices"],                        defaultOpen: true  },
+      { label: "Stock & Warehousing",moduleKeys: ["inventory", "warehouses", "suppliers", "purchasing"],                  defaultOpen: true  },
+      { label: "Finance",            moduleKeys: ["financials", "banking", "expenses", "budget", "assets", "petty-cash"], defaultOpen: true  },
+      { label: "HR & People",        moduleKeys: ["hr", "payroll", "attendance", "recruitment"],                          defaultOpen: false },
+      { label: "System",             moduleKeys: ["reports", "approvals", "audit-log", "administration", "staff", "settings"], defaultOpen: true },
+    ],
   },
+
+  // ── 4. Manufacturing ──────────────────────────────────────────────────────
   {
     slug: "manufacturing",
     name: "Manufacturing",
@@ -330,7 +380,27 @@ export const INDUSTRIES: IndustryVertical[] = [
       "hr","payroll","attendance","budget","assets","petty-cash",
       "pos","reports","staff","settings","approvals","administration","audit-log",
     ],
+    moduleAliases: {
+      "inventory":  "Materials & Stock",
+      "suppliers":  "Vendors",
+      "purchasing": "Procurement",
+      "production": "Production Orders",
+      "mrp":        "MRP Planning",
+      "pos":        "Finished Goods Sales",
+      "customers":  "Buyers",
+    },
+    navGroups: [
+      { label: "Main",           moduleKeys: ["dashboard", "pos"],                                                    defaultOpen: true  },
+      { label: "Production",     moduleKeys: ["production", "mrp"],                                                   defaultOpen: true  },
+      { label: "Materials & Supply", moduleKeys: ["inventory", "warehouses", "suppliers", "purchasing"],              defaultOpen: true  },
+      { label: "Sales",          moduleKeys: ["customers", "invoices"],                                               defaultOpen: true  },
+      { label: "Finance",        moduleKeys: ["financials", "banking", "expenses", "budget", "assets", "petty-cash"], defaultOpen: true  },
+      { label: "HR & People",    moduleKeys: ["hr", "payroll", "attendance", "recruitment"],                          defaultOpen: false },
+      { label: "System",         moduleKeys: ["reports", "approvals", "audit-log", "administration", "staff", "settings"], defaultOpen: true },
+    ],
   },
+
+  // ── 5. Pharmacy & Health ──────────────────────────────────────────────────
   {
     slug: "pharmacy",
     name: "Pharmacy & Health",
@@ -346,7 +416,26 @@ export const INDUSTRIES: IndustryVertical[] = [
       "payroll","attendance","budget","assets","petty-cash",
       "pharmacy-rx","reports","staff","settings","approvals","administration",
     ],
+    moduleAliases: {
+      "pharmacy-rx": "Prescriptions",
+      "inventory":   "Drug Register",
+      "customers":   "Patients",
+      "pos":         "Counter Sales",
+      "invoices":    "Patient Billing",
+      "suppliers":   "Drug Suppliers",
+      "purchasing":  "Drug Procurement",
+    },
+    navGroups: [
+      { label: "Dispensary",       moduleKeys: ["dashboard", "pharmacy-rx", "pos"],                                    defaultOpen: true  },
+      { label: "Drug Stock",       moduleKeys: ["inventory", "suppliers", "purchasing"],                               defaultOpen: true  },
+      { label: "Patients & Billing",moduleKeys: ["customers", "crm", "invoices"],                                     defaultOpen: true  },
+      { label: "Finance",          moduleKeys: ["financials", "banking", "expenses", "budget", "assets", "petty-cash"],defaultOpen: true  },
+      { label: "Team",             moduleKeys: ["hr", "payroll", "attendance"],                                        defaultOpen: false },
+      { label: "System",           moduleKeys: ["reports", "approvals", "administration", "staff", "settings"],        defaultOpen: true  },
+    ],
   },
+
+  // ── 6. Professional Services ──────────────────────────────────────────────
   {
     slug: "professional",
     name: "Professional Services",
@@ -361,7 +450,24 @@ export const INDUSTRIES: IndustryVertical[] = [
       "expenses","financials","banking","hr","payroll","attendance","budget","petty-cash",
       "timesheets","reports","staff","settings","approvals","administration","audit-log",
     ],
+    moduleAliases: {
+      "customers": "Clients",
+      "crm":       "Business Development",
+      "invoices":  "Client Billing",
+      "projects":  "Engagements",
+      "service":   "Service Contracts",
+      "timesheets":"Billable Hours",
+    },
+    navGroups: [
+      { label: "Work",        moduleKeys: ["dashboard", "projects", "service", "timesheets"],                          defaultOpen: true  },
+      { label: "Clients",     moduleKeys: ["customers", "crm", "invoices"],                                            defaultOpen: true  },
+      { label: "Finance",     moduleKeys: ["financials", "banking", "expenses", "budget", "petty-cash"],               defaultOpen: true  },
+      { label: "HR & People", moduleKeys: ["hr", "payroll", "attendance", "recruitment"],                              defaultOpen: false },
+      { label: "System",      moduleKeys: ["reports", "approvals", "audit-log", "administration", "staff", "settings"],defaultOpen: true  },
+    ],
   },
+
+  // ── 7. Construction ───────────────────────────────────────────────────────
   {
     slug: "construction",
     name: "Construction",
@@ -377,7 +483,27 @@ export const INDUSTRIES: IndustryVertical[] = [
       "hr","payroll","attendance","budget","assets","petty-cash",
       "reports","staff","settings","approvals","administration","audit-log",
     ],
+    moduleAliases: {
+      "projects":   "Construction Projects",
+      "invoices":   "Progress Claims",
+      "inventory":  "Site Materials",
+      "suppliers":  "Contractors & Vendors",
+      "purchasing": "Procurement",
+      "customers":  "Clients",
+      "warehouses": "Site Stores",
+      "crm":        "Business Development",
+    },
+    navGroups: [
+      { label: "Projects",      moduleKeys: ["dashboard", "projects"],                                                 defaultOpen: true  },
+      { label: "Procurement",   moduleKeys: ["purchasing", "inventory", "warehouses", "suppliers"],                    defaultOpen: true  },
+      { label: "Billing",       moduleKeys: ["customers", "crm", "invoices"],                                          defaultOpen: true  },
+      { label: "Finance",       moduleKeys: ["financials", "banking", "expenses", "budget", "assets", "petty-cash"],  defaultOpen: true  },
+      { label: "Site Labour",   moduleKeys: ["hr", "payroll", "attendance", "recruitment"],                           defaultOpen: false },
+      { label: "System",        moduleKeys: ["reports", "approvals", "audit-log", "administration", "staff", "settings"], defaultOpen: true },
+    ],
   },
+
+  // ── 8. Transport & Logistics ──────────────────────────────────────────────
   {
     slug: "transport",
     name: "Transport & Logistics",
@@ -392,7 +518,24 @@ export const INDUSTRIES: IndustryVertical[] = [
       "financials","banking","hr","payroll","attendance","budget","assets","petty-cash",
       "crm","reports","staff","settings","approvals","administration",
     ],
+    moduleAliases: {
+      "fleet":     "Fleet & Trips",
+      "customers": "Clients",
+      "invoices":  "Trip Invoices",
+      "purchasing":"Fuel & Parts",
+      "crm":       "Business Development",
+    },
+    navGroups: [
+      { label: "Operations",     moduleKeys: ["dashboard", "fleet"],                                                   defaultOpen: true  },
+      { label: "Clients & Billing",moduleKeys: ["customers", "crm", "invoices"],                                      defaultOpen: true  },
+      { label: "Procurement",    moduleKeys: ["purchasing", "expenses"],                                               defaultOpen: true  },
+      { label: "Finance",        moduleKeys: ["financials", "banking", "budget", "assets", "petty-cash"],              defaultOpen: true  },
+      { label: "HR & Drivers",   moduleKeys: ["hr", "payroll", "attendance", "recruitment"],                          defaultOpen: false },
+      { label: "System",         moduleKeys: ["reports", "approvals", "administration", "staff", "settings"],         defaultOpen: true  },
+    ],
   },
+
+  // ── 9. Hospitality & Hotels ───────────────────────────────────────────────
   {
     slug: "hospitality",
     name: "Hospitality & Hotels",
@@ -408,7 +551,27 @@ export const INDUSTRIES: IndustryVertical[] = [
       "hr","payroll","attendance","budget","assets","petty-cash",
       "restaurant","reports","staff","settings","approvals","administration",
     ],
+    moduleAliases: {
+      "hotel-mgmt": "Rooms & Bookings",
+      "customers":  "Guests",
+      "invoices":   "Guest Folios",
+      "restaurant": "F&B Orders",
+      "pos":        "Front Desk POS",
+      "inventory":  "Hotel Supplies",
+      "purchasing": "Procurement",
+    },
+    navGroups: [
+      { label: "Front Desk",       moduleKeys: ["dashboard", "hotel-mgmt", "pos"],                                     defaultOpen: true  },
+      { label: "Food & Beverage",  moduleKeys: ["restaurant"],                                                         defaultOpen: true  },
+      { label: "Stock & Supplies", moduleKeys: ["inventory", "suppliers", "purchasing"],                               defaultOpen: true  },
+      { label: "Guests & Billing", moduleKeys: ["customers", "crm", "invoices"],                                       defaultOpen: true  },
+      { label: "Finance",          moduleKeys: ["financials", "banking", "expenses", "budget", "assets", "petty-cash"],defaultOpen: true  },
+      { label: "Team",             moduleKeys: ["hr", "payroll", "attendance"],                                        defaultOpen: false },
+      { label: "System",           moduleKeys: ["reports", "approvals", "administration", "staff", "settings"],        defaultOpen: true  },
+    ],
   },
+
+  // ── 10. Auto Services & Garage ────────────────────────────────────────────
   {
     slug: "auto",
     name: "Auto Services & Garage",
@@ -423,7 +586,26 @@ export const INDUSTRIES: IndustryVertical[] = [
       "suppliers","purchasing","crm","expenses","hr","payroll","attendance","assets","petty-cash",
       "reports","staff","settings","approvals",
     ],
+    moduleAliases: {
+      "garage":    "Workshop & Job Cards",
+      "inventory": "Spare Parts",
+      "customers": "Vehicle Owners",
+      "pos":       "Parts Counter",
+      "invoices":  "Workshop Invoices",
+      "purchasing":"Parts Procurement",
+      "crm":       "Business Development",
+    },
+    navGroups: [
+      { label: "Workshop",           moduleKeys: ["dashboard", "garage"],                                              defaultOpen: true  },
+      { label: "Parts & Supplies",   moduleKeys: ["inventory", "suppliers", "purchasing"],                             defaultOpen: true  },
+      { label: "Customers & Billing",moduleKeys: ["customers", "crm", "invoices", "pos"],                             defaultOpen: true  },
+      { label: "Finance",            moduleKeys: ["expenses", "assets", "petty-cash"],                                 defaultOpen: true  },
+      { label: "Team",               moduleKeys: ["hr", "payroll", "attendance"],                                     defaultOpen: false },
+      { label: "System",             moduleKeys: ["reports", "approvals", "staff", "settings"],                       defaultOpen: true  },
+    ],
   },
+
+  // ── 11. Agriculture ───────────────────────────────────────────────────────
   {
     slug: "agriculture",
     name: "Agriculture",
@@ -439,7 +621,26 @@ export const INDUSTRIES: IndustryVertical[] = [
       "payroll","attendance","assets","petty-cash",
       "reports","staff","settings","approvals",
     ],
+    moduleAliases: {
+      "farm-mgmt":  "Farms & Plots",
+      "inventory":  "Inputs & Harvest",
+      "customers":  "Buyers & Offtakers",
+      "suppliers":  "Input Suppliers",
+      "purchasing": "Input Procurement",
+      "invoices":   "Sales Invoices",
+      "warehouses": "Storage & Silos",
+    },
+    navGroups: [
+      { label: "Farm Operations", moduleKeys: ["dashboard", "farm-mgmt"],                                              defaultOpen: true  },
+      { label: "Inputs & Stock",  moduleKeys: ["inventory", "purchasing", "warehouses", "suppliers"],                  defaultOpen: true  },
+      { label: "Sales",           moduleKeys: ["customers", "invoices"],                                               defaultOpen: true  },
+      { label: "Finance",         moduleKeys: ["financials", "banking", "expenses", "assets", "petty-cash"],           defaultOpen: true  },
+      { label: "Farm Labour",     moduleKeys: ["hr", "payroll", "attendance"],                                         defaultOpen: false },
+      { label: "System",          moduleKeys: ["reports", "approvals", "staff", "settings"],                          defaultOpen: true  },
+    ],
   },
+
+  // ── 12. Beauty & Wellness ─────────────────────────────────────────────────
   {
     slug: "beauty",
     name: "Beauty & Wellness",
@@ -453,7 +654,24 @@ export const INDUSTRIES: IndustryVertical[] = [
       "dashboard","pos","inventory","customers","invoices","expenses",
       "crm","hr","payroll","attendance","petty-cash","reports","staff","settings","approvals",
     ],
+    moduleAliases: {
+      "customers": "Clients",
+      "invoices":  "Service Bills",
+      "inventory": "Products & Supplies",
+      "pos":       "Service Till",
+      "crm":       "Client Relations",
+    },
+    navGroups: [
+      { label: "Main",    moduleKeys: ["dashboard", "pos"],                                        defaultOpen: true  },
+      { label: "Clients", moduleKeys: ["customers", "crm", "invoices"],                            defaultOpen: true  },
+      { label: "Stock",   moduleKeys: ["inventory"],                                               defaultOpen: true  },
+      { label: "Finance", moduleKeys: ["expenses", "petty-cash"],                                  defaultOpen: true  },
+      { label: "Team",    moduleKeys: ["hr", "payroll", "attendance"],                             defaultOpen: false },
+      { label: "System",  moduleKeys: ["reports", "approvals", "staff", "settings"],              defaultOpen: true  },
+    ],
   },
+
+  // ── 13. Financial Services ────────────────────────────────────────────────
   {
     slug: "financial",
     name: "Financial Services",
@@ -468,6 +686,23 @@ export const INDUSTRIES: IndustryVertical[] = [
       "expenses","hr","payroll","attendance","budget","assets","petty-cash",
       "reports","staff","settings","approvals","administration","audit-log",
     ],
+    moduleAliases: {
+      "customers":      "Clients",
+      "crm":            "Client Relations",
+      "invoices":       "Fee Notes",
+      "administration": "Compliance & Control",
+      "financials":     "General Ledger",
+      "audit-log":      "Compliance Log",
+    },
+    navGroups: [
+      { label: "Main",         moduleKeys: ["dashboard"],                                                              defaultOpen: true  },
+      { label: "Clients",      moduleKeys: ["customers", "crm", "invoices"],                                          defaultOpen: true  },
+      { label: "Finance & GL", moduleKeys: ["financials", "banking", "budget", "assets"],                             defaultOpen: true  },
+      { label: "Costs",        moduleKeys: ["expenses", "petty-cash"],                                                 defaultOpen: true  },
+      { label: "Compliance",   moduleKeys: ["audit-log", "administration", "approvals"],                              defaultOpen: true  },
+      { label: "HR & People",  moduleKeys: ["hr", "payroll", "attendance"],                                           defaultOpen: false },
+      { label: "System",       moduleKeys: ["reports", "staff", "settings"],                                          defaultOpen: true  },
+    ],
   },
 ];
 
@@ -475,10 +710,9 @@ export const INDUSTRY_MAP = Object.fromEntries(
   INDUSTRIES.map((i) => [i.slug, i])
 ) as Record<string, IndustryVertical>;
 
-// ─── Nav Group Structure ───────────────────────────────────────────────────────
-// Controls sidebar section labels and ordering.
-// Groups are filtered by the current industry's defaultModules at render time,
-// so a group with no visible modules is automatically hidden.
+// ─── Nav Group Structure (fallback for no-industry businesses) ─────────────────
+// Used when business has no industry_vertical_slug set.
+// Each industry now has its own navGroups defined above.
 
 export const NAV_GROUPS: NavGroup[] = [
   {

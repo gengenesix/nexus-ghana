@@ -49,8 +49,8 @@ export interface UseModulesResult {
 }
 
 export function useModules(): UseModulesResult {
-  const { modules: industryModules, slug } = useIndustry();
-  const { canAccess: tierCanAccess }       = useLicenseTier();
+  const { modules: industryModules, slug, industry } = useIndustry();
+  const { canAccess: tierCanAccess }                 = useLicenseTier();
 
   const industryKeySet = useMemo(
     () => new Set(industryModules.map((m) => m.key)),
@@ -79,18 +79,31 @@ export function useModules(): UseModulesResult {
   };
 
   const navGroups = useMemo(() => {
-    return NAV_GROUPS.map((group) => {
-      const visibleModules = group.moduleKeys
-        .map((key) => MODULE_MAP[key])
-        .filter((mod): mod is ModuleDefinition => {
-          if (!mod) return false;
-          if (!slug && INDUSTRY_VERTICAL_ONLY.has(mod.key)) return false;
-          const inIndustry = !slug || industryKeySet.has(mod.key);
-          return inIndustry;
-        });
-      return { ...group, visibleModules };
-    }).filter((g) => g.visibleModules.length > 0);
-  }, [slug, industryKeySet]);
+    // Use this industry's unique nav structure; fall back to the global one
+    // for businesses that haven't selected an industry yet.
+    const baseGroups =
+      slug && industry.navGroups?.length > 0 ? industry.navGroups : NAV_GROUPS;
+    const aliases: Record<string, string> =
+      slug && industry.moduleAliases ? industry.moduleAliases : {};
+
+    return baseGroups
+      .map((group) => {
+        const visibleModules = group.moduleKeys
+          .map((key) => {
+            const mod = MODULE_MAP[key];
+            if (!mod) return null;
+            if (!slug && INDUSTRY_VERTICAL_ONLY.has(mod.key)) return null;
+            const inIndustry = !slug || industryKeySet.has(mod.key);
+            if (!inIndustry) return null;
+            // Apply industry-specific terminology if an alias exists
+            const alias = aliases[key];
+            return alias ? { ...mod, name: alias } : mod;
+          })
+          .filter((mod): mod is ModuleDefinition => mod !== null);
+        return { ...group, visibleModules };
+      })
+      .filter((g) => g.visibleModules.length > 0);
+  }, [slug, industryKeySet, industry]);
 
   return { canAccess, isComingSoon, industryModules, navGroups };
 }
