@@ -39,13 +39,37 @@ export default function AttachmentPanel({ recordType, recordId }: AttachmentPane
     enabled: !!business && !!recordId,
   });
 
+  const ALLOWED_MIME = new Set([
+    "image/jpeg", "image/png", "image/gif", "image/webp",
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+    "application/vnd.ms-excel", // .xls
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+    "text/plain", "text/csv",
+  ]);
+  const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !business) return;
+
+    if (!ALLOWED_MIME.has(file.type)) {
+      toast.error("File type not allowed. Use images, PDF, Excel, Word, or CSV.");
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      toast.error("File too large. Maximum size is 10 MB.");
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
+
     setUploading(true);
     try {
-      const path = `${business.id}/${recordType}/${recordId}/${Date.now()}-${file.name}`;
-      const { error: uploadErr } = await supabase.storage.from("attachments").upload(path, file);
+      // Sanitize filename — strip path traversal and special chars
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").replace(/\.{2,}/g, "_");
+      const path = `${business.id}/${recordType}/${recordId}/${Date.now()}-${safeName}`;
+      const { error: uploadErr } = await supabase.storage.from("attachments").upload(path, file, { contentType: file.type });
       if (uploadErr) throw uploadErr;
       const { data: { publicUrl } } = supabase.storage.from("attachments").getPublicUrl(path);
       const { error } = await supabase.from("attachments").insert({
@@ -93,7 +117,7 @@ export default function AttachmentPanel({ recordType, recordId }: AttachmentPane
           {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Upload className="h-3.5 w-3.5 mr-1" />}
           Upload
         </Button>
-        <input ref={fileRef} type="file" className="hidden" onChange={handleUpload} />
+        <input ref={fileRef} type="file" accept="image/*,application/pdf,.xlsx,.xls,.docx,.csv,.txt" className="hidden" onChange={handleUpload} />
       </div>
       {attachments.length > 0 && (
         <div className="space-y-1.5">

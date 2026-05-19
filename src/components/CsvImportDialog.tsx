@@ -41,13 +41,25 @@ export default function CsvImportDialog({ open, onOpenChange, type }: CsvImportD
 
   const fieldMap = FIELD_MAPS[type];
 
+  const MAX_CSV_BYTES = 5 * 1024 * 1024; // 5 MB
+  const MAX_ROWS = 5_000;
+
   const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_CSV_BYTES) {
+      toast.error("CSV file too large. Maximum size is 5 MB.");
+      e.target.value = "";
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
       const parsed = parseCsv(text);
+      if (parsed.rows.length > MAX_ROWS) {
+        toast.error(`Too many rows (${parsed.rows.length.toLocaleString()}). Maximum is ${MAX_ROWS.toLocaleString()} rows per import.`);
+        return;
+      }
       setHeaders(parsed.headers);
       setRows(parsed.rows);
       setStep("preview");

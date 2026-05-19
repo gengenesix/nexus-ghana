@@ -25,6 +25,18 @@ const supabase = createClient(
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") ?? "Nexus-GH <noreply@nexusgh.com>";
+const APP_URL    = Deno.env.get("APP_URL")    ?? "https://nexus-ghana.vercel.app";
+
+// ── HTML escape — prevents injection of user-supplied data into email HTML ────
+function h(str: string | number | null | undefined): string {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 // ── Resend helper ─────────────────────────────────────────────────────────────
 async function sendEmail(to: string, subject: string, html: string) {
@@ -52,9 +64,9 @@ function overdueEmailHtml(businessName: string, invoices: any[]) {
     .map(
       (inv) => `
       <tr>
-        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">${inv.invoice_number}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">${inv.customer_name}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">${inv.due_date}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">${h(inv.invoice_number)}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">${h(inv.customer_name)}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">${h(inv.due_date)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#d97706">
           GHS ${Number(inv.total).toLocaleString("en-GH", { minimumFractionDigits: 2 })}
         </td>
@@ -68,7 +80,7 @@ function overdueEmailHtml(businessName: string, invoices: any[]) {
   <div style="font-family:'DM Sans',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff">
     <div style="background:#0f1623;padding:24px 32px;border-radius:12px 12px 0 0">
       <h1 style="color:#d97706;margin:0;font-size:22px">Nexus-GH</h1>
-      <p style="color:#94a3b8;margin:4px 0 0;font-size:13px">${businessName}</p>
+      <p style="color:#94a3b8;margin:4px 0 0;font-size:13px">${h(businessName)}</p>
     </div>
     <div style="padding:32px">
       <h2 style="color:#1e293b;margin-top:0">⚠️ Overdue Invoice Alert</h2>
@@ -87,7 +99,7 @@ function overdueEmailHtml(businessName: string, invoices: any[]) {
         <tbody>${rows}</tbody>
       </table>
       <div style="margin-top:24px">
-        <a href="https://nexus-ghana.vercel.app/invoices"
+        <a href="${APP_URL}/invoices"
            style="background:#d97706;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">
           View Invoices →
         </a>
@@ -104,13 +116,13 @@ function lowStockEmailHtml(businessName: string, products: any[]) {
     .map(
       (p) => `
       <tr>
-        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">${p.name}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">${h(p.name)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center">
           <span style="background:${p.qty === 0 ? "#fef2f2" : "#fefce8"};color:${p.qty === 0 ? "#dc2626" : "#d97706"};padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600">
-            ${p.qty === 0 ? "Out of stock" : p.qty + " left"}
+            ${p.qty === 0 ? "Out of stock" : h(p.qty) + " left"}
           </span>
         </td>
-        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center;color:#64748b">${p.reorder_level}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center;color:#64748b">${h(p.reorder_level)}</td>
       </tr>`
     )
     .join("");
@@ -119,7 +131,7 @@ function lowStockEmailHtml(businessName: string, products: any[]) {
   <div style="font-family:'DM Sans',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff">
     <div style="background:#0f1623;padding:24px 32px;border-radius:12px 12px 0 0">
       <h1 style="color:#d97706;margin:0;font-size:22px">Nexus-GH</h1>
-      <p style="color:#94a3b8;margin:4px 0 0;font-size:13px">${businessName}</p>
+      <p style="color:#94a3b8;margin:4px 0 0;font-size:13px">${h(businessName)}</p>
     </div>
     <div style="padding:32px">
       <h2 style="color:#1e293b;margin-top:0">📦 Low Stock Alert</h2>
@@ -137,7 +149,7 @@ function lowStockEmailHtml(businessName: string, products: any[]) {
         <tbody>${rows}</tbody>
       </table>
       <div style="margin-top:24px">
-        <a href="https://nexus-ghana.vercel.app/inventory"
+        <a href="${APP_URL}/inventory"
            style="background:#d97706;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">
           View Inventory →
         </a>
